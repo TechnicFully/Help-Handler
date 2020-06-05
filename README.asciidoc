@@ -1,6 +1,6 @@
 Description
 -----------
-A simple one-header file that does exactly as the name suggests: handles help argument reading and output, which would otherwise be inadequately done boilerplate code - there are various popular projects where simply trying to get usage help is a roll of the dice as to what argument works (nano doesn't support "help", openssl and gcc _only_ support "help" and "--help" respectively, etc), which is not user friendly. Newer programs are better in this regard, but why reinvent the wheel? It's 160 lines of code and two functions!
+A simple one-header file that does exactly as the name suggests: handles help argument reading and output, which would otherwise be inadequately done boilerplate code - there are various popular projects where simply trying to get usage help is a roll of the dice as to what argument works (nano doesn't support "help", openssl and gcc _only_ support "help" and "--help" respectively, Python only supports "--version", etc.), and are usually not case insensitive which is not user friendly. Newer programs are better in this regard, but why reinvent the wheel? It's two functions!
 
 Requirements
 ------------
@@ -11,16 +11,30 @@ Requirements
 - BSD
 
 ##### Compiler
-- C99 / C++11
+- Python - 2.xx through 3.xx
+- CPP - C++11
+- C - C99
 
 
 Example
 -------
 The first example call includes a version string, and passes 1 to match for extra arguments (you may also use the pre-defined HELP_MATCH_EXTRA_STRINGS macro). The second function example passes no version string, and disables matching of extra arguments (h, -h, --h, v, -v, --v). The EXIT_FAILURE standard macro is returned if no string was matched:
 
+##### C
 [source,C]
 -----------------
 help_handler(argc, argv, "Usage: Test\n", "A version string", 1);
 help_handler(argc, argv, "Usage: Test\n", NULL, 0);
+-----------------
+##### C++ (Arguments are optional)
+[source,CPP]
+-----------------
+helpHandler(argc, argv, "Usage: Test\n", "A version string", true);
+helpHandler(argc, argv, "Usage: Test\n");
+-----------------
+##### Python
+[source,Python]
+-----------------
+help_handler("Usage: Test");
 -----------------
 image:https://www.dropbox.com/s/n4a97cwkfu8fwy6/5b0e12e163303c16501e4f31aa4b63cf56c6e604.png?raw=1[alt="example terminal screenshot"]

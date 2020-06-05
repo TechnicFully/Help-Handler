@@ -35,21 +35,23 @@
 static bool noArgHelpGlob = true;
 static bool unknownArgHelpGlob = true;
 static bool extraStringsGlob = false;
-static std::string verGlob = "";
+static std::string verGlob = "No version is available";
 
 
 
 
 void helpHandlerConfig(bool noArgHelp = true, bool unknownArgHelp = true, bool extraStrings = false, std::string ver = "") {
-    if (noArgHelp == false) { noArgHelpGlob = false; }
-    if (unknownArgHelp == false) { unknownArgHelpGlob = false; }
-    if (extraStrings == true) extraStringsGlob = true;
+    if (false == noArgHelp) { noArgHelpGlob = false; }
+    if (false == unknownArgHelp) { unknownArgHelpGlob = false; }
+    if (true == extraStrings) extraStringsGlob = true;
     if (!ver.empty()) verGlob = ver;
     
     return;
 }
 
-int helpHandler(int argc, char** argv, std::string help, std::string unknownArg = "") {
+int helpHandler(int argc, char** argv, std::string help, std::string unknownArg ="") {
+    if (help.empty()) {
+        help = "No usage help is available"; }
     if (noArgHelpGlob == true && argc <= 1) {
         std::cout << help << std::endl;
         return EXIT_SUCCESS; }
@@ -76,10 +78,7 @@ int helpHandler(int argc, char** argv, std::string help, std::string unknownArg 
         std::cerr << "WARNING:" << __func__ << "() argument help string (argv) is NULL" << warn << std::endl;
         #endif
         return EXIT_FAILURE;
-    } if (help.empty()) {
-        help = "No usage help is available"; }
-    if (verGlob.empty()) {
-        verGlob = "No version is available"; }
+    }
     
     
     if (argc > 128) {
@@ -106,7 +105,7 @@ int helpHandler(int argc, char** argv, std::string help, std::string unknownArg 
     /*******/
     if (extraStringsGlob != true) {
         helpLex[0].clear(); helpLex[1].clear(); helpLex[2].clear();
-        verLex[0].clear(); verLex[1].clear(); verLex[2].clear();
+        verLex[0].clear();  verLex[1].clear();  verLex[2].clear();
     }
 
 
@@ -114,7 +113,7 @@ int helpHandler(int argc, char** argv, std::string help, std::string unknownArg 
     const int verLex_elenum  = sizeof(verLex) /sizeof(std::string);
 
     int i; for (i = 1; i < argc; i++) {
-        if (argv[i] == nullptr) {
+        if (nullptr == argv[i]) {
             std::cerr << "ERROR:" << __func__ << "() argument count (argc) exceeds actual number of arguments (argv) or argv is NULL\n";
             return EXIT_FAILURE;
         }
@@ -148,7 +147,7 @@ int helpHandler(int argc, char** argv, std::string help, std::string unknownArg 
     }
             
     
-    if (unknownArgHelpGlob == true && argc > 1) {
+    if (true == unknownArgHelpGlob && argc > 1) {
         if (unknownArg.empty()) {
             unknownArg = "Unknown argument given"; }
         
