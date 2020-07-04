@@ -31,6 +31,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <climits>
 
 static bool noArgHelpGlob = true;
 static bool unknownArgHelpGlob = true;
