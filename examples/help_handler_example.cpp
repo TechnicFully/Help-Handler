@@ -5,6 +5,7 @@
 
 int main(int argc, char** argv) {
     helpHandlerConfig(true, true, true, "1.0.0");
+    helpHandlerVer("2.0.0");
     helpHandler(argc, argv, "Usage: Test");
 
     return EXIT_SUCCESS;

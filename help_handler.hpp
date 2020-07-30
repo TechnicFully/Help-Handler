@@ -42,13 +42,19 @@ static std::string verGlob = "No version is available";
 
 
 void helpHandlerConfig(bool noArgHelp = true, bool unknownArgHelp = true, bool extraStrings = false, std::string ver = "") {
-    if (false == noArgHelp) { noArgHelpGlob = false; }
-    if (false == unknownArgHelp) { unknownArgHelpGlob = false; }
+    if (false == noArgHelp) noArgHelpGlob = false;
+    if (false == unknownArgHelp) unknownArgHelpGlob = false;
     if (true == extraStrings) extraStringsGlob = true;
     if (!ver.empty()) verGlob = ver;
     
     return;
 }
+
+
+void helpHandlerVer(std::string ver) {
+    verGlob = ver;
+}
+
 
 int helpHandler(int argc, char** argv, std::string help, std::string unknownArg ="") {
     if (help.empty()) {
@@ -121,7 +127,7 @@ int helpHandler(int argc, char** argv, std::string help, std::string unknownArg 
 
            
         //There is no standard C++ library function for case-insensitive comparison of strings, so we will continue using the same C functions
-        int j; for (j = 0; j < sizeof(std::string); j++) {
+        int j; for (j = 0; j < helpLex_elenum; j++) {
             #if defined _WIN32 || defined _WIN64
             int result = _stricmp(argv[i], helpLex[j].c_str());
             #else
@@ -152,7 +158,7 @@ int helpHandler(int argc, char** argv, std::string help, std::string unknownArg 
         if (unknownArg.empty()) {
             unknownArg = "Unknown argument given"; }
         
-        std::cout << unknownArg << std::endl;
+        std::cerr << unknownArg << std::endl;
         return EXIT_SUCCESS;
     }
 
