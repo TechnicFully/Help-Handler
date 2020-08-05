@@ -52,6 +52,22 @@ def help_handler_config(noArgHelp=None, unknownArgHelp=None, extraStrings=None, 
     return
 
 
+def help_handler_ver(ver):
+    global verGlob
+
+    if sys.version_info.major >= 3:
+        if (isinstance(ver, str)):
+            verGlob = ver
+        else:
+            if (False == help_ignore_warnings):
+                print("WARNING: " + help_handler_config.__name__ + "() argument ver is not of type str")
+    elif sys.version_info.major <= 2:
+        if (isinstance(ver, basestring)):
+            verGlob = ver
+        else:
+            if (False == help_ignore_warnings):
+                print("WARNING: " + help_handler_config.__name__ + "() argument ver is not of type str")
+
 
 def help_handler(help, unknownArg=None):
     if (True == noArgHelpGlob and len(sys.argv) <= 1):
@@ -97,8 +113,9 @@ def main():
     elif sys.version_info.major < 2:
         print("Python version is older than expected, issues may occur")
 
-    help_handler_config(True, False, True, "0.1.0")
-    help_handler("hi6fy")
+    help_handler_config(True, False, True, "1.0.0")
+    help_handler_ver("2.0.0")
+    help_handler("Usage: Test")
 
 
 
