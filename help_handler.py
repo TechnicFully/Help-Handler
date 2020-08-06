@@ -25,7 +25,7 @@ def help_handler_config(noArgHelp=None, unknownArgHelp=None, extraStrings=None, 
             print("WARNING: " + help_handler_config.__name__ + "() argument noArgHelp is not of type bool or int")
 
     if (isinstance(unknownArgHelp, int)):
-        unknownArgHelpGlob = False
+        unknownArgHelpGlob = unknownArgHelp
     else:
         if (False == help_ignore_warnings):
             print("WARNING: " + help_handler_config.__name__ + "() argument unknownArgHelp is not of type bool or int")
@@ -76,7 +76,7 @@ def help_handler(help, unknownArg=None):
         print(help)
         return
     
-    
+    global unknownArgHelpGlob
     warn = ". Define the variable help_ignore_warnings as global and set it to True to ignore this warning"
     helpLex = [ "h", "-h", "--h",
         "help", "-help","--help",
@@ -101,6 +101,11 @@ def help_handler(help, unknownArg=None):
                 return
 
 
+    if unknownArgHelpGlob == True:
+        if not unknownArg:
+            unknownArg = "Unknown argument given"
+        print(unknownArg)
+
     return
 
 
@@ -113,7 +118,7 @@ def main():
     elif sys.version_info.major < 2:
         print("Python version is older than expected, issues may occur")
 
-    help_handler_config(True, False, True, "1.0.0")
+    help_handler_config(True, True, True, "1.0.0")
     help_handler_ver("2.0.0")
     help_handler("Usage: Test")
 
