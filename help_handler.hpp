@@ -41,22 +41,22 @@ static std::string verGlob = "No version is available";
 
 
 
-void helpHandlerConfig(bool noArgHelp = true, bool unknownArgHelp = true, bool extraStrings = false, std::string ver = "") {
-    if (false == noArgHelp) noArgHelpGlob = false;
-    if (false == unknownArgHelp) unknownArgHelpGlob = false;
-    if (true == extraStrings) extraStringsGlob = true;
-    if (!ver.empty()) verGlob = ver;
-    
-    return;
-}
-
-
 void helpHandlerVer(std::string ver) {
     verGlob = ver;
 }
 
 
-int helpHandler(int argc, char** argv, std::string help, std::string unknownArg ="") {
+void helpHandlerConfig(bool noArgHelp = true, bool unknownArgHelp = true, bool extraStrings = false, std::string ver = "") {
+    if (false == noArgHelp) noArgHelpGlob = false;
+    if (false == unknownArgHelp) unknownArgHelpGlob = false;
+    if (true == extraStrings) extraStringsGlob = true;
+    if (!ver.empty()) helpHandlerVer(ver);
+    
+    return;
+}
+
+
+int helpHandler(int argc, char** argv, std::string help, std::string unknownArg = "") {
     if (help.empty()) {
         help = "No usage help is available"; }
     if (noArgHelpGlob == true && argc <= 1) {
