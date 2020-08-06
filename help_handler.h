@@ -31,15 +31,50 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h> //For CHAR_BIT and INT_MIN
+#include <stdbool.h>
+
+
+static const char* warn = ". Define HELP_IGNORE_WARN to ignore this warning";
+static bool no_arg_help_glob = 1;
+static bool unknown_arg_help_glob = 1;
+static bool extra_strings_glob = 1;
+static char ver_glob[128];
 
 
 
 
-int help_handler(int argc, char** argv, char* help, char* ver, int extra_strings) {
-    const char* warn = ". Define HELP_IGNORE_WARN to ignore this warning";
+void help_handler_ver(char* ver) {
+    if (ver == NULL) {
+        #ifndef HELP_IGNORE_WARN
+        fprintf(stderr, "WARNING: The given version string is NULL%s\n", warn);
+        #endif
+        return;
+    } if (strlen(ver) <= 0) {
+        #ifndef HELP_IGNORE_WARN
+        fprintf(stderr, "WARNING: The given version string is empty%s\n", warn);
+        #endif
+        return;
+    } if (sizeof(ver) > sizeof(ver_glob)) {
+        #ifndef HELP_IGNORE_WARN
+        fprintf(stderr, "WARNING: The given version string is larger than allowed%s\n", warn);
+        #endif
+        return;
+    }
+    
+    strcpy(ver_glob, ver);
+}
 
-    //Feel free to delete this entire if-statement if you don't want help/usage dialogue when a user passes no arguments
-    if (argc <= 1) {
+
+void help_handler_config(int no_arg_help, int unknown_arg_help, int extra_strings, char* ver) {
+    if (false == no_arg_help)       no_arg_help_glob = false;
+    if (false == unknown_arg_help)  unknown_arg_help_glob = false;
+    if (true == extra_strings)      extra_strings_glob = true;
+    if (ver != NULL)                help_handler_ver(ver);
+}
+
+
+int help_handler(int argc, char** argv, char* help, char* unknown_arg) {
+    if (argc <= 1 && no_arg_help_glob >= 1) {
         if (!help) {
             #ifndef HELP_IGNORE_WARN
             fprintf(stderr, "WARNING:%s() argv is NULL%s\n", __func__, warn);
@@ -75,8 +110,8 @@ int help_handler(int argc, char** argv, char* help, char* ver, int extra_strings
         return EXIT_FAILURE;
     } if (!help) {
         help = "No usage help is available\n"; }
-    if (!ver) {
-        ver = "No version is available\n"; }
+    if (!ver_glob) {
+        strcpy(ver_glob, "No version is available\n"); }
     
     
     if (argc > 128) {
@@ -86,14 +121,11 @@ int help_handler(int argc, char** argv, char* help, char* ver, int extra_strings
             fflush(stderr);
             #endif
             return EXIT_FAILURE; }
-        
     #ifndef HELP_IGNORE_WARN
         else {
             fprintf(stderr, "WARNING:%s() argument count (argc) is extremely large (128+)%s\n", __func__, warn); }
-        
     } else if (argc < 1) {
         fprintf(stderr, "WARNING:%s() argument count (argc) is 0 or less (should always be at least 1)%s\n", __func__, warn); }
-    
     if (CHAR_BIT != 8) {
         fprintf(stderr, "Char type is not defined as 8 bits. This is untested and may result in issues and/or crashing\n%s\n", warn); }
     fflush(stderr);
@@ -106,7 +138,7 @@ int help_handler(int argc, char** argv, char* help, char* ver, int extra_strings
     /*******/
     /* Run */
     /*******/
-    if (extra_strings != 1) {
+    if (extra_strings_glob != true) {
         ver_lex[0] = "";ver_lex[1] = "";ver_lex[2] = "";
         help_lex[0] = "";help_lex[1] = "";help_lex[2] = "";
     }
@@ -144,11 +176,20 @@ int help_handler(int argc, char** argv, char* help, char* ver, int extra_strings
             #endif
         
             if (result == 0) {
-                printf("%s", ver);
+                printf("%s", ver_glob);
                 fflush(stdout);
                 //printf("Matched %s with lex %s\n%s\n", argv[i], ver_lex[k], help); //Debug
                 return EXIT_SUCCESS; }
         }
+    }
+
+
+    if (unknown_arg_help_glob >= 1 && argc > 1) {
+        if (!unknown_arg) {
+             strcpy(unknown_arg, "Unknown argument given"); }
+        
+        fprintf(stderr, "%s", unknown_arg);
+        return EXIT_SUCCESS;
     }
 
     return EXIT_FAILURE;
