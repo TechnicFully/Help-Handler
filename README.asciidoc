@@ -32,7 +32,7 @@ help_handler(argc, argv, "Usage: Test\n", NULL);
 helpHandler(argc, argv, "Usage: Test\n", "Unknown argument given\n");
 helpHandler(argc, argv, "Usage: Test\n");
 -----------------
-##### Python
+##### Python (Last argument is optional)
 [source,Python]
 -----------------
 help_handler("Usage: Test", "Unknown argument given");
