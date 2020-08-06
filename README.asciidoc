@@ -6,7 +6,7 @@ A simple one-header file that does exactly as the name suggests: handles help ar
 
 Requirements
 ------------
-##### Operating System
+##### OS
 - Windows
 - macOS [small]#(Tested ^Yosemite^)#
 - Linux [small]#(Tested ^Fedora-31^)#
@@ -49,7 +49,7 @@ help_handler_ver("1.5.9")
 and whether or not to output help if no arguments are given, an unknown argument is given, to match strings which may conflict with your program (h, -h, --h, v, -v, --v), and a version for convenience if needed. The function is defined as such:
 [source,C]
 ----------
-help_handler_config(int noArgumentHelp, int unknownArgumentHelp, int extraStrings, "Version string")
+help_handler_config(int noArgumentHelp, int unknownArgumentHelp, int extraStrings, "Optional version string")
 ----------
 {blank}
 {blank}
