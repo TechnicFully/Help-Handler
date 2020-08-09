@@ -116,8 +116,8 @@ int helpHandler(int argc, char** argv, std::string help, std::string unknownArg 
     }
 
 
-    const int helpLex_elenum = sizeof(helpLex)/sizeof(std::string);
-    const int verLex_elenum  = sizeof(verLex) /sizeof(std::string);
+    const int helpLexElementCount = sizeof(helpLex)/sizeof(std::string);
+    const int verLexElementCount  = sizeof(verLex) /sizeof(std::string);
 
     int i; for (i = 1; i < argc; i++) {
         if (nullptr == argv[i]) {
@@ -127,7 +127,7 @@ int helpHandler(int argc, char** argv, std::string help, std::string unknownArg 
 
            
         //There is no standard C++ library function for case-insensitive comparison of strings, so we will continue using the same C functions
-        int j; for (j = 0; j < helpLex_elenum; j++) {
+        int j; for (j = 0; j < helpLexElementCount; j++) {
             #if defined _WIN32 || defined _WIN64
             int result = _stricmp(argv[i], helpLex[j].c_str());
             #else
@@ -139,7 +139,7 @@ int helpHandler(int argc, char** argv, std::string help, std::string unknownArg 
                 //std::cout << "Matched " << argv[i] << "with lex " << helpLex[j] << std::endl << help << std::endl; //Debug
                 return EXIT_SUCCESS; }
         
-        } int k; for (k = 0; k < verLex_elenum; k++) {
+        } int k; for (k = 0; k < verLexElementCount; k++) {
             #if defined _WIN32 || defined _WIN64
             int result = _stricmp(argv[i], verLex[k].c_str());
             #else

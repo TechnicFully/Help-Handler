@@ -144,8 +144,8 @@ int help_handler(int argc, char** argv, char* help, char* unknown_arg) {
     }
 
 
-    const int help_lex_elenum = sizeof(help_lex)/CHAR_BIT;
-    const int ver_lex_elenum = sizeof(ver_lex)/CHAR_BIT;
+    const int help_lex_element_count = sizeof(help_lex)/CHAR_BIT;
+    const int ver_lex_element_count = sizeof(ver_lex)/CHAR_BIT;
 
 
     int i; for (i = 1; i < argc; i++) {
@@ -155,7 +155,7 @@ int help_handler(int argc, char** argv, char* help, char* unknown_arg) {
             return EXIT_FAILURE;
         }
     
-        int j; for (j = 0; j < help_lex_elenum; j++) {
+        int j; for (j = 0; j < help_lex_element_count; j++) {
             #if defined _WIN32 || defined _WIN64
             int result = _stricmp(argv[i], help_lex[j]);
             #else
@@ -168,7 +168,7 @@ int help_handler(int argc, char** argv, char* help, char* unknown_arg) {
                 //printf("Matched %s with lex %s\n%s\n", argv[i], help_lex[j], help); //Debug
                 return EXIT_SUCCESS; }
         
-        } int k; for (k = 0; k < ver_lex_elenum; k++) {
+        } int k; for (k = 0; k < ver_lex_element_count; k++) {
             #if defined _WIN32 || defined _WIN64
             int result = _stricmp(argv[i], ver_lex[k]);
             #else
