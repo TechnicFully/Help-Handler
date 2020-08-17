@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
     clock_t t;
     t = clock();
     
-    help_handler_config(1, 1, 0\1, "1.0.0");
+    help_handler_config(1, 1, 1, "1.0.0");
     help_handler_ver("2.0.0");
     help_handler(argc, argv, "Usage: Test\n", NULL);
     
