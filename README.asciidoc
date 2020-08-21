@@ -1,4 +1,7 @@
 :blank: pass:[ +]
+
+image:https://www.dropbox.com/s/mh6798b7f1kwrzg/HelpHandler.png?raw=1[alt="HelpHandler()"]
+
 Description
 -----------
 A simple one-header file that does exactly as the name suggests: handles help argument reading and output, which would otherwise be inadequately done boilerplate code - there are various popular projects where simply trying to get usage help is a roll of the dice as to what argument works (nano doesn't support "help", openssl and gcc _only_ support "help" and "--help" respectively, Python only supports "--version", etc.), and are usually not case insensitive which is not user friendly. Newer programs are better in this regard, but why reinvent the wheel? It's two functions!
