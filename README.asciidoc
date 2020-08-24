@@ -11,11 +11,12 @@ Requirements
 ------------
 ##### OS
 - Windows
-- macOS [small]#(Tested ^Yosemite^)#
-- Linux [small]#(Tested ^Fedora-31^)#
+- macOS
+- Linux
 - BSD
 
 ##### Compiler
+- Java -
 - Python - 2.xx through 3.xx
 - CPP - C++11
 - C - C99
