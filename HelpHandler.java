@@ -42,7 +42,7 @@ public class HelpHandler {
     }
 
 
-    public static void handle(String args[], String help, String unknownArgument) throws Exception {
+    public static void handle(String args[], String help, String unknownArgument) {
         if (help.length() <= 0) help = "No usage help is available";
         if (noArgHelpGlob == true && args.length <= 0) {
             System.out.println(help);

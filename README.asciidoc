@@ -11,14 +11,15 @@ Requirements
 ------------
 ##### OS
 - Windows
-- macOS [small]#(Tested ^Yosemite^)#
-- Linux [small]#(Tested ^Fedora-31^)#
+- macOS
+- Linux
 - BSD
 
 ##### Compiler
+- Java {nbsp}{nbsp}{nbsp}{nbsp}- 7
 - Python - 2.xx through 3.xx
-- CPP - C++11
-- C - C99
+- CPP {nbsp}{nbsp}{nbsp}{nbsp}- C++11
+- C {nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- C99
 {blank}
 
 Example
@@ -40,6 +41,11 @@ helpHandler(argc, argv, "Usage: Test\n");
 -----------------
 help_handler("Usage: Test", "Unknown argument given");
 help_handler("Usage: Test")
+-----------------
+##### Java
+[source,Java]
+-----------------
+HelpHandler("Usage: Test", "Unknown argument given");
 -----------------
 {blank}
 
