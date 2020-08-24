@@ -1,6 +1,7 @@
 public class HelpHandler {
-    final static String warn = ". Define the variable public static fianl HelpIgnoreWarnings to disable this warning";
+    final static String warn = ". Call the class function HelpHandler.ignoreWarnings() to disable this warning";
 
+    private static boolean ignoreWarningsGlob = false;
     private static boolean noArgHelpGlob = true;
     private static boolean unknownArgHelpGlob = true;
     private static boolean extraStringsGlob = false;
@@ -8,10 +9,17 @@ public class HelpHandler {
     
     
     
+    public static void ignoreWarnings() {
+        ignoreWarningsGlob = true;
+    }
+    
+    
     public static void ver(String ver) {
         if (ver.length() <= 0) {
-            System.err.println("WARNING: given version string is empty" + warn);
-            return;
+            if (ignoreWarningsGlob == true) {
+                System.err.println("WARNING: given version string is empty" + warn);
+                return;
+            }
         }
         
         verGlob = ver;
@@ -39,23 +47,28 @@ public class HelpHandler {
         if (noArgHelpGlob == true && args.length <= 0) {
             System.out.println(help);
             return; }
-        
 
-        
+
         /****************/
         /* Error checks */
         /****************/
         String functionName = new Object(){}.getClass().getEnclosingMethod().getName();
 
         if (args == null) {
-            System.err.println("WARNING:" +functionName+ "() argument is null" +warn);
-            return;
+            if (ignoreWarningsGlob == true) {
+                System.err.println("WARNING:" +functionName+ "() argument is null" +warn);
+                return;
+            }
         }
         
         if (args.length > 128) {
-            System.err.println("WARNING:" +functionName+ "() argument length is extremely large (128+)" +warn);
+            if (ignoreWarningsGlob == true) {
+                System.err.println("WARNING:" +functionName+ "() argument length is extremely large (128+)" +warn);
+            }
         } if (args.length < 0) {
-            System.err.println("WARNING:" +functionName+ "() argument length is smaller than 0 (should always be at least 0).." +warn);
+            if (ignoreWarningsGlob == true) {
+                System.err.println("WARNING:" +functionName+ "() argument length is smaller than 0 (should always be at least 0).." +warn);
+            }
         }
 
 
@@ -85,7 +98,7 @@ public class HelpHandler {
         
         for (int i = 0; i < args.length; i++) {
             if (args[i] == null) {
-                System.err.println("ERROR:" +functionName+ "() argument is null");
+                System.err.println("ERROR:" +functionName+ "() args[] argument is null despite being of length greater than zero");
                 return;
             }
             
@@ -106,7 +119,7 @@ public class HelpHandler {
         }
             
         
-        if (true == unknownArgHelpGlob && args.length > 1) {
+        if (true == unknownArgHelpGlob && args.length > 0) {
             if (unknownArgument.length() <= 0) {
                 unknownArgument = "Unknown argument given"; }
             
