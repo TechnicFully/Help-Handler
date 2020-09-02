@@ -35,10 +35,13 @@
 
 
 static const char* warn = ". Define HELP_IGNORE_WARN to ignore this warning";
-static bool no_arg_help_glob = 1;
-static bool unknown_arg_help_glob = 1;
-static bool extra_strings_glob = 1;
-static char ver_glob[128];
+
+static struct options_t {
+    char ver[512];
+    bool no_arg_help;
+    bool unknown_arg_help;
+    bool extra_strings;
+} options = { {0}, 1, 1, 1 }; 
 
 
 
@@ -54,33 +57,34 @@ void help_handler_ver(char* ver) {
         fprintf(stderr, "WARNING: The given version string is empty%s\n", warn);
         #endif
         return;
-    } if (sizeof(ver) > sizeof(ver_glob)) {
+    } if (sizeof(ver) > sizeof(options.ver)) {
         #ifndef HELP_IGNORE_WARN
-        fprintf(stderr, "WARNING: The given version string is larger than allowed%s\n", warn);
+        fprintf(stderr, "WARNING: The given version string is larger than allowed (%lu bytes)%s\n", sizeof(ver), warn);
         #endif
         return;
     }
     
-    strcpy(ver_glob, ver);
+    strcpy(options.ver, ver);
 }
 
 
 void help_handler_config(int no_arg_help, int unknown_arg_help, int extra_strings, char* ver) {
-    if (false == no_arg_help)       no_arg_help_glob = false;
-    if (false == unknown_arg_help)  unknown_arg_help_glob = false;
-    if (true == extra_strings)      extra_strings_glob = true;
+    if (false == no_arg_help)  options.no_arg_help = false;
+    if (false == unknown_arg_help)  options.unknown_arg_help = false;
+    if (true == extra_strings)      options.extra_strings = true;
     if (ver != NULL)                help_handler_ver(ver);
 }
 
 
 int help_handler(int argc, char** argv, char* help, char* unknown_arg) {
-    if (argc <= 1 && no_arg_help_glob >= 1) {
+    if (argc <= 1 && options.no_arg_help == true) {
         if (!help) {
             #ifndef HELP_IGNORE_WARN
             fprintf(stderr, "WARNING:%s() argv is NULL%s\n", __func__, warn);
             fflush(stderr);
             #endif
-            return EXIT_FAILURE; }
+            return EXIT_FAILURE; 
+        }
         
         printf("%s", help);
         fflush(stdout);
@@ -96,18 +100,17 @@ int help_handler(int argc, char** argv, char* help, char* unknown_arg) {
         fprintf(stderr, "WARNING:%s() argument help string (argv) is NULL%s\n", __func__, warn);
         #endif
         return EXIT_FAILURE;
-    } if (!help) {
-        help = "No usage help is available\n"; }
-    if (strlen(ver_glob) <= 0) {
-        strcpy(ver_glob, "No version is available\n"); }
+    } 
+    if (!help)
+        help = "No usage help is available\n";
+    if (strlen(options.ver) <= 0)
+        strcpy(options.ver, "No version is available\n");
     
     
     if (argc > 128) {
         if (argc > INT_MAX) {
-            #ifndef HELP_IGNORE_WARN
             fprintf(stderr, "ERROR:%s() argument count (argc) is larger than the limit of int type\n", __func__);
-            fflush(stderr);
-            #endif
+            fflush(stderr); //stderr isn't buffered by default, but flush just in case
             return EXIT_FAILURE; }
     } else if (argc < 1) {
         if (argc < INT_MIN) {
@@ -146,7 +149,7 @@ int help_handler(int argc, char** argv, char* help, char* unknown_arg) {
     const int ver_lex_element_count = sizeof(ver_lex)/CHAR_BIT;
 
 
-    if (extra_strings_glob != true) {
+    if (options.extra_strings != true) {
         ver_lex[0] = "";ver_lex[1] = "";ver_lex[2] = "";
         help_lex[0] = "";help_lex[1] = "";help_lex[2] = "";
     }
@@ -179,7 +182,7 @@ int help_handler(int argc, char** argv, char* help, char* unknown_arg) {
             #endif
         
             if (result == 0) {
-                printf("%s", ver_glob);
+                printf("%s", options.ver);
                 fflush(stdout);
                 //printf("Matched %s with lex %s\n%s\n", argv[i], ver_lex[k], help);  //Debug
                 return EXIT_SUCCESS; }
@@ -187,11 +190,15 @@ int help_handler(int argc, char** argv, char* help, char* unknown_arg) {
     }
 
 
-    if (unknown_arg_help_glob >= 1 && argc > 1) {
-        if (!unknown_arg) {
-             strcpy(unknown_arg, "Unknown argument given"); }
+    if (true == options.unknown_arg_help && argc > 1) {
+        if (!unknown_arg || strlen(unknown_arg) <= 0) {
+             fprintf(stderr, "Unknown argument given\n");
+        } else {
+             fprintf(stderr, "%s", unknown_arg);
+            
+        }
         
-        fprintf(stderr, "%s", unknown_arg);
+        fflush(stderr);
         return EXIT_SUCCESS;
     }
 

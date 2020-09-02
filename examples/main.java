@@ -6,7 +6,3 @@ public class main {
         HelpHandler.handle(args, "Usage: Test", "Unknown argument given");
     }
 }
-
-
-
-

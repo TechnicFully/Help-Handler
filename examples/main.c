@@ -17,3 +17,4 @@ int main(int argc, char** argv) {
     double time_taken = ((double)t)/CLOCKS_PER_SEC; //In seconds
     printf("help_handler() exited in %f seconds\n", time_taken);
 }
+
