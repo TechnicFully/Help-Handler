@@ -4,7 +4,7 @@ image:https://www.dropbox.com/s/mh6798b7f1kwrzg/HelpHandler.png?raw=1[alt="HelpH
 
 Description
 -----------
-A simple one-header file that does exactly as the name suggests: handles help argument reading and output, which would otherwise be inadequately done boilerplate code - there are various popular projects where simply trying to get usage help is a roll of the dice as to what argument works (nano doesn't support "help", openssl and gcc _only_ support "help" and "--help" respectively, Python only supports "--version", etc.), and are usually not case insensitive which is not user friendly. Newer programs are better in this regard, but why reinvent the wheel? It's two functions!
+A simple one-file three-function library that does exactly as the name suggests: handles help (and optionally version) argument reading and output, which would otherwise be inadequately done boilerplate code - there are various popular projects where simply trying to get usage help is a roll of the dice as to what argument works (nano doesn't support "help", openssl and gcc _only_ support "help" and "--help" respectively, Python only supports "--version", etc.), and are usually case sensitive which is not user friendly. Newer programs are better in this regard, but why reinvent the wheel? It's three functions!
 {blank}
 
 Requirements
@@ -24,38 +24,35 @@ Requirements
 
 Example
 -------
-##### C
-[source,C]
------------------
+[source,CPP]
+------------
+C
 help_handler(argc, argv, "Usage: Test\n", "Unknown argument given\n");
 help_handler(argc, argv, "Usage: Test\n", NULL);
------------------
-##### C++ (Last argument is optional)
-[source,CPP]
------------------
+
+C++
 helpHandler(argc, argv, "Usage: Test\n", "Unknown argument given\n");
-helpHandler(argc, argv, "Usage: Test\n");
------------------
-##### Python (Last argument is optional)
-[source,Python]
------------------
-help_handler("Usage: Test", "Unknown argument given");
-help_handler("Usage: Test")
------------------
-##### Java
-[source,Java]
------------------
-HelpHandler("Usage: Test", "Unknown argument given");
------------------
+
+Python
+help_handler("Usage: Test", "Unknown argument given")
+
+Java
+HelpHandler.handle("Usage: Test", "Unknown argument given");
+------------
 {blank}
 
 
 You may also define a _version_ for your program:
-[source,C]
-----------
+[source,CPP]
+------------
+help_handler_ver("1.5.9");
+helpHandler::ver("1.5.9");
 help_handler_ver("1.5.9")
-----------
-and whether or not to output help if no arguments are given, an unknown argument is given, to match strings which may conflict with your program (h, -h, --h, v, -v, --v), and a version for convenience if needed. The function is defined as such:
+helpHandler.ver("1.5.9");
+------------
+{blank}
+
+Or whether or not to output help if no arguments are given, an unknown argument is given, to match strings which may conflict with your program (h, -h, --h, v, -v, --v), and again a version for convenience if needed. The function is defined as such:
 [source,C]
 ----------
 help_handler_config(int noArgumentHelp, int unknownArgumentHelp, int extraStrings, "Optional version string")
