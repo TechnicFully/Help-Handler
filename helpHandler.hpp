@@ -60,7 +60,6 @@ namespace helpHandler {
 
 
     void config(bool noArgHelp = true, bool unknownArgHelp = true, bool extraStrings = false, std::string ver = "") {
-
         if (false == noArgHelp) options.noArgHelp = false;
         if (false == unknownArgHelp) options.unknownArgHelp = false;
         if (true == extraStrings) options.extraStrings = true;
