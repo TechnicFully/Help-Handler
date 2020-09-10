@@ -25,8 +25,21 @@
 #ifndef HELP_HANDLER_HPP
 #define HELP_HANDLER_HPP
 
-#ifndef HELP_MATCH_EXTRA_STRINGS
-    #define HELP_MATCH_EXTRA_STRINGS true
+#ifndef HELP_NO_ARGS
+    #define HELP_NO_ARGS true
+    #define HELP_DISABLE_NO_ARGS false
+#endif
+#ifndef HELP_UNK_ARGS
+    #define HELP_UNK_ARGS true
+    #define HELP_DISABLE_UNK_ARGS false
+#endif
+#ifndef HELP_UNKNOWN_ARGS
+    #define HELP_UNKNOWN_ARGS true
+    #define HELP_DISABLE_UNKNOWN_ARGS false
+#endif
+#ifndef HELP_EXTRA_STRINGS
+    #define HELP_EXTRA_STRINGS true
+    #define HELP_DISABLE_EXTRA_STRINGS false
 #endif
 
 #include <iostream>
@@ -47,62 +60,83 @@ static struct options_t {
 
 
 namespace helpHandler {
+    static void helpPrint(std::string s, int err_val) {
+        #ifndef HELP_IGNORE_ALL
+        constexpr const char* helpFuncName = "helpHandler() ";
+
+        if (err_val == 0) {
+            #ifndef HELP_IGNORE_WARN
+            std::cerr << "WARNING:" << helpFuncName << s << ". Define HELP_IGNORE_WARN to ignore this warning";
+            #endif
+        } else if (err_val == 1) {
+            #ifndef HELP_IGNORE_ERR
+            std::cerr << "ERROR:" << helpFuncName << s << ". Define HELP_IGNORE_ERR to ignore this warning";
+            #endif
+        } else {
+            #ifndef HELP_IGNORE_UNKNOWN
+            #ifndef HELP_IGNORE_UNK
+            std::cerr << "UNKNOWN:" << helpFuncName << s << ". Define HELP_IGNORE_UNKNOWN to ignore this warning";
+            #endif
+            #endif
+        }
+
+        std::cerr << std::endl;
+        #endif
+
+        return;
+    }
+
+
     void ver(std::string ver) {
         if (ver.empty()) {
-            #ifndef HELP_IGNORE_WARN
-            std::cerr << "WARNING: given version string is empty" << warn << std::endl;
-            #endif
+            helpPrint("given version string is empty", 0);
             return;
         }
         
         options.ver = ver;
     }
 
-
     void config(bool noArgHelp = true, bool unknownArgHelp = true, bool extraStrings = false, std::string ver = "") {
-        if (false == noArgHelp) options.noArgHelp = false;
-        if (false == unknownArgHelp) options.unknownArgHelp = false;
-        if (true == extraStrings) options.extraStrings = true;
-        if (ver.length() >= 1) helpHandler::ver(ver);
+        if (false == noArgHelp)       options.noArgHelp = false;
+        if (false == unknownArgHelp)  options.unknownArgHelp = false;
+        if (true == extraStrings)     options.extraStrings = true;
+        if (ver.length() >= 1)        helpHandler::ver(ver);
         return;
     }
-
 
     int handle(int argc, char** argv, std::string help, std::string unknownArg = "") {
         if (help.empty()) {
             help = "No usage help is available"; }
-        if (true == options.noArgHelp && argc <= 1) {
+        if (argc == 1 && options.noArgHelp == true) {
             std::cout << help << std::endl;
-            return EXIT_SUCCESS; }
+            return EXIT_SUCCESS; 
+        }
     
     
         /****************/
         /* Error checks */
         /****************/
         if (!argv) {
-            #ifndef HELP_IGNORE_WARN
-            std::cerr << "WARNING:" << __func__ << "() argument help string (argv) is NULL" << warn << std::endl;
-            #endif
+            helpPrint("argument help string (argv) is NULL", 1);
             return EXIT_FAILURE;
         }
     
         if (argc > 128) {
             if (argc > std::numeric_limits<int>::max()) {
-                std::cerr << "ERROR:" << __func__ << "() argument count (argc) is larger than the limit of int type" << std::endl;
+                helpPrint("argument count (argc) is larger than the limit of int type", 1);
                 return EXIT_FAILURE;
             }
-        #ifndef HELP_IGNORE_WARN
-            else {
-                std::cerr << "WARNING:" << __func__ << "() argument count (argc) is extremely large (128+)" << warn << std::endl; }
+
+            helpPrint("argument count (argc) is extremely large (128+)", 0);
         } else if (argc < 1) {
             if (argc < std::numeric_limits<int>::min()) {
-                std::cerr << "WARNING:" << __func__ << "() argument count (argc) is smaller than the limit of int type" << std::endl; }
-            else {
-                std::cerr << "WARNING:" << __func__ << "() argument count (argc) is 0 or less (should always be at least 1).." << warn << std::endl; }
+                helpPrint("argument count (argc) is smaller than the limit of int type", 1);
+            } else {
+                helpPrint("argument count (argc) is 0 or less (should always be at least 1)..", 1);
+            }
+
+            return EXIT_FAILURE;
         }
-        #else
-        }
-        #endif
 
 
         /*******/
@@ -129,9 +163,9 @@ namespace helpHandler {
             verLex[0].clear();  verLex[1].clear();  verLex[2].clear();
         }
 
-        for (int i = 1; i < argc; i++) {
+        for (int i = 1; i < argc; i++) { //Start from 1 to skip binary name
             if (nullptr == argv[i]) {
-                std::cerr << "ERROR:" << __func__ << "() argument count (argc) exceeds actual number of arguments (argv) or argv is a nullptr" << std::endl;
+                helpPrint("argument count (argc) exceeds actual number of arguments (argv), or argv is a nullptr", 1);
                 return EXIT_FAILURE;
             }
 
@@ -148,11 +182,11 @@ namespace helpHandler {
                     //std::cout << "Matched " << argv[i] << "with lex " << helpLex[j] << std::endl << help << std::endl; //Debug
                     return EXIT_SUCCESS; }
         
-            } for (int k = 0; k < verLexElementCount; k++) {
+            } for (int j = 0; j < verLexElementCount; j++) {
                 #if defined _WIN32 || defined _WIN64
                 int result = _stricmp(argv[i], verLex[k].c_str());
                 #else
-                int result = strcasecmp(argv[i], verLex[k].c_str());
+                int result = strcasecmp(argv[i], verLex[j].c_str());
                 #endif
         
                 if (result == 0) {

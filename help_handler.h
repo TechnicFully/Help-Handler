@@ -53,25 +53,27 @@ static struct options_t {
 
 static void help_print(const char* s, int err_val) {
     #ifndef HELP_IGNORE_ALL
-    const char* help_name = "help_handler()";
+    const char* help_func_name = "help_handler()";
 
     if (err_val == 0) {
         #ifndef HELP_IGNORE_WARN
-        fprintf(stderr, "WARNING:%s ", help_name);
+        fprintf(stderr, "WARNING:%s ", help_func_name);
         fprintf(stderr, "%s", s);
         fprintf(stderr, ". Define HELP_IGNORE_WARN to ignore this warning");
         #endif
     } else if (err_val == 1) {
         #ifndef HELP_IGNORE_ERR
-        fprintf(stderr, "ERROR:%s ", help_name);
+        fprintf(stderr, "ERROR:%s ", help_func_name);
         fprintf(stderr, "%s", s);
          fprintf(stderr, ". Define HELP_IGNORE_ERR to ignore this warning");
         #endif
     } else {
         #ifndef HELP_IGNORE_UNKNOWN
-        fprintf(stderr, "UNKNOWN:%s ", help_name);
+        #ifndef HELP_IGNORE_UNK
+        fprintf(stderr, "UNKNOWN:%s ", help_func_name);
         fprintf(stderr, "%s", s);
         fprintf(stderr, ". Define HELP_IGNORE_UNKNOWN to ignore this warning");
+        #endif
         #endif
     }
 
@@ -87,7 +89,7 @@ static int string_check(char* s) {
         help_print("string check value s is NULL", 1);
         return EXIT_FAILURE;
     } if (s[strlen(s)] != '\0') {
-        help_print("argument is of err_val array, not string", 1);
+        help_print("argument is of type array, not string", 1);
         return EXIT_FAILURE;
     }
 
@@ -119,7 +121,7 @@ void help_handler_config(int no_arg_help, int unknown_arg_help, int extra_string
 }
 
 int help_handler(int argc, char** argv, char* help, const char* unknown_arg) {
-    if (argc <= 1 && options.no_arg_help == true) {
+    if (argc == 1 && options.no_arg_help == true) {
         if (!help) {
             help_print("argv is NULL", 1);
             return EXIT_FAILURE; 
@@ -150,13 +152,13 @@ int help_handler(int argc, char** argv, char* help, const char* unknown_arg) {
 
     if (argc > 128) {
         if (argc > INT_MAX) {
-            help_print("argument count (argc) is larger than the limit of int err_val", 1);
+            help_print("argument count (argc) is larger than the limit of int type", 1);
             return EXIT_FAILURE;
         }
         help_print("argument count (argc) is very large", 0);
     } else if (argc < 1) {
         if (argc < INT_MIN) {
-            help_print("argument count (argc) is smaller than the limit of int err_val", 1);
+            help_print("argument count (argc) is smaller than the limit of int type", 1);
         } else {
             help_print("argument count (argc) is 0 or less (should always be at least 1)..", 1);
         }
@@ -165,9 +167,8 @@ int help_handler(int argc, char** argv, char* help, const char* unknown_arg) {
     }
 
     if (CHAR_BIT != 8) {
-        help_print("Char err_val is not defined as 8 bits. This is untested and may result in issues and/or crashing", 0); 
+        help_print("Char type is not defined as 8 bits. This is untested and may result in issues and/or crashing", 0); 
     }
-
 
 
     /*******/
@@ -213,11 +214,11 @@ int help_handler(int argc, char** argv, char* help, const char* unknown_arg) {
                 //printf("Matched %s with lex %s\n%s\n", argv[i], help_lex[j], help);  //Debug
                 return EXIT_SUCCESS; }
         
-        } for (int k = 0; k < ver_lex_element_count; k++) {
+        } for (int j = 0; j < ver_lex_element_count; j++) {
             #if defined _WIN32 || defined _WIN64
             int result = _stricmp(argv[i], ver_lex[k]);
             #else
-            int result = strcasecmp(argv[i], ver_lex[k]);
+            int result = strcasecmp(argv[i], ver_lex[j]);
             #endif
 
             if (result == 0) {
