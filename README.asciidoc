@@ -55,7 +55,7 @@ You may also define a _version_ for your program:
 help_handler_ver("1.5.9");
 helpHandler::ver("1.5.9");
 help_handler_ver("1.5.9")
-helpHandler.ver("1.5.9");
+HelpHandler.ver("1.5.9");
 ------------
 {blank}
 {blank}
@@ -81,9 +81,6 @@ In the C/C++ versions, you may also pass the following macros to the first three
 * HELP_NO_ARGS
 * HELP_UNK_ARGS / HELP_UNKNOWN_ARGS
 * HELP_EXTRA_STRINGS
-
-{blank}
-
 * HELP_DISABLE_NO_ARGS
 * HELP_DISABLE_UNK_ARGS / HELP_DISABLE_UNKNOWN_ARGS
 * HELP_DISABLE_EXTRA_STRINGS
