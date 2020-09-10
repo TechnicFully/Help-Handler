@@ -16,10 +16,10 @@ Requirements
 - BSD
 
 ##### Compiler
-- Java {nbsp}{nbsp}{nbsp}{nbsp}- 7
+- Java{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- 7
 - Python - 2.xx through 3.xx
-- CPP {nbsp}{nbsp}{nbsp}{nbsp}- C++11
-- C {nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- C99
+- CPP{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- C++11
+- C{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- C99
 {blank}
 
 Example
@@ -31,17 +31,24 @@ help_handler(argc, argv, "Usage: Test\n", "Unknown argument given\n");
 help_handler(argc, argv, "Usage: Test\n", NULL);
 
 C++
-helpHandler(argc, argv, "Usage: Test\n", "Unknown argument given\n");
+helpHandler::handle(argc, argv, "Usage: Test\n", "Unknown argument given\n");
+helpHandler::handle(argc, argv, "Usage: Test\n");
 
 Python
 help_handler("Usage: Test", "Unknown argument given")
+help_handler("Usage: Test")
 
 Java
 HelpHandler.handle("Usage: Test", "Unknown argument given");
+HelpHandler.handle("Usage: Test");
 ------------
-{blank}
 
 
+You can configure whether or not to output help if no arguments are given, an unknown argument is given, or to match strings which may conflict with your program (h, -h, --h, v, -v, --v), and an argument to pass your application version for convenience if needed. The function is defined as such:
+[source,C]
+----------
+help_handler_config(bool noArgumentHelp, bool unknownArgumentHelp, bool extraStrings, "Optional version string")
+----------
 You may also define a _version_ for your program:
 [source,CPP]
 ------------
@@ -51,13 +58,33 @@ help_handler_ver("1.5.9")
 helpHandler.ver("1.5.9");
 ------------
 {blank}
-
-Or whether or not to output help if no arguments are given, an unknown argument is given, to match strings which may conflict with your program (h, -h, --h, v, -v, --v), and again a version for convenience if needed. The function is defined as such:
-[source,C]
-----------
-help_handler_config(int noArgumentHelp, int unknownArgumentHelp, int extraStrings, "Optional version string")
-----------
-{blank}
 {blank}
 
 image:https://www.dropbox.com/s/n4a97cwkfu8fwy6/5b0e12e163303c16501e4f31aa4b63cf56c6e604.png?raw=1[alt="example terminal screenshot"]
+
+
+Details
+-------
+On completion of the main help handler function, the following success/failure values are returned, a success value indicating that an argument was matched (even if it's an unknown argument), or a failure value indicating that either an error occurred or no arguments were matched:
+
+* C/C++{nbsp}{nbsp}- EXIT_SUCCESS / EXIT_FAILURE
+* Python - None
+* Java{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- None
+
+If an issue occurs, an error/warning message will be output to stderr, and the function will return if the issue is fatal (typically only in regards to the argument count or argument help string). All other output will be directed to stdout.
+
+
+{blank}
+
+In the C/C++ versions, you may also pass the following macros to the first three config function parameters for whether or not to _match_ various possible inputs, in order:
+
+* HELP_NO_ARGS
+* HELP_UNK_ARGS / HELP_UNKNOWN_ARGS
+* HELP_EXTRA_STRINGS
+
+{blank}
+
+* HELP_DISABLE_NO_ARGS
+* HELP_DISABLE_UNK_ARGS / HELP_DISABLE_UNKNOWN_ARGS
+* HELP_DISABLE_EXTRA_STRINGS
+
