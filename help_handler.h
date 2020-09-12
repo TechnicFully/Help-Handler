@@ -232,7 +232,10 @@ int help_handler(int argc, char** argv, char* help, const char* unknown_arg) {
 
     if (true == options.unknown_arg_help && argc > 1) {
         if (!unknown_arg || strlen(unknown_arg) <= 0) {
-             printf("Unknown argument given\n");
+            if (argc > 2) {
+                printf("Unknown arguments given\n"); 
+            } else {
+                printf("Unknown argument given\n"); }
         } else {
              printf("%s", unknown_arg); }
 

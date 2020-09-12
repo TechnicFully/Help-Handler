@@ -199,7 +199,11 @@ namespace helpHandler {
     
         if (true == options.unknownArgHelp && argc > 1) {
             if (unknownArg.empty()) {
-                unknownArg = "Unknown argument given"; }
+                if (argc > 2) {
+                    unknownArg = "Unknown arguments given"; 
+                } else {
+                    unknownArg = "Unknown argument given"; }
+            }
         
             std::cerr << unknownArg << std::endl;
             return EXIT_SUCCESS;
