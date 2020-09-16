@@ -42,6 +42,7 @@
     #define HELP_DISABLE_EXTRA_STRINGS false
 #endif
 
+#include <stdexcept>
 #include <iostream>
 #include <cstring>
 #include <limits>
@@ -60,7 +61,7 @@ static struct options_t {
 
 
 namespace helpHandler {
-    static void helpPrint(std::string s, int err_val) {
+    static void helpPrint(std::string s, int err_val) noexcept {
         #ifndef HELP_IGNORE_ALL
         constexpr const char* helpFuncName = "helpHandler() ";
 
@@ -87,16 +88,16 @@ namespace helpHandler {
     }
 
 
-    void ver(std::string ver) {
+    void ver(std::string ver) noexcept {
         if (ver.empty()) {
-            helpPrint("given version string is empty", 0);
+            helpPrint("version string was given, but is empty", 0);
             return;
         }
         
         options.ver = ver;
     }
 
-    void config(bool noArgHelp = true, bool unknownArgHelp = true, bool extraStrings = false, std::string ver = "") {
+    void config(bool noArgHelp = true, bool unknownArgHelp = true, bool extraStrings = false, std::string ver = "") noexcept {
         if (false == noArgHelp)       options.noArgHelp = false;
         if (false == unknownArgHelp)  options.unknownArgHelp = false;
         if (true == extraStrings)     options.extraStrings = true;
@@ -117,25 +118,21 @@ namespace helpHandler {
         /* Error checks */
         /****************/
         if (!argv) {
-            helpPrint("argument help string (argv) is NULL", 1);
-            return EXIT_FAILURE;
-        }
-    
+            throw std::invalid_argument("Argument value (argv) is NULL");
+        } 
+        
         if (argc > 128) {
             if (argc > std::numeric_limits<int>::max()) {
-                helpPrint("argument count (argc) is larger than the limit of int type", 1);
-                return EXIT_FAILURE;
+                throw std::invalid_argument("Argument count (argc) is larger than the limit of int type");
             }
 
             helpPrint("argument count (argc) is extremely large (128+)", 0);
         } else if (argc < 1) {
             if (argc < std::numeric_limits<int>::min()) {
-                helpPrint("argument count (argc) is smaller than the limit of int type", 1);
+                throw std::invalid_argument("Argument count (argc) is smaller than the limit of int type");
             } else {
-                helpPrint("argument count (argc) is 0 or less (should always be at least 1)..", 1);
+                throw std::invalid_argument("Argument count (argc) is 0 or less (should always be at least 1)...");
             }
-
-            return EXIT_FAILURE;
         }
 
 
@@ -164,8 +161,8 @@ namespace helpHandler {
         }
 
         for (int i = 1; i < argc; i++) { //Start from 1 to skip binary name
-            if (nullptr == argv[i]) {
-                helpPrint("argument count (argc) exceeds actual number of arguments (argv), or argv is a nullptr", 1);
+            if (argv[i] == nullptr) {
+                throw std::out_of_range("Argument value (argv) index is a nullptr (argc exceeds actual number count?)");
                 return EXIT_FAILURE;
             }
 
@@ -197,7 +194,7 @@ namespace helpHandler {
         }
             
     
-        if (true == options.unknownArgHelp && argc > 1) {
+        if (options.unknownArgHelp == true && argc > 1) {
             if (unknownArg.empty()) {
                 if (argc > 2) {
                     unknownArg = "Unknown arguments given"; 
@@ -205,7 +202,7 @@ namespace helpHandler {
                     unknownArg = "Unknown argument given"; }
             }
         
-            std::cerr << unknownArg << std::endl;
+            std::cout << unknownArg << std::endl;
             return EXIT_SUCCESS;
         }
 
