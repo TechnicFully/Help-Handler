@@ -1,0 +1,56 @@
+:toc:
+:blank: pass:[ +]
+
+image:https://www.dropbox.com/s/qvtu9z2c4xekaww/f6d766cccecd96c622788a4aa99b438d1ab4abc9faee901949ea14beec23b5ee.png?raw=1[alt="HelpHandler"]
+
+
+
+
+Requirements
+------------
+##### OS
+- Windows (MSVC currently not supported)
+- MacOS
+- Linux
+
+##### Compiler
+- g+\+/clang++/MinGW
+- C++11 support
+
+
+
+Usage
+------
+The only function needed after including helpHandler.hpp is ```helpHandler::handle(int argc, char** argv, std::string help_dialogue)```. Beyond that, most users will only be concerned with ```helpHandler::config(bool extraStrings, bool noArgHelp, bool unknownArgHelp)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. You can refer to the _examples_ folder for more advanced usage.
+
+Basic usage example:
+[source,CPP]
+----------
+helpHandler::handle(argc, argv, "Usage: Test\n");
+----------
+An exception will be thrown if an error occurs, and the number of arguments matched will be returned on success (0 if none). It will increase your executable size by ~100KB without optimizations turned on. If this is a concern, the C version of this library works with C++ as well.
+
+
+Functions
+---------
+[source,CPP]
+----------
+helpHandler::handle
+----------
+
+
+Contributing
+------------
+If you'd like to submit a bugfix, I'd be glad to take a pull request or fix it myself given adequate description of the cause of the issue. If you'd like a feature added, it will be  considered so long as it's within the scope of this project.
+
+
+License
+-------
+Distributed under the MIT License. See link:https://github.com/Inaff/Help-Handler/blob/master/LICENSE[here] for more information.
+
+
+Contact
+------
+keatonsquires97@gmail.com
+
+

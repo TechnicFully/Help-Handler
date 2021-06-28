@@ -1,0 +1,104 @@
+:toc:
+:blank: pass:[ +]
+
+image:https://www.dropbox.com/s/qvtu9z2c4xekaww/f6d766cccecd96c622788a4aa99b438d1ab4abc9faee901949ea14beec23b5ee.png?raw=1[alt="HelpHandler"]
+
+
+'''
+
+
+Requirements
+------------
+##### OS
+- Windows (MSVC currently not supported)
+- macOS
+- Linux
+
+##### Compiler
+- GCC/Clang/MinGW
+- C99 support
+
+
+
+Usage
+------
+The only function needed after including help_handler.h is ```help_handler(int argc, char** argv, const char* help_dialogue)```. Beyond that, most users will only be concerned with ```help_handler_config(bool extra_strings, bool no_arg_help, bool unknown_arg_help)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. As a bonus, functions support type overloading where applicable if your compiler standard is set to C11 or above. You can refer to the _examples_ folder for more advanced usage.
+
+Basic usage example:
+[source,C]
+----------
+help_handler(argc, argv, "Usage: Test\n");
+----------
+A negative value is returned if an error occurred, otherwise the number of arguments matched will be returned, (0 if none). It will increase your executable size by ~15KB with no optimizations enabled.
+
+
+Functions
+---------
+[source,C]
+----------
+bool help_handler_is_err(int errorCode);
+char* help_handler_get_err(void);
+int help_handler(int argc, char** argv, const char* help_dialogue);
+void help_handler_config(bool extra_strings, bool no_arg_help, bool unknown_arg_help);
+void help_handler_disable_err(bool disableErrorOutput);
+int help_handler_f(int argc, char** argv, const char* file_name);
+int help_handler_info(const char* app_name, const char* ver);
+int help_handler_name(const char* app_name);
+int help_handler_version(const char* ver);
+void help_handler_pipe(const char* output_pipe);
+void help_handler_print_err(void);
+
+C99 only
+int help_handler_name_s(const char* app_name);
+int help_handler_name_w(const wchar_t* app_name);
+int help_handler_version_s(const char* ver);
+int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue);
+int help_handler_info_d(const char* app_name, double ver);
+int help_handler_info_i(const char* app_name, int ver);
+int help_handler_info_s(const char* app_name, const char* ver);
+void help_handler_pipe_i(int output_pipe);
+void help_handler_pipe_s(const char* output_pipe);
+void help_handler_version_d(double ver);
+void help_handler_version_i(unsigned int ver);
+----------
+
+Macros
+------
+Passable to their respective help_handler_config(extra_strings, no_arg_help, unknown_arg_help) parameters:
+```
+HELP_HANDLER_NO_ARGS
+HELP_HANDLER_UNK_ARGS
+HELP_HANDLER_UNKNOWN_ARGS
+HELP_HANDLER_EXTRA_STRINGS
+HELP_HANDLER_DISABLE_NO_ARGS
+HELP_HANDLER_DISABLE_UNK_ARGS
+HELP_HANDLER_DISABLE_UNKNOWN_ARGS
+HELP_HANDLER_DISABLE_EXTRA_STRINGS
+```
+
+Identical to help_handler_disable_err, you may define this prior to including help_handler.h to disable any error/warning output:
+```
+HELP_HANDLER_IGNORE_ALL
+```
+
+Known limitations & issues
+--------------------------
+- MSVC only supports ANSI C90 and is therefore currently unsupported, but may eventually be, likely as its own seperate file.
+- Non-POSIX systems don't have regex argument matching, as the regex library (_regex.h_) is a POSIX C library, and Windows does not even have a system library for this. A third party library will be embedded for those systems in the future.
+
+
+Contributing
+------------
+If you'd like to submit a bugfix, I'd be glad to take a pull request or fix it myself given adequate description of the cause of the issue. If you'd like a feature added, it will be considered so long as it's within the scope of this project.
+
+
+License
+-------
+Distributed under the MIT License. See link:https://github.com/Inaff/Help-Handler/blob/master/LICENSE[here] for more information.
+
+
+Contact
+------
+keatonsquires97@gmail.com
+
+
