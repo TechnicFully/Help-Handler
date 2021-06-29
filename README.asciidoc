@@ -17,11 +17,11 @@ This library isn't meant to be another argparse or a derivative, but a one-file 
 
 
 ##### Language minimum versions
-- Java{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- 7
-- Python - 2.xx through 3.xx
-- C+\+{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- C++11
 - C{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- C99
+- C+\+{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- C++11
+- Java{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- 7
 - Lua{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- 5.3.5 (Older versions untested)
+- Python - 2.xx through 3.xx
 {blank}
 
 Usage
