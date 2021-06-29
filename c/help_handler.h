@@ -340,7 +340,7 @@ static size_t trim(char *out, size_t len, const char *str) {
     end++;
 
     //Set output size to minimum of trimmed string length and buffer size minus 1
-    out_size = (end-str) < (unsigned int)(len-1 ? (unsigned int)(end-str) : len-1);
+    out_size = (end-str) < (unsigned int)len-1 ? (unsigned int)(end-str) : len-1;
 
     // Copy trimmed string and add null terminator
     memcpy(out, str, out_size);
@@ -596,7 +596,6 @@ int help_handler_version(const char* ver) {
         return helpHandlerFailure; }
 
     char* version = (char*)malloc(strlen(ver)+1);
-    trim(version, strlen(ver)+1, ver);
     strcpy(info_t.ver_str, version);
     most_recent_t.ver = versionStr;
 
@@ -787,4 +786,4 @@ int help_handler_f(int argc, char** argv, const char* file_name) {
 #undef MAX_STRING_COUNT
 #undef HELP_HANDLER_POSIX_C
 #undef HELP_HANDLER_OVERLOAD_SUPPORTED
-#endif //HELP_HANDLER_H
+#endif  /* HELP_HANDLER_H */
