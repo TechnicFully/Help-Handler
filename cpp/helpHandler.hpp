@@ -62,8 +62,8 @@ namespace helpHandler {
     static std::string trim(const std::string& str) {
         size_t first = str.find_first_not_of(' ');
         if (std::string::npos == first) {
-            return str;
-        }
+            return str; }
+            
         size_t last = str.find_last_not_of(' ');
         return str.substr(first, (last - first + 1));
     }
@@ -129,7 +129,6 @@ namespace helpHandler {
                     case version_double: std::cout << info_t.versionDouble; break;
                 }
 
-                std::cout << std::endl;
             }
 
             if (matchedHelp == true) {
@@ -154,7 +153,7 @@ namespace helpHandler {
         return 0;
     }
 
-    int handleFile(int argc, char** argv, std::string fileName) {
+    int handleFile(int argc, char** argv, const std::string& fileName) {
         std::ifstream f;
         std::string s;
 
@@ -171,7 +170,7 @@ namespace helpHandler {
          f.close();
 
         return helpHandler::handle(argc, argv, s);
-    }
+    } 
 
     void version(double version) noexcept {
         info_t.versionDouble = version;
@@ -183,24 +182,47 @@ namespace helpHandler {
         if (version.empty()) {
             throw std::invalid_argument("Version string was given, but is empty"); }
         
-        info_t.versionStr = version;
+        info_t.versionStr = trim(version);
         info_t.versionMostRecent = version_str;
     }
 
-    void name(std::string appName) { //Parent
+    int handle(int argc, char** argv, std::string helpDialogue, std::string version) {
+        helpHandler::version(version);
+        return helpHandler::handle(argc, argv, helpDialogue);
+    } int handle(int argc, char** argv, std::string helpDialogue, double version) {
+        helpHandler::version(version);
+        return helpHandler::handle(argc, argv, helpDialogue);
+    } int handle(int argc, char** argv, std::string helpDialogue, unsigned int version) {
+        helpHandler::version(version);
+        return helpHandler::handle(argc, argv, helpDialogue);
+    }
+
+    int handleFile(int argc, char** argv, const std::string& fileName, std::string version) {
+        helpHandler::version(version);
+        return helpHandler::handleFile(argc, argv, fileName);
+    } int handleFile(int argc, char** argv, const std::string& fileName, double version) {
+        helpHandler::version(version);
+        return helpHandler::handleFile(argc, argv, fileName);
+    } int handleFile(int argc, char** argv, const std::string& fileName, unsigned int version) {
+        helpHandler::version(version);
+        return helpHandler::handleFile(argc, argv, fileName);
+    }
+
+
+    void name(const std::string& appName) { //Parent
         if (appName.empty()) {
             throw std::invalid_argument("App name was given, but is empty"); }
 
-        info_t.name = appName;
+        info_t.name = trim(appName);
     }
 
-    void info(std::string appName, std::string version) {
+    void info(const std::string& appName, std::string version) {
         helpHandler::name(appName);
         helpHandler::version(version);
-    } void info(std::string appName, double version) {
+    } void info(const std::string& appName, double version) {
         helpHandler::name(appName);
         helpHandler::version(version);
-    } void info(std::string appName, unsigned int version) {
+    } void info(const std::string& appName, unsigned int version) {
         helpHandler::name(appName);
         helpHandler::version(version);
     }
