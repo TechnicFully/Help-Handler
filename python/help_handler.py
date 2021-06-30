@@ -23,19 +23,26 @@ SOFTWARE.
 '''
 
 from __future__ import print_function #For compatibility between Python 2 and 3 print functions
-import sys
+import sys, re, warnings #sys is for grabbing arguments
 
 
 noArgHelpGlob = True;
-unknownArgHelpGlob = True;
-extraStringsGlob = False;
+extraStringsGlob = True;
+unknownArgHelpGlob = False;
 verGlob = "No version available";
 
 help_ignore_warnings = False
 
 
+def _warning_formatted(message, category, filename, lineno, file=None, line=None):
+        return '%s at line %s: %s\n' % (filename, lineno, message)
 
-def help_handler_config(noArgHelp=None, unknownArgHelp=None, extraStrings=None, ver=None):
+warnings.formatwarning = _warning_formatted
+
+
+
+
+def help_handler_config(noArgHelp=None, extraStrings=None, unknownArgHelp=None):
     global noArgHelpGlob
     global unknownArgHelpGlob
     global extraStringsGlob
@@ -46,32 +53,19 @@ def help_handler_config(noArgHelp=None, unknownArgHelp=None, extraStrings=None, 
         noArgHelpGlob = noArgHelp
     else:
         if (False == help_ignore_warnings):
-            print("WARNING: " + help_handler_config.__name__ + "() argument noArgHelp is not of type bool or int", file=stderr)
-
-    if (isinstance(unknownArgHelp, int)):
-        unknownArgHelpGlob = unknownArgHelp
-    else:
-        if (False == help_ignore_warnings):
-            print("WARNING: " + help_handler_config.__name__ + "() argument unknownArgHelp is not of type bool or int", file=stderr)
+            warnings.warn("argument noArgHelp is not of type bool or int")
 
     if (isinstance(extraStrings, int)):
         extraStringsGlob = True
     else:
         if (False == help_ignore_warnings):
-            print("WARNING: " + help_handler_config.__name__ + "() argument extraStrings is not of type bool or int", file=stderr)
+            warnings.warn("argument extraStrings is not of type bool or int")
 
-    if sys.version_info.major >= 3:
-        if (isinstance(ver, str)):
-            verGlob = ver
-        else:
-            if (False == help_ignore_warnings):
-                print("WARNING: " + help_handler_config.__name__ + "() argument ver is not of type str", file=stderr)
-    elif sys.version_info.major <= 2:
-        if (isinstance(ver, basestring)):
-            verGlob = ver
-        else:
-            if (False == help_ignore_warnings):
-                print("WARNING: " + help_handler_config.__name__ + "() argument ver is not of type str", file=stderr)
+    if (isinstance(unknownArgHelp, int)):
+        unknownArgHelpGlob = unknownArgHelp
+    else:
+        if (False == help_ignore_warnings):
+            warnings.warn("argument unknownArgHelp is not of type bool or int")
 
     return
 
@@ -84,56 +78,48 @@ def help_handler_version(ver):
             verGlob = ver
         else:
             if (False == help_ignore_warnings):
-                print("WARNING: " + help_handler_config.__name__ + "() argument ver is not of type str", file=stderr)
+                warnings.warn("argument ver is not of type str")
     elif sys.version_info.major <= 2:
         if (isinstance(ver, basestring)):
             verGlob = ver
         else:
             if (False == help_ignore_warnings):
-                print("WARNING: " + help_handler_config.__name__ + "() argument ver is not of type str", file=stderr)
+                warnings.warn("argument ver is not of type str")
 
 
-def help_handler(help, unknownArg=None):
-    if not help:
-        help = "No usage help is available"
+def help_handler(helpDialogue, version=None):
+    if not helpDialogue:
+        helpDialogue = "No usage help is available"
     if (len(sys.argv) == 1 and noArgHelpGlob == True):
-        print(help)
+        print(helpDialogue)
         return
     
+    helpRegex    = "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)"
+    versionRegex = "-{0,}v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)"
+    foundRegexMatch = False
 
-    helpLex = [
-        "h", "-h", "--h",
-        "help", "-help","--help",
-        "hhelp", "heelp", "hellp", "helpp",
-        "-hhelp", "-heelp", "-hellp", "-helpp",
-        "--hhelp", "--heelp", "--hellp", "--helpp"]
-    verLex = [
-        "v", "-v", "--v",
-        "version", "-version", "--version",
-        "vversion", "veersion", "verrsion", "verssion", "versiion", "versioon", "versionn",
-        "-vversion", "-veersion", "-verrsion", "-verssion", "-versiion", "-versioon", "-versionn",
-        "--vversion", "--veersion", "--verrsion", "--verssion", "--versiion", "--versioon", "--versionn" ]
-
+    if extraStringsGlob == True:
+        helpRegex    += "|-{0,}h{1,}$"
+        versionRegex += "|^-{0,}v$"
 
     for arg in sys.argv[1:]:
-        for i in helpLex:
-            if arg.lower() == i:
-                print(help)
-                return
-        for i in verLex:
-            if arg.lower() == i:
-                print(verGlob)
-                return
+        if re.match(versionRegex, arg):
+            print(verGlob)
+            foundRegexMatch = True
+    for arg in sys.argv[1:]:
+        if re.match(helpRegex, arg):
+            print(helpDialogue)
+            foundRegexMatch = True
+
+    if foundRegexMatch == True: 
+        return
 
 
-    global unknownArgHelpGlob
     if unknownArgHelpGlob == True:
-        if not unknownArg:
-            if (len(sys.argv) > 2):
-                unknownArg = "Unknown arguments given"
-            else:
-                unknownArg = "Unknown argument given"
-        print(unknownArg)
+        if (len(sys.argv) > 2):
+            print("Unknown arguments given")
+        else:
+            print("Unknown argument given")
 
     return
 
