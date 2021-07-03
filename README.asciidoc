@@ -59,7 +59,7 @@ HelpHandler.handle("Usage: Test")
 
 Example
 -------
-image:https://www.dropbox.com/s/n4a97cwkfu8fwy6/5b0e12e163303c16501e4f31aa4b63cf56c6e604.png?raw=1[alt="example terminal screenshot"]
+image:https://github.com/Inaff/Help-Handler/blob/master/example.png?raw=true[alt="example terminal screenshot"]
 
 
 Contributing
