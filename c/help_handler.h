@@ -140,7 +140,7 @@ static const char* helpHandlerFuncName = "help_handler";
 static int outputPipe = 0; //Used by print_pipe()
 
 /*
- * These enums below are used for verbosity/changeability, in place of what'd otherwise be magic numbers
+ * These enums below are used for verbosity/changeability internally, in place of what'd otherwise be magic numbers
  */
 //C99 and above allows trailing commas
 enum output { 
@@ -364,19 +364,16 @@ int return_result(int result_help, int result_ver) {
 static bool print_ver(void) {
     if (most_recent_t.ver == versionStr) {
         print_pipe(info_t.ver_str);
-        print_pipe("\n");
         return true;
     } else if (most_recent_t.ver == versionInt) {
         char n[MAX_STRING_LEN];
         sprintf(n, "%d", info_t.ver_int);
         print_pipe(n);
-        print_pipe("\n");
         return true;
     } else if (most_recent_t.ver == versionDouble) {
         char n[MAX_STRING_LEN];
         sprintf(n, "%lf", info_t.ver_double);
         print_pipe(n);
-        print_pipe("\n");
         return true; }
 
     return false;
@@ -388,8 +385,7 @@ static bool print_name(void) {
         return true;
     } else if (wcslen(info_t.name_w) > 0 && most_recent_t.name == nameWChar) {
         print_pipe_w(info_t.name_w);
-        return true;
-    }
+        return true; }
 
     return false;
 }
@@ -596,6 +592,7 @@ int help_handler_version(const char* ver) {
         return helpHandlerFailure; }
 
     char* version = (char*)malloc(strlen(ver)+1);
+    trim(version, strlen(ver)+1, ver);
     strcpy(info_t.ver_str, version);
     most_recent_t.ver = versionStr;
 
@@ -699,6 +696,7 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
         if (print_name()) {
             print_pipe(" Version "); }
         print_ver();
+        print_pipe("\n");
         print_pipe(help);
     } else if (result == dialogHelp) {
         if (print_name()) {
@@ -733,6 +731,7 @@ int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
         if (print_name()) {
             print_pipe(" Version "); }
         print_ver();
+        print_pipe("\n");
         print_pipe_w(help);
     } else if (result == dialogHelp) {
         if (print_name()) {
@@ -744,6 +743,8 @@ int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
     
     print_pipe("\n");
 
+
+    free(help);
     return helpHandlerSuccess;
 }
 
