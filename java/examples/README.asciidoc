@@ -31,8 +31,6 @@ Functions
 int helpHandler.handle(final String args[], String helpDialogue, String|Double  version) throws RuntimeException; //Version arguments is optional
 void helpHandler.config(bool extraStrings=true, bool noArgHelp=true, bool unknownArgHelp=false); //noArgHelp and unknownArgHelp are optional
 void helpHandler.version(String|double  ver); //throws RuntimeException if string is passed
-
-
 ----------
 
 
