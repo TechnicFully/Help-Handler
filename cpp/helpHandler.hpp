@@ -34,16 +34,22 @@
 
 
 //Using globals instead of macros to avoid polluting namespace where possible
-static constexpr unsigned int version_str    = 0;
-static constexpr unsigned int version_int    = 1;
-static constexpr unsigned int version_double = 2;
+enum varTypes {
+    versionStr,
+    versionInt,
+    versionDouble,
+};
+
+static struct most_recent_t {
+    unsigned int name = 0;
+    unsigned int ver = versionStr;
+} most_recent_t;
 
 static struct info_t {
     std::string name        = "";
     std::string versionStr  = "";
     unsigned int versionInt = 0;
     double versionDouble    = 0;
-    unsigned int versionMostRecent = 0; //Used to determine which overloaded version function was called last
 } info_t;
 
 static struct options_t {
@@ -83,10 +89,10 @@ namespace helpHandler {
         /* Error checks */
         /****************/
         if (!argv) {
-            throw std::invalid_argument("Argument value (argv) is NULL"); } 
-            
+            throw std::invalid_argument("Argument value (argv) is NULL"); }
+
         if (argc > std::numeric_limits<int>::max()) {
-            throw std::invalid_argument("Argument count (argc) is larger than the limit of int type"); }
+            throw std::invalid_argument("Argument count (argc) is larger than the limit of int type");
         } else if (argc < 1) {
             if (argc < std::numeric_limits<int>::min()) {
                 throw std::invalid_argument("Argument count (argc) is smaller than the limit of int type");
@@ -120,10 +126,10 @@ namespace helpHandler {
         //Output appropriate results
         if (matches > 0) {
             if (matchedVer == true) {
-                switch (info_t.versionMostRecent) {
-                    case version_str: std::cout << trim(info_t.versionStr); break;
-                    case version_int: std::cout << info_t.versionInt; break; 
-                    case version_double: std::cout << info_t.versionDouble; break;
+                switch (most_recent_t.ver) {
+                    case versionStr: std::cout << trim(info_t.versionStr); break;
+                    case versionInt: std::cout << info_t.versionInt; break; 
+                    case versionDouble: std::cout << info_t.versionDouble; break;
                 }
 
             }
@@ -171,16 +177,16 @@ namespace helpHandler {
 
     void version(double version) noexcept {
         info_t.versionDouble = version;
-        info_t.versionMostRecent = version_double;
+        most_recent_t.ver = versionDouble;
     } void version(unsigned int version) noexcept {
         info_t.versionInt = version;
-        info_t.versionMostRecent = version_int;
+        most_recent_t.ver = versionInt;
     } void version(std::string version) { //Parent
         if (version.empty()) {
             throw std::invalid_argument("Version string was given, but is empty"); }
         
         info_t.versionStr = trim(version);
-        info_t.versionMostRecent = version_str;
+        most_recent_t.ver = versionStr;
     }
 
     int handle(int argc, char** argv, std::string helpDialogue, std::string version) {
