@@ -33,7 +33,7 @@
 #include <stdexcept>
 
 
-//Using globals instead of macros to avoid polluting namespace where possible
+//Using globals instead of macros to avoid undefs/polluting namespace where possible
 enum varTypes {
     versionStr,
     versionInt,
@@ -137,7 +137,7 @@ namespace helpHandler {
             if (matchedHelp == true) {
                 if (info_t.name.empty() == false) { std::cout << trim(info_t.name) << " "; }
                     std::cout << help;
-                }
+            }
 
             std::cout << std::endl;
             return matches;
