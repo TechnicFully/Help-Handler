@@ -96,16 +96,19 @@ static const int helpHandlerFailure = -1;
 #endif
 
 
-#include <errno.h>
+#include <errno.h> //For strerror and errno
 #include <ctype.h> //For isspace()
 #include <wchar.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h> //strcasecmp causes an implicit function declaration warning in Ubuntu 18.04, but I don't think it does in MacOS
-#include <limits.h> //For CHAR_BIT and INT_MIN/INT_MAX
+#include <strings.h> //strcasecmp causes an implicit function declaration warning in Ubuntu 18.04 with just string.h, but I don't think it does in MacOS
+#include <limits.h> //For INT_MIN and INT_MAX
 #include <stdbool.h>
 
+/*
+ * Sort of macro spaghetti, but a necessary evil for finding and/or warning about regex capability (or lack thereof)
+ */
 //unistd.h and regex.h are OS-specific headers, so check for them on an opt-in basis
 #if !defined(_WIN32) && (defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))) //POSIX and Unix
     #include <unistd.h>
@@ -120,19 +123,19 @@ static const int helpHandlerFailure = -1;
 #include <windows.h>
 #else
     //MSVC is the only common compiler that doesn't support the warning directive
-    #if _MSC_VER && !__INTEL_COMPILER //Prefixing "warning:" makes MSVC output a warning instead of a message
-        #pragma message("warning: Compiling without regular expression support") 
+    #if _MSC_VER && !__INTEL_COMPILER
+        #pragma message("warning: Compiling without regular expression support") //Prefixing "warning:" makes MSVC output a warning instead of a message
     #else
         #warning "Compiling without regular expression support"
     #endif
 #endif
 
 
+//Only used for internal strings
 #define MAX_STRING_LEN 64
 #define MAX_STRING_COUNT 32
 
-
-static bool   printErr = true;
+static bool   printErr = false;
 static size_t errCount = 0; //Used for counting & printing ALL errors when user calls help_handler_print_err/get_err
 static char   errs[MAX_STRING_COUNT][MAX_STRING_LEN] = {{0}};
 
@@ -162,7 +165,9 @@ enum errTypes {
     warning,
     error, };
 
-//User info structs
+/*
+ * User info/setting structs
+ */
 static struct most_recent_t {
     unsigned int name;
     unsigned int ver;
@@ -196,7 +201,7 @@ bool help_handler_is_err(int errorCode); //Forward declaration so private functi
 /*
  * String functions
  */
-//While making print_pipe take varargs would obviate calling print_pipe repeatedly, it would also cause string-nonliteral warnings (surpressing these would require non-portable macros)
+//While making print_pipe use varargs would obviate calling the functions repeatedly in some cases, it would also cause string-nonliteral warnings - surpressing these would require non-portable macros
 static void print_pipe(const char* s) {
     if (outputPipe == outDefault) {
         fprintf(stdout, "%s", s);
@@ -241,9 +246,10 @@ static void store_err(const char* s) {
 
 static void print_err(const char* s, int err_line, int err_val) {    
     #ifndef HELP_HANDLER_IGNORE_ALL
+    if (err_val == silent) { //Sometimes used internally to skip outputting anything
+        return; }
+
     if (printErr == true) {
-        if (err_val == silent) {
-            return; }
         if (err_val == warning) {
             #ifndef HELP_HANDLER_IGNORE_WARN
             print_pipe(helpHandlerFuncName);
@@ -308,7 +314,7 @@ static int string_check_w(const wchar_t* s, int s_line, int err_val, const char*
 }
 
 /*
- * Utilities
+ * Utility functions
  */
 #ifdef HELP_HANDLER_POSIX_C
 static int regex_match(const char *s, const char *pattern) {
@@ -331,7 +337,6 @@ static size_t trim(char *out, size_t len, const char *str) {
     const char* end;
     size_t out_size;
 
-    
     //Trim leading whitespace
     while(isspace((unsigned char)*str)) { str++; };
     //Trim trailing space
@@ -342,18 +347,18 @@ static size_t trim(char *out, size_t len, const char *str) {
     //Set output size to minimum of trimmed string length and buffer size minus 1
     out_size = (end-str) < (unsigned int)len-1 ? (unsigned int)(end-str) : len-1;
 
-    // Copy trimmed string and add null terminator
+    //Copy trimmed string and add null terminator
     memcpy(out, str, out_size);
     out[out_size] = 0;
-
 
     return out_size;
 }
 
 /*
- * These static functions are only called from the two help_handler functions, but split into functions for the sake of code reuse
+ * Static functions. 
+ * These are called from the two help_handler functions, split into their own functions for code reuse
  */
-int return_result(int result_help, int result_ver) {
+static int return_result(int result_help, int result_ver) {
     if (result_help > 0 && result_ver > 0) { return dialogHelpVer; }
     else if (result_help > 0) { return dialogHelp;
     } else if (result_ver > 0) { return dialogVer;
@@ -366,12 +371,14 @@ static bool print_ver(void) {
         print_pipe(info_t.ver_str);
         return true;
     } else if (most_recent_t.ver == versionInt) {
-        char n[MAX_STRING_LEN];
+        //Max number of digits a 64-bit int can hold. Calculating this maximum at compile-time would be prudent
+        char n[20];
         sprintf(n, "%d", info_t.ver_int);
         print_pipe(n);
         return true;
     } else if (most_recent_t.ver == versionDouble) {
-        char n[MAX_STRING_LEN];
+        //Maximum value for an IEEE 754 64-bit double is 1.8 × 10308, but cap to 20 digits (plus decimal point) for the time being
+        char n[21]; 
         sprintf(n, "%lf", info_t.ver_double);
         print_pipe(n);
         return true; }
@@ -440,6 +447,7 @@ static int arg_match(int argc, char** argv, const char* regex_string, const char
 }
 
 static int help_handler_sub(int argc, char** argv) {
+    //Avoiding this ifdef by embedding regex functionality in the future would be great
     #ifndef HELP_HANDLER_POSIX_C
     //Casts to silence C++ warnings
     char* help_lex[] = {
@@ -459,7 +467,7 @@ static int help_handler_sub(int argc, char** argv) {
     if (options_t.extra_strings != true) {
         ver_lex[0]  = "";ver_lex[1]  = "";ver_lex[2]  = "";
         help_lex[0] = "";help_lex[1] = "";help_lex[2] = ""; 
-        i = 3; } //First three elements of help/ver array should be abbreviated versions, hence setting the array index to the fourth element
+        i = 3; } //First three elements of help/ver array should be abbreviated terms, hence setting the array index to the fourth element
 
     int result_help, result_ver = 0;
     for (; *help_lex[i] != '\0'; i++) {
@@ -477,7 +485,9 @@ static int help_handler_sub(int argc, char** argv) {
 
     int r = return_result(result_help, result_ver);
     if (r != 0) { return r; }
-    #else
+
+    #else //HELP_HANDLER_POSIX_C
+
     char help_lex[MAX_STRING_LEN];
     char ver_lex[MAX_STRING_LEN];
     if (options_t.extra_strings == true) {
@@ -493,7 +503,7 @@ static int help_handler_sub(int argc, char** argv) {
     if (help_handler_is_err(result_ver)) { return result_ver; }
     int r = return_result(result_help, result_ver);
     if (r != 0) { return r; }
-    #endif
+    #endif //HELP_HANDLER_POSIX_C
 
     if (true == options_t.unknown_arg_help && argc > 1) {
         if (argc > 2) {
@@ -691,6 +701,7 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
         return helpHandlerSuccess;
     }
 
+    //Should probably find a better way to handle this than variables as flags to make it easier to expand
     int result = help_handler_sub(argc, argv);
     if (result == dialogHelpVer) {
         if (print_name()) {
@@ -726,6 +737,7 @@ int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
         return helpHandlerSuccess;
     }
 
+    //Should probably find a better way to handle this than variables as flags to make it easier to expand
     int result = help_handler_sub(argc, argv);
     if (result == dialogHelpVer) {
         if (print_name()) {
@@ -778,7 +790,8 @@ int help_handler_f(int argc, char** argv, const char* file_name) {
         return helpHandlerFailure; }
 
     int return_val = help_handler(argc, argv, (const char*)contents);
-    if (contents) { free(contents); }
+    free(contents);
+
     return return_val;
 }
 
