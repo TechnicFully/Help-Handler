@@ -135,8 +135,9 @@ namespace helpHandler {
             }
 
             if (matchedHelp == true) {
-                if (info_t.name.empty() == false) { std::cout << trim(info_t.name) << " "; }
-                    std::cout << help;
+                if (info_t.name.empty() == false) { 
+                    std::cout << trim(info_t.name) << " "; }
+                std::cout << help;
             }
 
             std::cout << std::endl;
@@ -181,6 +182,9 @@ namespace helpHandler {
     } void version(unsigned int version) noexcept {
         info_t.versionInt = version;
         most_recent_t.ver = versionInt;
+    } void version(int version) noexcept {
+        info_t.versionInt = version;
+        most_recent_t.ver = versionInt;
     } void version(std::string version) { //Parent
         if (version.empty()) {
             throw std::invalid_argument("Version string was given, but is empty"); }
@@ -198,6 +202,9 @@ namespace helpHandler {
     } int handle(int argc, char** argv, std::string helpDialogue, unsigned int version) {
         helpHandler::version(version);
         return helpHandler::handle(argc, argv, helpDialogue);
+    } int handle(int argc, char** argv, std::string helpDialogue, int version) {
+        helpHandler::version(version);
+        return helpHandler::handle(argc, argv, helpDialogue);
     }
 
     int handleFile(int argc, char** argv, const std::string& fileName, std::string version) {
@@ -207,6 +214,9 @@ namespace helpHandler {
         helpHandler::version(version);
         return helpHandler::handleFile(argc, argv, fileName);
     } int handleFile(int argc, char** argv, const std::string& fileName, unsigned int version) {
+        helpHandler::version(version);
+        return helpHandler::handleFile(argc, argv, fileName);
+    } int handleFile(int argc, char** argv, const std::string& fileName, int version) {
         helpHandler::version(version);
         return helpHandler::handleFile(argc, argv, fileName);
     }
@@ -226,6 +236,9 @@ namespace helpHandler {
         helpHandler::name(appName);
         helpHandler::version(version);
     } void info(const std::string& appName, unsigned int version) {
+        helpHandler::name(appName);
+        helpHandler::version(version);
+    } void info(const std::string& appName, int version) {
         helpHandler::name(appName);
         helpHandler::version(version);
     }
