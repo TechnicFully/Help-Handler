@@ -84,12 +84,9 @@ namespace helpHandler {
         /****************/
         if (!argv) {
             throw std::invalid_argument("Argument value (argv) is NULL"); } 
-        
-        if (argc >= 256) { //Magic number
-            if (argc > std::numeric_limits<int>::max()) {
-                throw std::invalid_argument("Argument count (argc) is larger than the limit of int type"); }
-
-            std::cerr << "Argument count (argc) is extremely large (256+)";
+            
+        if (argc > std::numeric_limits<int>::max()) {
+            throw std::invalid_argument("Argument count (argc) is larger than the limit of int type"); }
         } else if (argc < 1) {
             if (argc < std::numeric_limits<int>::min()) {
                 throw std::invalid_argument("Argument count (argc) is smaller than the limit of int type");
