@@ -135,6 +135,7 @@ namespace helpHandler {
             }
 
             if (matchedHelp == true) {
+                if (matchedVer == true) { std::cout << std::endl; }
                 if (info_t.name.empty() == false) { 
                     std::cout << trim(info_t.name) << " "; }
                 std::cout << help;
