@@ -103,11 +103,11 @@ def help_handler(helpDialogue, version=None):
         versionRegex += "|^-{0,}v$"
 
     for arg in sys.argv[1:]:
-        if re.match(versionRegex, arg):
+        if re.match(versionRegex, arg, flags=re.IGNORECASE):
             print(verGlob)
             foundRegexMatch = True
     for arg in sys.argv[1:]:
-        if re.match(helpRegex, arg):
+        if re.match(helpRegex, arg, flags=re.IGNORECASE):
             print(helpDialogue)
             foundRegexMatch = True
 
