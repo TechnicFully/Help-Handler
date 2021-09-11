@@ -51,7 +51,8 @@ static const int helpHandlerFailure = -1;
 /* * * * * * * * * * * * * * * */
 /* * * * INTERNAL MACROS * * * */
 /* * * * * * * * * * * * * * * */
-#ifndef __cplusplus //C++ does not support the _Generic macro
+//C++ does not support the _Generic macro. This is important for C++-like function overloading for ease-of-use for library users
+#ifndef __cplusplus
 #ifdef __STDC__
 #ifdef __STDC_VERSION__
 #if (__STDC_VERSION__ >= 201112L)
@@ -60,8 +61,8 @@ static const int helpHandlerFailure = -1;
 #endif
 #endif
 #endif
-
-#ifdef HELP_HANDLER_OVERLOAD_SUPPORTED       //(0,help) makes array decay to a pointer, otherwise _Generic will throw selection errors (not sure if this is only an issue with Clang, but GCC *does* throw an unused-value warning)
+//If overloading is supported, define macro functions
+#ifdef HELP_HANDLER_OVERLOAD_SUPPORTED       //(0,help) makes arrays decay to a pointer, otherwise _Generic will throw selection errors (not sure if this is only an issue with Clang, but GCC *does* throw an unused-value warning)
 #if defined (__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-value"
@@ -96,23 +97,25 @@ static const int helpHandlerFailure = -1;
 #endif
 
 
+
 #include <errno.h> //For strerror and errno
 #include <ctype.h> //For isspace()
 #include <wchar.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h> //strcasecmp causes an implicit function declaration warning in Ubuntu 18.04 with just string.h, but I don't think it does in MacOS
+#ifndef _WIN32
+#include <strings.h> //strcasecmp causes an implicit function declaration warning in Ubuntu 18.04 with just string.h, but I don't believe macOS does
+#endif
 #include <limits.h> //For INT_MIN and INT_MAX
 #include <stdbool.h>
 
 /*
  * Sort of macro spaghetti, but a necessary evil for finding and/or warning about regex capability (or lack thereof)
  */
-//unistd.h and regex.h are OS-specific headers, so check for them on an opt-in basis
 #if !defined(_WIN32) && (defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))) //POSIX and Unix
-    #include <unistd.h>
-    #if defined(_POSIX_VERSION) //POSIX compliant
+    #include <unistd.h> //unistd.h and regex.h are OS-specific headers, so check for them on an opt-in basis
+    #if defined(_POSIX_VERSION) //is POSIX compliant
         #define HELP_HANDLER_POSIX_C
         #include <regex.h>
     #endif
@@ -126,21 +129,46 @@ static const int helpHandlerFailure = -1;
     #if _MSC_VER && !__INTEL_COMPILER
         #pragma message("warning: Compiling without regular expression support") //Prefixing "warning:" makes MSVC output a warning instead of a message
     #else
-        #warning "Compiling without regular expression support"
+        #warning "Compiling without regular expression support" //#warning is a non-standard directive, but extremely common, so we presume this will work
     #endif
 #endif
 
+/*
+ * Strcpy_s (or strlcpy in BSD) is a secure variant of strcpy that prevents buffer overflows if the source buffer is larger than the destination buffer. 
+ * The function is only guaranteed to be available if, before including string.h, C11 or later is supported and STDC_WANT_LIB_EXT1 is defined with an integer value of 1.
+ */
+#ifdef __STDC__
+#ifdef __STDC_VERSION__
+#if (__STDC_VERSION__ >= 201112L) || defined(_WIN32)
+#ifdef __STDC_WANT_LIB_EXT1__
+#if (__STDC_WANT_LIB_EXT1__ == 1)
+#define HELP_HANDLER_SECURE_VARIANTS
+#endif
+#endif
+#endif
+#endif
+#endif
+
+#ifdef _WIN32
+#define HELP_HANDLER_SECURE_VARIANTS
+#endif
 
 //Only used for internal strings
 #define MAX_STRING_LEN 64
 #define MAX_STRING_COUNT 32
 
-static bool   printErr = false;
-static size_t errCount = 0; //Used for counting & printing ALL errors when user calls help_handler_print_err/get_err
-static char   errs[MAX_STRING_COUNT][MAX_STRING_LEN] = {{0}};
+//A newline feed does have the correct output on Windows and should on any modern OS, but older OSs or log reader programs may interpret a single \n wrong
+#ifdef _WIN32
+static const char* newline = "\r\n";
+#else
+static const char* newline = "\n";
+#endif
 
-static const char* helpHandlerFuncName = "help_handler";
-static int outputPipe = 0; //Used by print_pipe()
+static bool printErr = false;
+static struct err_t { //Ring buffer for error messages
+    char err[MAX_STRING_COUNT][MAX_STRING_LEN];
+    size_t count;
+} err_t = { {{0}}, 0 };
 
 /*
  * These enums below are used for verbosity/changeability internally, in place of what'd otherwise be magic numbers
@@ -165,6 +193,8 @@ enum errTypes {
     warning,
     error, };
 
+static int  outputPipe = outDefault; //Used by print_pipe()
+
 /*
  * User info/setting structs
  */
@@ -173,7 +203,7 @@ static struct most_recent_t {
     unsigned int ver;
 } most_recent_t = { 0, versionStr };
 
-static struct info_t {
+static struct info_t { //Probably best to malloc this struct in the future, though 512 bytes is likely more than enough for any use of this data
     char name[512];
     wchar_t name_w[512];
     char ver_str[512];
@@ -188,10 +218,11 @@ static struct options_t {
 } options_t = { true, true, false }; 
 
 
-bool help_handler_is_err(int errorCode); //Forward declaration so private functions can use this to check for errors
+bool help_handler_is_err(int errorCode); //Forward declaration so private/static functions can use this to check for errors
 
 
 
+//NOTE: It's understood that casting the return of malloc is bad practice and can hide issues, however it is necessary to silence C++ warnings
 
 /***************************/
 /*                         */
@@ -201,59 +232,114 @@ bool help_handler_is_err(int errorCode); //Forward declaration so private functi
 /*
  * String functions
  */
-//While making print_pipe use varargs would obviate calling the functions repeatedly in some cases, it would also cause string-nonliteral warnings - surpressing these would require non-portable macros
-static void print_pipe(const char* s) {
+/*
+ * While making print_pipe use varargs would obviate calling the functions repeatedly in some areas, it would also cause string-nonliteral warnings - surpressing these would require non-portable macros
+ */
+static int print_pipe(const char* s) {
     if (outputPipe == outDefault) {
-        fprintf(stdout, "%s", s);
+        if (fprintf(stdout, "%s", s) < 0) {
+            return helpHandlerFailure; }
         fflush(stdout);
     } else if (outputPipe == outStdout) {
-        fprintf(stdout, "%s", s);
+        if (fprintf(stdout, "%s", s) < 0) {
+            return helpHandlerFailure; }
         fflush(stdout);
     } else if (outputPipe == outStderr) {
-        fprintf(stderr, "%s", s);
+        if (fprintf(stderr, "%s", s) < 0) {
+            return helpHandlerFailure; }
         fflush(stderr); //stderr isn't buffered by default, but flush just in case
     }
+
+    return helpHandlerSuccess;
 }
-static void print_pipe_i(int n) {
+static int print_pipe_i(int n) {
     if (outputPipe == outDefault) {
-        fprintf(stdout, "%d", n);
+        if (fprintf(stdout, "%d", n) < 0) {
+            return helpHandlerFailure; }
         fflush(stdout);
     } else if (outputPipe == outStdout) {
-        fprintf(stdout, "%d", n);
+        if (fprintf(stdout, "%d", n) < 0) {
+            return helpHandlerFailure; }
         fflush(stdout);
     } else if (outputPipe == outStderr) {
-        fprintf(stderr, "%d", n);
+        if (fprintf(stderr, "%d", n) < 0) {
+            return helpHandlerFailure; }
         fflush(stderr); //stderr isn't buffered by default, but flush just in case
     }
+
+    return helpHandlerSuccess;
 }
-static void print_pipe_w(const wchar_t* s) {
+static int print_pipe_w(const wchar_t* s) {
     if (outputPipe == outDefault) {
-        fwprintf(stdout, L"%ls", s);
+        if (fwprintf(stdout, L"%ls", s) < 0) {
+            return helpHandlerFailure; }
         fflush(stdout);
     } else if (outputPipe == outStdout) {
-        fwprintf(stdout, L"%ls", s);
+        if (fwprintf(stdout, L"%ls", s) < 0) {
+            return helpHandlerFailure; }
         fflush(stdout);
     } else if (outputPipe == outStderr) {
-        fwprintf(stderr, L"%ls", s);
+        if (fwprintf(stderr, L"%ls", s) < 0) {
+            return helpHandlerFailure; }
         fflush(stderr); //stderr isn't buffered by default, but flush just in case
     }
+
+    return helpHandlerSuccess;
 }
 
-static void store_err(const char* s) {
-    strcpy(errs[errCount % MAX_STRING_COUNT], s);
-    errCount++;
+/*
+ * As noted above, strcpy is an unsecure function, with secure variants only available in C11 and above, or OS-specific.
+ * With that in mind, that leaves us at minimum leaving C99 open to buffer overflows, or partly rolling our own.
+ */
+static int bounds_check( size_t dst_size, const char* src) {
+    if (dst_size < strlen(src)+1) { return helpHandlerFailure; }
+
+    return helpHandlerSuccess;
 }
 
-static void print_err(const char* s, int err_line, int err_val) {    
+static int help_handler_strcpy(char* dst, size_t dst_size, const char* src) {
+    if (bounds_check(dst_size, src) == helpHandlerFailure) { return helpHandlerFailure; }
+    
+    #ifdef HELP_HANDLER_SECURE_VARIANTS
+    strcpy_s(dst_size, src);
+    #else
+    strcpy(dst, src);
+    #endif
+
+    return helpHandlerSuccess;
+}
+static int help_handler_strcat(char* dst, size_t dst_size, const char* src) {
+    if (bounds_check(dst_size, src) == helpHandlerFailure) { return helpHandlerFailure; }
+
+    #ifdef HELP_HANDLER_SECURE_VARIANTS
+    strcat_s(dst_size, src);
+    #else
+    strcat(dst, src);
+    #endif
+
+    return helpHandlerSuccess;
+}
+
+
+static int err_buf_put(const char* s) {
+    if (err_t.count >= MAX_STRING_COUNT) {
+        err_t.count = 0; }
+
+    help_handler_strcpy(err_t.err[err_t.count], MAX_STRING_LEN, s);
+    err_t.count++;
+
+    return helpHandlerSuccess;
+}
+
+static int print_err(const char* s, int err_line, int err_val) {    
     #ifndef HELP_HANDLER_IGNORE_ALL
-    if (err_val == silent) { //Sometimes used internally to skip outputting anything
-        return; }
+    if (err_val == silent) { //Sometimes used internally to skip outputting anything when being called from string_check
+        return helpHandlerSuccess; }
 
     if (printErr == true) {
         if (err_val == warning) {
             #ifndef HELP_HANDLER_IGNORE_WARN
-            print_pipe(helpHandlerFuncName);
-            print_pipe(":");
+            print_pipe("help_handler:");
             print_pipe_i(err_line);
             print_pipe(" warning: ");
             print_pipe(s);
@@ -261,8 +347,7 @@ static void print_err(const char* s, int err_line, int err_val) {
             #endif
         } else if (err_val == error) {
             #ifndef HELP_HANDLER_IGNORE_ERR
-            print_pipe(helpHandlerFuncName);
-            print_pipe(":");
+            print_pipe("help_handler:");
             print_pipe_i(err_line);
             print_pipe(" error: ");
             print_pipe(s);
@@ -270,24 +355,29 @@ static void print_err(const char* s, int err_line, int err_val) {
             #endif
         }
 
-        print_pipe("\n");
+        print_pipe(newline);
+        return helpHandlerSuccess;
     }
     #endif
 
-    store_err(s);
+    return err_buf_put(s);
 }
 
 static int string_check(const char* s, int s_line, int err_val, const char* var_name) {
     char err_msg[MAX_STRING_LEN];
 
+    if (var_name == NULL) {
+        string_check(s, s_line, err_val, "variable"); }
+
     if (var_name != NULL) {
-        strcpy(err_msg, var_name); }
+        help_handler_strcpy(err_msg, sizeof(err_msg), var_name); //TODO: fix overflow
+    }
     if (s == NULL) {
-        strcat(err_msg, " is NULL");
+        help_handler_strcat(err_msg, sizeof(err_msg), " is NULL");
         print_err(err_msg, s_line,  err_val);
         return EXIT_FAILURE; }
     if (s[0] == '\0') {
-        strcat(err_msg, "is empty");
+        help_handler_strcat(err_msg, sizeof(err_msg), "is empty");
         print_err(err_msg, s_line,  err_val);
         return EXIT_FAILURE; } 
 
@@ -296,19 +386,19 @@ static int string_check(const char* s, int s_line, int err_val, const char* var_
 static int string_check_w(const wchar_t* s, int s_line, int err_val, const char* var_name) {
     char err_msg[MAX_STRING_LEN];
 
-    if (var_name != NULL) {
-        strcpy(err_msg, var_name); }
+    if (var_name == NULL) {
+        string_check_w(s, s_line, err_val, "variable"); }
+
+    help_handler_strcpy(err_msg, sizeof(err_msg), var_name);
+
     if (s == NULL) {
-        strcat(err_msg, " is NULL");
+        help_handler_strcat(err_msg, sizeof(err_msg), " is NULL");
         print_err(err_msg, s_line,  err_val);
         return EXIT_FAILURE; }
     if (s[0] == L'\0') {
-            strcat(err_msg, "is empty");
+            help_handler_strcat(err_msg, sizeof(err_msg), "is empty");
             print_err(err_msg, s_line,  err_val);
             return EXIT_FAILURE; }
-    else if (sizeof(wchar_t) == 4) {
-
-    }
 
     return EXIT_SUCCESS;
 }
@@ -356,7 +446,7 @@ static size_t trim(char *out, size_t len, const char *str) {
 
 /*
  * Static functions. 
- * These are called from the two help_handler functions, split into their own functions for code reuse
+ * These are called from the two help_handler functions, split up for code reuse
  */
 static int return_result(int result_help, int result_ver) {
     if (result_help > 0 && result_ver > 0) { return dialogHelpVer; }
@@ -414,9 +504,9 @@ static int arg_match(int argc, char** argv, const char* regex_string, const char
         return helpHandlerFailure; }
 
     if (argv == NULL) {
-        print_err("argument value (argv) is NULL", __LINE__, error);
+        print_err("argument vector (argv) is NULL", __LINE__, error);
         return helpHandlerFailure; }
-    if (string_check(*argv, __LINE__, error, "argument value (argv)") == EXIT_FAILURE) {
+    if (string_check(*argv, __LINE__, error, "argument vector (argv)") == EXIT_FAILURE) {
         return helpHandlerFailure; }
 
     for (int i = 1; i < argc; i++) { //Start from 1 to skip executable name
@@ -447,7 +537,7 @@ static int arg_match(int argc, char** argv, const char* regex_string, const char
 }
 
 static int help_handler_sub(int argc, char** argv) {
-    //Avoiding this ifdef by embedding regex functionality in the future would be great
+    //Avoiding this ifdef by embedding regex functionality in the future for Windows would be great
     #ifndef HELP_HANDLER_POSIX_C
     //Casts to silence C++ warnings
     char* help_lex[] = {
@@ -469,48 +559,42 @@ static int help_handler_sub(int argc, char** argv) {
         help_lex[0] = "";help_lex[1] = "";help_lex[2] = ""; 
         i = 3; } //First three elements of help/ver array should be abbreviated terms, hence setting the array index to the fourth element
 
-    int result_help, result_ver = 0;
-    for (; *help_lex[i] != '\0'; i++) {
-        int result;
-        result = arg_match(argc, argv, NULL, help_lex[i]);
-        if (help_handler_is_err(result)) { return result; }
-
-        if (result > 0) { result_help = result; }
-        for (; *ver_lex[i] != '\0'; j++) {
-            result = arg_match(argc, argv, NULL, ver_lex[i]);
-            if (help_handler_is_err(result)) { return result; }
-            if (result > 0) { result_ver = result; }
-        }
+    int result_help = 0, result_ver = 0;
+    for (int temp = i; temp != sizeof(help_lex)/sizeof(help_lex[0]); temp++) {
+        result_help = arg_match(argc, argv, NULL, help_lex[temp]);
+        if (help_handler_is_err(result_help)) { return result_help; }
+        if (result_help > 0) { break; }
     }
 
-    int r = return_result(result_help, result_ver);
-    if (r != 0) { return r; }
+    for (int temp = i; temp != sizeof(ver_lex)/sizeof(ver_lex[0]); temp++) {
+        result_ver = arg_match(argc, argv, NULL, ver_lex[temp]);
+        if (help_handler_is_err(result_ver)) { return result_ver; }
+        if (result_ver > 0) { break; }
+    }
 
     #else //HELP_HANDLER_POSIX_C
 
     char help_lex[MAX_STRING_LEN];
     char ver_lex[MAX_STRING_LEN];
     if (options_t.extra_strings == true) {
-        strcpy(help_lex, "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)|-{0,}h{1,}$");
-        strcpy(ver_lex, "-{0,}v{1,}e{1,}r{1,}s{0,}i{0,}o{0,}n{0,}(.*)|^-{0,}v$");
+        help_handler_strcpy(help_lex, sizeof(help_lex), "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)|-{0,}h{1,}$");
+        help_handler_strcpy(ver_lex, sizeof(ver_lex), "-{0,}v{1,}e{1,}r{1,}s{0,}i{0,}o{0,}n{0,}(.*)|^-{0,}v$");
     } else {
-        strcpy(help_lex, "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)"); 
-        strcpy(ver_lex, "-{0,}v{1,}e{1,}r{1,}s{0,}i{0,}o{0,}n{0,}(.*)"); }
+        help_handler_strcpy(help_lex, sizeof(help_lex), "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)"); 
+        help_handler_strcpy(ver_lex, sizeof(ver_lex), "-{0,}v{1,}e{1,}r{1,}s{0,}i{0,}o{0,}n{0,}(.*)"); }
 
     int result_help = arg_match(argc, argv, help_lex, NULL);
     if (help_handler_is_err(result_help)) { return result_help; }
     int result_ver  = arg_match(argc, argv, ver_lex, NULL);
     if (help_handler_is_err(result_ver)) { return result_ver; }
-    int r = return_result(result_help, result_ver);
-    if (r != 0) { return r; }
     #endif //HELP_HANDLER_POSIX_C
 
-    if (true == options_t.unknown_arg_help && argc > 1) {
-        if (argc > 2) {
-            print_pipe("Unknown arguments given\n"); 
-        } else {
-            print_pipe("Unknown argument given\n"); }
+    int r = return_result(result_help, result_ver);
+    if (r != 0) { return r; }
 
+    if (true == options_t.unknown_arg_help && argc > 1) {
+        argc > 2 ? print_pipe("Unknown arguments given") : print_pipe("Unknown argument given");
+        print_pipe(newline);
         return helpHandlerSuccess;
     }
 
@@ -526,8 +610,7 @@ static int help_handler_sub(int argc, char** argv) {
 /*                        */
 /**************************/
 bool help_handler_is_err(int errorCode) {
-    if (errorCode < 0) { return true; }
-    else { return false; };
+    return (errorCode < 0) ? true : false;
 }
 
 void help_handler_disable_err(bool disableErrorOutput) {
@@ -535,17 +618,16 @@ void help_handler_disable_err(bool disableErrorOutput) {
 }
 
 void help_handler_print_err(void) {
-    for (size_t i = 0; i < errCount; i++) {
-        print_pipe(helpHandlerFuncName);
-        print_pipe(" ERROR ");
-        print_pipe(errs[i]);
+    for (size_t i = 0; err_t.count != i; err_t.count--) {
+        print_pipe(err_t.err[err_t.count]);
     }
 }
 
 char* help_handler_get_err(void) {
-    if (errs[errCount][0] != '0') {
-        errCount--;
-        return errs[errCount]; }
+    if (err_t.count > 0) {
+        err_t.count--;
+        return err_t.err[err_t.count+1];
+    }
 
     return NULL;
 }
@@ -602,8 +684,11 @@ int help_handler_version(const char* ver) {
         return helpHandlerFailure; }
 
     char* version = (char*)malloc(strlen(ver)+1);
+    if (version == NULL) {
+        print_err("failed to allocate memory for version string", __LINE__, error);
+        return helpHandlerFailure; }
     trim(version, strlen(ver)+1, ver);
-    strcpy(info_t.ver_str, version);
+    help_handler_strcpy(info_t.ver_str, sizeof(info_t.ver_str), version);
     most_recent_t.ver = versionStr;
 
     free(version);
@@ -630,15 +715,19 @@ int help_handler_name(const char* app_name) {
         return helpHandlerFailure; }
 
     char* name = (char*)malloc(strlen(app_name)+1);
+    if (name == NULL) {
+        print_err("failed to allocate memory for app_name", __LINE__, error);
+        free(name);
+        return helpHandlerFailure; }
     trim(name, strlen(app_name)+1, app_name);
-    strcpy(info_t.name, name);
+    help_handler_strcpy(info_t.name, sizeof(info_t.name), name);
     most_recent_t.name = nameChar;
 
     return helpHandlerSuccess;
 }
 
 int help_handler_name_w(const wchar_t* app_name) { //Parent function
-    if (string_check((char*)app_name, __LINE__, error, "app_name") == EXIT_FAILURE) { return helpHandlerFailure; }
+    if (string_check_w(app_name, __LINE__, error, "app_name") == EXIT_FAILURE) { return helpHandlerFailure; }
     if (wcslen(app_name)+1 >= sizeof(info_t.name)) {
         print_err("given app name (wchar type) is larger than allowed", __LINE__, warning);
         return helpHandlerFailure; }
@@ -687,27 +776,42 @@ int help_handler_s(int argc, char** argv, const char* help_dialogue) {
 #else
 int help_handler(int argc, char** argv, const char* help_dialogue) {
 #endif
-    char* help = (char*)malloc(strlen("No usage help is available")+1); //Cast to silence C++ warning    
+    char* help = (char*)malloc(strlen("No usage help is available")+1); //Cast to silence C++ warning
     if (string_check(help_dialogue, __LINE__, silent, NULL) == EXIT_SUCCESS) {
-        help = (char*)realloc(help, strlen(help_dialogue)+1);
-        strcpy(help, help_dialogue); } 
+        char* tmp = (char*)realloc(help, strlen(help_dialogue)+1);
+        if (tmp == NULL) {  
+            free(help);
+            return helpHandlerFailure; 
+        }
+        
+        help = tmp;
+    }
+
+    //The C standard states it is undefined behavior to pass anything except a pointer to a null-terminated string to printf. Most libc implementations will print "(null)" in such circumstances, but not all. 
+    if (help == NULL) {
+        print_err("failed to allocate memory for help dialogue", __LINE__, error);
+        free(help);
+        return helpHandlerFailure; }
+
+    help_handler_strcpy(help, strlen(help_dialogue)+1, help_dialogue);
+
     if (argc == 1 && options_t.no_arg_help == true) {
         if (print_name()) { 
             print_pipe(" "); }
         print_pipe(help); 
-        print_pipe("\n");
+        print_pipe(newline);
  
         free(help);
         return helpHandlerSuccess;
     }
 
-    //Should probably find a better way to handle this than variables as flags to make it easier to expand
+    //Should probably find a better way to handle this than variables as flags, to make it easier to expand
     int result = help_handler_sub(argc, argv);
     if (result == dialogHelpVer) {
         if (print_name()) {
             print_pipe(" Version "); }
         print_ver();
-        print_pipe("\n");
+        print_pipe(newline);
         print_pipe(help);
     } else if (result == dialogHelp) {
         if (print_name()) {
@@ -717,8 +821,7 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
         print_ver();
     } else if (help_handler_is_err(result)) { return result; }
     
-    print_pipe("\n");
-
+    print_pipe(newline);
 
     free(help);
     return helpHandlerSuccess;
@@ -726,24 +829,39 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
 
 int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
     wchar_t* help = (wchar_t*)L"No usage help is available"; //Cast to silence C++ warning
-    if (string_check_w(help_dialogue, __LINE__, silent, NULL) == EXIT_FAILURE) {
-        help = (wchar_t*)malloc(wcslen(help_dialogue)+1);
-        wcscpy(help, help_dialogue); }
+    if (string_check_w(help_dialogue, __LINE__, silent, NULL) == EXIT_SUCCESS) {
+        wchar_t* tmp = (wchar_t*)malloc(wcslen(help_dialogue)+1);
+        if (tmp == NULL) {
+            free(help);
+            return helpHandlerFailure;
+        }
+
+        help = tmp;
+    }
+
+    //The C standard states it is undefined behavior to pass anything except a pointer to a null-terminated string to printf. Most libc implementations will print "(null)" in such circumstances, but not all
+    if (help == NULL) {
+        print_err("failed to allocate memory for help dialogue", __LINE__, error);
+        return helpHandlerFailure; } 
+
+    wcscpy(help, help_dialogue);
+
     if (argc == 1 && options_t.no_arg_help == true) {
         if (print_name()) { 
             print_pipe(" "); }
         print_pipe_w(help); 
-        print_pipe("\n");
+        print_pipe(newline);
+        free(help);
         return helpHandlerSuccess;
     }
 
-    //Should probably find a better way to handle this than variables as flags to make it easier to expand
+    //Should probably find a better way to handle this than variables as flags, to make it easier to expand
     int result = help_handler_sub(argc, argv);
     if (result == dialogHelpVer) {
         if (print_name()) {
             print_pipe(" Version "); }
         print_ver();
-        print_pipe("\n");
+        print_pipe(newline);
         print_pipe_w(help);
     } else if (result == dialogHelp) {
         if (print_name()) {
@@ -753,8 +871,7 @@ int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
         print_ver();
     } else if (help_handler_is_err(result)) { return result; }
     
-    print_pipe("\n");
-
+    print_pipe(newline);
 
     free(help);
     return helpHandlerSuccess;
@@ -764,29 +881,42 @@ int help_handler_f(int argc, char** argv, const char* file_name) {
     if (string_check(file_name, __LINE__, error, "file_name") == EXIT_FAILURE) {
         return helpHandlerFailure; }
 
+    #ifdef HELP_HANDLER_SECURE_VARIANTS
+    FILE* fp = NULL;
+    int err = fopen_s(&fp, file_name, "rb");
+    if (err < 0) { return helpHandlerFailure; }
+    #else
     FILE* fp = fopen(file_name, "rb"); //Windows mangles newlines in r, so use rb
+    #endif
     if (fp == NULL) {
         print_err(strerror(errno), __LINE__, error);
         return helpHandlerFailure; }
 
     fseek(fp, 0L, SEEK_END);
     long size = ftell(fp);
+    if (size == -1L) {
+        print_err(strerror(errno), __LINE__, error);
+        fclose(fp);
+        return helpHandlerFailure; }
     rewind(fp);
 
     char* contents = NULL;
     if ((contents = (char*)malloc((unsigned long)size+1)) == NULL) { 
         print_err("failed to allocate memory", __LINE__, error);
+        fclose(fp);
         return helpHandlerFailure; }
 
     size_t n_items = fread(contents, 1, (size_t)size, fp);
     if (n_items == 0) {
-        print_err("given help file is empty", __LINE__, error); 
-        return helpHandlerFailure; }
+        print_err("given help file is empty", __LINE__, warning); }
     if ((long)n_items < size) {
         print_err(strerror(errno), __LINE__, error);
+        free(contents);
+        fclose(fp);
         return helpHandlerFailure; }
     if (fclose(fp) == EOF) {
         print_err(strerror(errno), __LINE__, error);
+        free(contents);
         return helpHandlerFailure; }
 
     int return_val = help_handler(argc, argv, (const char*)contents);
@@ -800,4 +930,4 @@ int help_handler_f(int argc, char** argv, const char* file_name) {
 #undef MAX_STRING_COUNT
 #undef HELP_HANDLER_POSIX_C
 #undef HELP_HANDLER_OVERLOAD_SUPPORTED
-#endif  /* HELP_HANDLER_H */
+#endif /* HELP_HANDLER_H */
