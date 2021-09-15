@@ -32,6 +32,19 @@
 #include <iostream>
 #include <stdexcept>
 
+//C++'s std::endl doesn't change it's newline feed to the appropriate host OS's, so we use our own
+#ifdef _WIN32
+#define NEWLINE \
+    "\r\n" \
+    << \
+    std::flush;
+#else
+#define NEWLINE \
+    "\n" \
+    << \
+    std::flush;
+#endif
+
 
 //Using globals instead of macros to avoid undefs/polluting namespace where possible
 enum varTypes {
@@ -82,7 +95,7 @@ namespace helpHandler {
         if (help.empty()) {
             help = "No usage help is available"; }
         if (argc == 1 && options_t.noArgHelp == true) {
-            std::cout << help << std::endl;
+            std::cout << help << NEWLINE;
             return EXIT_SUCCESS; }
 
         /****************/
@@ -109,16 +122,19 @@ namespace helpHandler {
 
         //Match arguments
         std::vector<std::string> arguments(argv+1, argv+argc); //Start from argv+1 to skip binary name
+        std::string helpExpression = "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)";
+        if (options_t.extraStrings == true) { helpExpression += "|-{0,}h{1,}$"; }
+        std::string versionExpression = "-{0,}v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)";
+        if (options_t.extraStrings == true) { versionExpression += "|^-{0,}v$"; }
+
         for (auto arg: arguments) {
-                std::string r = "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)";
-                if (options_t.extraStrings == true) { r += "|-{0,}h{1,}$"; }
-                if (std::regex_match(arg, std::regex(r)) == true) {
+                std::regex helpRegex(helpExpression, std::regex_constants::icase);
+                if (std::regex_match(arg, helpRegex) == true) {
                     matchedHelp = true;
                     matches++; }
 
-                r = "-{0,}v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)";
-                if (options_t.extraStrings == true) { r += "|^-{0,}v$"; }
-                if (std::regex_match(arg, std::regex(r)) == true) {
+                std::regex versionRegex(versionExpression, std::regex_constants::icase);
+                if (std::regex_match(arg, versionRegex) == true) {
                     matchedVer = true;
                     matches++; }
         }
@@ -135,22 +151,22 @@ namespace helpHandler {
             }
 
             if (matchedHelp == true) {
-                if (matchedVer == true) { std::cout << std::endl; }
+                if (matchedVer == true) { std::cout << NEWLINE; }
                 if (info_t.name.empty() == false) { 
                     std::cout << trim(info_t.name) << " "; }
                 std::cout << help;
             }
 
-            std::cout << std::endl;
+            std::cout << NEWLINE;
             return matches;
         }
 
         //End
         if (options_t.unknownArgHelp == true && argc > 1) {
             if (argc > 2) {
-                std::cout << "Unknown arguments given" << std::endl; 
+                std::cout << "Unknown arguments given" << NEWLINE; 
             } else {
-                std::cout << "Unknown argument given" << std::endl; }
+                std::cout << "Unknown argument given" << NEWLINE; }
 
             return 0;
         }
