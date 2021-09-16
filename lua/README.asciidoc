@@ -1,0 +1,55 @@
+:toc:
+:blank: pass:[ +]
+
+image:https://www.dropbox.com/s/qvtu9z2c4xekaww/f6d766cccecd96c622788a4aa99b438d1ab4abc9faee901949ea14beec23b5ee.png?raw=1[alt="HelpHandler"]
+
+
+
+
+Requirements
+------------
+##### Lua 5.1.5
+
+
+
+Usage
+------
+The only function needed after including the HelpHandler.lua module is ```HelpHandler.handle(help_dialogue)```. Beyond that, most users will only be concerned with ```helpHandler.config(bool extraStrings, bool noArgHelp, bool unknownArgHelp)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. You can refer to the _examples_ folder for more advanced usage.
+
+Basic usage example:
+[source,CPP]
+----------
+HelpHandler.handle("Usage: Test");
+----------
+An error will be thrown if an error occurs, and the number of arguments matched will be returned on success (0 if none).
+
+
+
+Functions
+---------
+[source,lua]
+----------
+int HelpHandler.handle(help_dialogue);
+int HelpHandler.handleFile(fileName);
+void HelpHandler.config(bool extraStrings=true, bool noArgHelp=true, bool unknownArgHelp=false);
+void HelpHandler.info(appName, version);
+void HelpHandler.name(appName);
+void HelpHandler.version(version);
+----------
+
+
+Contributing
+------------
+If you'd like to submit a bugfix, I'd be glad to take a pull request or fix it myself given adequate description of the cause of the issue. If you'd like a feature added, it will be  considered so long as it's within the scope of this project.
+
+
+License
+-------
+Distributed under the MIT License. See link:https://github.com/Inaff/Help-Handler/blob/master/LICENSE[here] for more information.
+
+
+Contact
+------
+keatonsquires97@gmail.com
+
+

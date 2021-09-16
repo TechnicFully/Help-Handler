@@ -25,7 +25,7 @@ The only function needed after including helpHandler.hpp is ```helpHandler::hand
 Basic usage example:
 [source,CPP]
 ----------
-helpHandler::handle(argc, argv, "Usage: Test\n");
+helpHandler::handle(argc, argv, "Usage: Test");
 ----------
 An exception will be thrown if an error occurs, and the number of arguments matched will be returned on success (0 if none). It will increase your executable size by ~100KB without optimizations turned on. If this is a concern, the C version of this library works with C++ as well.
 
@@ -35,7 +35,7 @@ Functions
 ---------
 [source,CPP]
 ----------
-int helpHandler::handle(int argc, char** argv, std::string helpDialogue, std::string||double||unsigned int  version="");
+int helpHandler::handle(int argc, char** argv, std::string helpDialogue);
 int helpHandler::handleFile(int argc, char** argv, const std::string& fileName);
 void helpHandler::config(bool extraStrings=true, bool noArgHelp=true, bool unknownArgHelp=false);
 void helpHandler::info(const std::string& appName, std::string|double|unsigned int  version="");
