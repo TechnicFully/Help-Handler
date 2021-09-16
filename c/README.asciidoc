@@ -27,7 +27,7 @@ The only function needed after including help_handler.h is ```help_handler(int a
 Basic usage example:
 [source,C]
 ----------
-help_handler(argc, argv, "Usage: Test\n");
+help_handler(argc, argv, "Usage: Test");
 ----------
 A negative value is returned if an error occurred, otherwise the number of arguments matched will be returned, (0 if none). It will increase your executable size by ~15KB with no optimizations enabled.
 
