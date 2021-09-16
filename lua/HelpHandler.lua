@@ -105,23 +105,28 @@ HelpHandler.handle = function(help)
         return
     end
 
+    matches = 0
     matchHelp, matchVer = false
     for i = 1, #arg do
         if (string.match(arg[i], '-*h+e+l+p+')) then
             matchHelp = true
+            matches = matches + 1
         end 
         if (options_t.extra_strings == true) then
             if (string.match(arg[i], '-*h+')) then
                 matchHelp = true
+                matches = matches + 1
             end
         end
 
         if (string.match(arg[i], '-*v+e+r+s+i+o+n+')) then
             matchVer = true
+            matches = matches + 1
         end 
         if (options_t.extra_strings == true) then
             if (string.match(arg[i], '-*v+')) then
                 matchVer = true
+                matches = matches + 1
             end
         end
     end
@@ -147,7 +152,7 @@ HelpHandler.handle = function(help)
         return
     end
 
-    return
+    return matches
 end
 
 HelpHandler.handleFile = function(file_name, unknown_arg)
@@ -157,5 +162,5 @@ HelpHandler.handleFile = function(file_name, unknown_arg)
     end
 
     local content = f:read("*all")
-    HelpHandler.handle(content)
+    return HelpHandler.handle(content)
 end
