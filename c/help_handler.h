@@ -32,14 +32,10 @@
  * These should be the only relevant variables to any library user not trying to change functionality
  */
 
-#define HELP_HANDLER_NO_ARGS true
-#define HELP_HANDLER_UNK_ARGS true
-#define HELP_HANDLER_UNKNOWN_ARGS true
-#define HELP_HANDLER_EXTRA_STRINGS true
-#define HELP_HANDLER_DISABLE_NO_ARGS false
-#define HELP_HANDLER_DISABLE_UNK_ARGS false
-#define HELP_HANDLER_DISABLE_UNKNOWN_ARGS false
-#define HELP_HANDLER_DISABLE_EXTRA_STRINGS false
+//Parameters for help_handler_config()
+int DISABLE_EXTRA_STRINGS    = 0x00000001;
+int DISABLE_NO_ARGS_HELP     = 0000000010;
+int UNKNOWN_ARGS_HELP        = 0000000100;
 
 //Return values
 static const int helpHandlerSuccess = 0; //This should remain 0, as it's also used to indicate no arguments were matched
@@ -185,9 +181,9 @@ enum varTypes {
     versionInt,
     versionDouble, };
 enum returnVal {
-    dialogHelpVer = 0,
-    dialogHelp,
-    dialogVer, };
+    dialogHelp = 1,
+    dialogVer,
+    dialogHelpVer, };
 enum errTypes {
     silent = 0,
     warning,
@@ -212,9 +208,9 @@ static struct info_t { //Probably best to malloc this struct in the future, thou
 } info_t = { {0}, {0}, "No version is available", 0, 0 };
 
 static struct options_t {
-    bool no_arg_help;
+    bool no_args_help;
     bool extra_strings;
-    bool unknown_arg_help;
+    bool unknown_args_help;
 } options_t = { true, true, false }; 
 
 
@@ -487,6 +483,11 @@ static bool print_name(void) {
     return false;
 }
 
+static void print_unknown(int argc) {
+    if (true == options_t.unknown_args_help) {
+        argc > 2 ? print_pipe("Unknown arguments given") : print_pipe("Unknown argument given");
+    }
+}
 
 static int arg_match(int argc, char** argv, const char* regex_string, const char* fallback_string) {
     (void)regex_string; //Doesn't effect the variables. Only gets rid of unused parameter warning due to #ifdef below
@@ -592,12 +593,6 @@ static int help_handler_sub(int argc, char** argv) {
     int r = return_result(result_help, result_ver);
     if (r != 0) { return r; }
 
-    if (true == options_t.unknown_arg_help && argc > 1) {
-        argc > 2 ? print_pipe("Unknown arguments given") : print_pipe("Unknown argument given");
-        print_pipe(newline);
-        return helpHandlerSuccess;
-    }
-
     return helpHandlerSuccess;
 }
 
@@ -667,10 +662,10 @@ void help_handler_pipe_i(int output_pipe) {
     }
 }
 
-void help_handler_config(bool extra_strings, bool no_arg_help, bool unknown_arg_help) {
-    options_t.extra_strings    = extra_strings;
-    options_t.no_arg_help      = no_arg_help;
-    options_t.unknown_arg_help = unknown_arg_help;
+void help_handler_config(int options) {
+    if (options & DISABLE_NO_ARGS_HELP) {       options_t.no_args_help = false; }
+    if (options & DISABLE_EXTRA_STRINGS) {      options_t.extra_strings = false; }
+    if (options & UNKNOWN_ARGS_HELP) {          options_t.unknown_args_help = true; }
 }
 
 #ifdef HELP_HANDLER_OVERLOAD_SUPPORTED
@@ -787,7 +782,7 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
         help = tmp;
     }
 
-    //The C standard states it is undefined behavior to pass anything except a pointer to a null-terminated string to printf. Most libc implementations will print "(null)" in such circumstances, but not all. 
+    //The C standard states it is undefined behavior to pass anything except a null-terminated string to printf. Most libc implementations will print "(null)" in such circumstances, but not all
     if (help == NULL) {
         print_err("failed to allocate memory for help dialogue", __LINE__, error);
         free(help);
@@ -795,7 +790,7 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
 
     help_handler_strcpy(help, strlen(help_dialogue)+1, help_dialogue);
 
-    if (argc == 1 && options_t.no_arg_help == true) {
+    if (argc == 1 && options_t.no_args_help == true) {
         if (print_name()) { 
             print_pipe(" "); }
         print_pipe(help); 
@@ -805,7 +800,7 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
         return helpHandlerSuccess;
     }
 
-    //Should probably find a better way to handle this than variables as flags, to make it easier to expand
+    //Should probably find a better way to handle this than int variables as flags, to make it easier to expand
     int result = help_handler_sub(argc, argv);
     if (result == dialogHelpVer) {
         if (print_name()) {
@@ -820,7 +815,10 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
     } else if (result == dialogVer) {
         print_ver();
     } else if (help_handler_is_err(result)) { return result; }
-    
+
+    if (result == 0) {
+        print_unknown(argc); }
+
     print_pipe(newline);
 
     free(help);
@@ -846,7 +844,7 @@ int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
 
     wcscpy(help, help_dialogue);
 
-    if (argc == 1 && options_t.no_arg_help == true) {
+    if (argc == 1 && options_t.no_args_help == true) {
         if (print_name()) { 
             print_pipe(" "); }
         print_pipe_w(help); 
@@ -870,7 +868,10 @@ int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
     } else if (result == dialogVer) {
         print_ver();
     } else if (help_handler_is_err(result)) { return result; }
-    
+
+    if (result == 0) {
+        print_unknown(argc); }
+
     print_pipe(newline);
 
     free(help);
