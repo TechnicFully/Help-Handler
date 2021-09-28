@@ -22,7 +22,7 @@ Requirements
 
 Usage
 ------
-The only function needed after including help_handler.h is ```help_handler(int argc, char** argv, const char* help_dialogue)```. Beyond that, most users will only be concerned with ```help_handler_config(bool extra_strings, bool no_arg_help, bool unknown_arg_help)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. As a bonus, functions support type overloading where applicable if your compiler standard is set to C11 or above. You can refer to the _examples_ folder for more advanced usage.
+The only function needed after including help_handler.h is ```help_handler(int argc, char** argv, const char* help_dialogue)```. Beyond that, most users will only be concerned with ```help_handler_config(int option_flags)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. As a bonus, functions support type overloading where applicable if your compiler standard is set to C11 or above. You can refer to the _examples_ folder for more advanced usage.
 
 Basic usage example:
 [source,C]
@@ -39,7 +39,7 @@ Functions
 bool help_handler_is_err(int errorCode);
 char* help_handler_get_err(void);
 int help_handler(int argc, char** argv, const char* help_dialogue);
-void help_handler_config(bool extra_strings, bool no_arg_help, bool unknown_arg_help);
+void help_handler_config(int option_flags); 
 void help_handler_disable_err(bool disableErrorOutput);
 int help_handler_f(int argc, char** argv, const char* file_name);
 int help_handler_info(const char* app_name, const char* ver);
@@ -62,22 +62,19 @@ void help_handler_version_d(double ver);
 void help_handler_version_i(unsigned int ver);
 ----------
 
-Macros
-------
-Passable to their respective help_handler_config(extra_strings, no_arg_help, unknown_arg_help) parameters:
+Configuration options
+---------------------
+Passable to help_handler_config(int option_flags):
 ```
-HELP_HANDLER_NO_ARGS
-HELP_HANDLER_UNK_ARGS
-HELP_HANDLER_UNKNOWN_ARGS
-HELP_HANDLER_EXTRA_STRINGS
-HELP_HANDLER_DISABLE_NO_ARGS
-HELP_HANDLER_DISABLE_UNK_ARGS
-HELP_HANDLER_DISABLE_UNKNOWN_ARGS
-HELP_HANDLER_DISABLE_EXTRA_STRINGS
+DISABLE_EXTRA_STRINGS   //For disabling matching of arguments h, -h, --h, v, -v, --v
+DISABLE_NO_ARGS_HELP    //Disable help dialogue output when no arguments are passed
+UNKNOWN_ARGS_HELP       //Enable dialogue output when an unknown argument is passed
 ```
 
-Identical to help_handler_disable_err, you may define this prior to including help_handler.h to disable any error/warning output:
+You may define these macros prior to including help_handler.h to disable the corresponding warning level:
 ```
+HELP_HANDLER_IGNORE_WARN
+HELP_HANDLER_IGNORE_ERR 
 HELP_HANDLER_IGNORE_ALL
 ```
 
