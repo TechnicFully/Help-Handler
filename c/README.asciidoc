@@ -22,14 +22,14 @@ Requirements
 
 Usage
 ------
-The only function needed after including help_handler.h is ```help_handler(int argc, char** argv, const char* help_dialogue)```. Beyond that, most users will only be concerned with ```help_handler_config(int option_flags)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. As a bonus, functions support type overloading where applicable if your compiler standard is set to C11 or above. You can refer to the _examples_ folder for more advanced usage.
+The only function needed after including help_handler.h is ```help_handler(int argc, char** argv, const char* help_dialogue)```. Beyond that, most users will only be concerned with ```help_handler_config(int option_flags)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. As a bonus, functions support type overloading if your compiler standard is C11 or above. You can refer to the _examples_ folder for more advanced usage.
 
 Basic usage example:
 [source,C]
 ----------
 help_handler(argc, argv, "Usage: Test");
 ----------
-A negative value is returned if an error occurred, otherwise the number of arguments matched will be returned, (0 if none). It will increase your executable size by ~15KB with no optimizations enabled.
+A negative value is returned if an error occurred, otherwise the number of arguments matched will be returned, (0 if none). It will increase your executable size by ~20KB with no optimizations or other flags enabled.
 
 
 Functions
