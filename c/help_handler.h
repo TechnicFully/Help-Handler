@@ -194,24 +194,24 @@ static int  outputPipe = outDefault; //Used by print_pipe()
 /*
  * User info/setting structs
  */
-static struct most_recent_t {
+static struct most_recent {
     unsigned int name;
     unsigned int ver;
-} most_recent_t = { 0, versionStr };
+} most_recent = { 0, versionStr };
 
-static struct info_t { //Probably best to malloc this struct in the future, though 512 bytes is likely more than enough for any use of this data
+static struct info { //Probably best to malloc this struct in the future, though 512 bytes is likely more than enough for any use of this data
     char name[512];
     wchar_t name_w[512];
     char ver_str[512];
     unsigned int ver_int;
     double ver_double;
-} info_t = { {0}, {0}, "No version is available", 0, 0 };
+} info = { {0}, {0}, "No version is available", 0, 0 };
 
-static struct options_t {
+static struct options {
     bool no_args_help;
     bool extra_strings;
     bool unknown_args_help;
-} options_t = { true, true, false }; 
+} options = { true, true, false }; 
 
 
 bool help_handler_is_err(int errorCode); //Forward declaration so private/static functions can use this to check for errors
@@ -287,8 +287,10 @@ static int print_pipe_w(const wchar_t* s) {
  * As noted above, strcpy is an unsecure function, with secure variants only available in C11 and above, or OS-specific.
  * With that in mind, that leaves us at minimum leaving C99 open to buffer overflows, or partly rolling our own.
  */
-static int bounds_check( size_t dst_size, const char* src) {
-    if (dst_size < strlen(src)+1) { return helpHandlerFailure; }
+static int bounds_check(size_t dst_size, const char* src) {
+    if (src == NULL) { return helpHandlerFailure; }
+    if (dst_size < strlen(src)+1) {
+        return helpHandlerFailure; }
 
     return helpHandlerSuccess;
 }
@@ -453,19 +455,19 @@ static int return_result(int result_help, int result_ver) {
 }
 
 static bool print_ver(void) {
-    if (most_recent_t.ver == versionStr) {
-        print_pipe(info_t.ver_str);
+    if (most_recent.ver == versionStr) {
+        print_pipe(info.ver_str);
         return true;
-    } else if (most_recent_t.ver == versionInt) {
+    } else if (most_recent.ver == versionInt) {
         //Max number of digits a 64-bit int can hold. Calculating this maximum at compile-time would be prudent
         char n[20];
-        sprintf(n, "%d", info_t.ver_int);
+        sprintf(n, "%d", info.ver_int);
         print_pipe(n);
         return true;
-    } else if (most_recent_t.ver == versionDouble) {
+    } else if (most_recent.ver == versionDouble) {
         //Maximum value for an IEEE 754 64-bit double is 1.8 × 10308, but cap to 20 digits (plus decimal point) for the time being
         char n[21]; 
-        sprintf(n, "%lf", info_t.ver_double);
+        sprintf(n, "%lf", info.ver_double);
         print_pipe(n);
         return true; }
 
@@ -473,18 +475,18 @@ static bool print_ver(void) {
 }
 
 static bool print_name(void) {
-    if (strlen(info_t.name) > 0 && most_recent_t.name == nameChar) {
-        print_pipe(info_t.name);
+    if (strlen(info.name) > 0 && most_recent.name == nameChar) {
+        print_pipe(info.name);
         return true;
-    } else if (wcslen(info_t.name_w) > 0 && most_recent_t.name == nameWChar) {
-        print_pipe_w(info_t.name_w);
+    } else if (wcslen(info.name_w) > 0 && most_recent.name == nameWChar) {
+        print_pipe_w(info.name_w);
         return true; }
 
     return false;
 }
 
 static void print_unknown(int argc) {
-    if (true == options_t.unknown_args_help) {
+    if (true == options.unknown_args_help) {
         argc > 2 ? print_pipe("Unknown arguments given") : print_pipe("Unknown argument given");
     }
 }
@@ -555,7 +557,7 @@ static int help_handler_sub(int argc, char** argv) {
         (char*)"--vversion", (char*)"--veersion", (char*)"--verrsion", (char*)"--verssion", (char*)"--versiion", (char*)"--versioon", (char*)"--versionn" };
     int i = 0;
 
-    if (options_t.extra_strings != true) {
+    if (options.extra_strings != true) {
         ver_lex[0]  = "";ver_lex[1]  = "";ver_lex[2]  = "";
         help_lex[0] = "";help_lex[1] = "";help_lex[2] = ""; 
         i = 3; } //First three elements of help/ver array should be abbreviated terms, hence setting the array index to the fourth element
@@ -577,7 +579,7 @@ static int help_handler_sub(int argc, char** argv) {
 
     char help_lex[MAX_STRING_LEN];
     char ver_lex[MAX_STRING_LEN];
-    if (options_t.extra_strings == true) {
+    if (options.extra_strings == true) {
         help_handler_strcpy(help_lex, sizeof(help_lex), "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)|-{0,}h{1,}$");
         help_handler_strcpy(ver_lex, sizeof(ver_lex), "-{0,}v{1,}e{1,}r{1,}s{0,}i{0,}o{0,}n{0,}(.*)|^-{0,}v$");
     } else {
@@ -662,10 +664,17 @@ void help_handler_pipe_i(int output_pipe) {
     }
 }
 
-void help_handler_config(int options) {
-    if (options & DISABLE_NO_ARGS_HELP) {       options_t.no_args_help = false; }
-    if (options & DISABLE_EXTRA_STRINGS) {      options_t.extra_strings = false; }
-    if (options & UNKNOWN_ARGS_HELP) {          options_t.unknown_args_help = true; }
+int help_handler_config(int option_flags) {
+    if (option_flags & DISABLE_NO_ARGS_HELP) {      options.no_args_help = false; }
+    if (option_flags & DISABLE_EXTRA_STRINGS) {     options.extra_strings = false; }
+    if (option_flags & UNKNOWN_ARGS_HELP) {         options.unknown_args_help = true; }
+
+    if (!option_flags & DISABLE_NO_ARGS_HELP &&
+        !option_flags & DISABLE_EXTRA_STRINGS &&
+        !option_flags & UNKNOWN_ARGS_HELP) {
+
+        print_err("invalid flag passed", __LINE__, warning);
+    }
 }
 
 #ifdef HELP_HANDLER_OVERLOAD_SUPPORTED
@@ -674,7 +683,7 @@ int help_handler_version_s(const char* ver) { //Parent function
 int help_handler_version(const char* ver) {
 #endif
     if (string_check(ver, __LINE__, error, "ver") == EXIT_FAILURE) { return helpHandlerFailure; }
-    if (strlen(ver)+1 >= sizeof(info_t.ver_str)) {
+    if (strlen(ver)+1 >= sizeof(info.ver_str)) {
         print_err("given version string is larger than allowed", __LINE__, error);
         return helpHandlerFailure; }
 
@@ -683,19 +692,19 @@ int help_handler_version(const char* ver) {
         print_err("failed to allocate memory for version string", __LINE__, error);
         return helpHandlerFailure; }
     trim(version, strlen(ver)+1, ver);
-    help_handler_strcpy(info_t.ver_str, sizeof(info_t.ver_str), version);
-    most_recent_t.ver = versionStr;
+    help_handler_strcpy(info.ver_str, sizeof(info.ver_str), version);
+    most_recent.ver = versionStr;
 
     free(version);
     return helpHandlerSuccess;
 } 
 void help_handler_version_i(unsigned int ver) {
-    info_t.ver_int = ver;
-    most_recent_t.ver = versionInt;
+    info.ver_int = ver;
+    most_recent.ver = versionInt;
 }
 void help_handler_version_d(double ver) {
-    info_t.ver_double = ver;
-    most_recent_t.ver = versionDouble;
+    info.ver_double = ver;
+    most_recent.ver = versionDouble;
 }
 
 
@@ -705,7 +714,7 @@ int help_handler_name_s(const char* app_name) { //Parent function
 int help_handler_name(const char* app_name) {
 #endif
     if (string_check(app_name, __LINE__, error, "app_name") == EXIT_FAILURE) { return helpHandlerFailure; }
-    if (strlen(app_name)+1 >= sizeof(info_t.name)) {
+    if (strlen(app_name)+1 >= sizeof(info.name)) {
         print_err("given app name is larger than allowed", __LINE__, error);
         return helpHandlerFailure; }
 
@@ -715,20 +724,20 @@ int help_handler_name(const char* app_name) {
         free(name);
         return helpHandlerFailure; }
     trim(name, strlen(app_name)+1, app_name);
-    help_handler_strcpy(info_t.name, sizeof(info_t.name), name);
-    most_recent_t.name = nameChar;
+    help_handler_strcpy(info.name, sizeof(info.name), name);
+    most_recent.name = nameChar;
 
     return helpHandlerSuccess;
 }
 
 int help_handler_name_w(const wchar_t* app_name) { //Parent function
     if (string_check_w(app_name, __LINE__, error, "app_name") == EXIT_FAILURE) { return helpHandlerFailure; }
-    if (wcslen(app_name)+1 >= sizeof(info_t.name)) {
+    if (wcslen(app_name)+1 >= sizeof(info.name)) {
         print_err("given app name (wchar type) is larger than allowed", __LINE__, warning);
         return helpHandlerFailure; }
 
-    wcscpy(info_t.name_w, app_name);
-    most_recent_t.name = nameWChar;
+    wcscpy(info.name_w, app_name);
+    most_recent.name = nameWChar;
 
     return helpHandlerSuccess;
 }
@@ -790,7 +799,7 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
 
     help_handler_strcpy(help, strlen(help_dialogue)+1, help_dialogue);
 
-    if (argc == 1 && options_t.no_args_help == true) {
+    if (argc == 1 && options.no_args_help == true) {
         if (print_name()) { 
             print_pipe(" "); }
         print_pipe(help); 
@@ -826,7 +835,7 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
 }
 
 int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
-    wchar_t* help = (wchar_t*)L"No usage help is available"; //Cast to silence C++ warning
+    wchar_t* help = (wchar_t*)malloc(wcslen(L"No usage help is available")); //Cast to silence C++ warning
     if (string_check_w(help_dialogue, __LINE__, silent, NULL) == EXIT_SUCCESS) {
         wchar_t* tmp = (wchar_t*)malloc(wcslen(help_dialogue)+1);
         if (tmp == NULL) {
@@ -844,7 +853,7 @@ int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
 
     wcscpy(help, help_dialogue);
 
-    if (argc == 1 && options_t.no_args_help == true) {
+    if (argc == 1 && options.no_args_help == true) {
         if (print_name()) { 
             print_pipe(" "); }
         print_pipe_w(help); 
