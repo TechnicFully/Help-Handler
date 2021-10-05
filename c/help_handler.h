@@ -150,7 +150,7 @@ static const int helpHandlerFailure = -1;
 #endif
 
 //Only used for internal strings
-#define MAX_STRING_LEN 64
+#define MAX_STRING_LEN 128
 #define MAX_STRING_COUNT 32
 
 //A newline feed does have the correct output on Windows and should on any modern OS, but older OSs or log reader programs may interpret a single \n wrong
@@ -623,7 +623,7 @@ void help_handler_print_err(void) {
 char* help_handler_get_err(void) {
     if (err_t.count > 0) {
         err_t.count--;
-        return err_t.err[err_t.count+1];
+        return err_t.err[err_t.count];
     }
 
     return NULL;
@@ -823,7 +823,9 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
         print_pipe(help);
     } else if (result == dialogVer) {
         print_ver();
-    } else if (help_handler_is_err(result)) { return result; }
+    } else if (help_handler_is_err(result)) {
+        free(help);
+        return result; }
 
     if (result == 0) {
         print_unknown(argc); }
@@ -837,7 +839,7 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
 int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
     wchar_t* help = (wchar_t*)malloc(wcslen(L"No usage help is available")); //Cast to silence C++ warning
     if (string_check_w(help_dialogue, __LINE__, silent, NULL) == EXIT_SUCCESS) {
-        wchar_t* tmp = (wchar_t*)malloc(wcslen(help_dialogue)+1);
+        wchar_t* tmp = (wchar_t*)realloc(help, wcslen(help_dialogue)+1);
         if (tmp == NULL) {
             free(help);
             return helpHandlerFailure;
@@ -876,7 +878,9 @@ int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
         print_pipe_w(help);
     } else if (result == dialogVer) {
         print_ver();
-    } else if (help_handler_is_err(result)) { return result; }
+    } else if (help_handler_is_err(result)) {
+        free(help);
+        return result; }
 
     if (result == 0) {
         print_unknown(argc); }
