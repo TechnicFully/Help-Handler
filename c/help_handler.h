@@ -319,6 +319,29 @@ static int help_handler_strcat(char* dst, size_t dst_size, const char* src) {
 }
 
 
+bool help_handler_is_err(int errorCode) {
+    return (errorCode < 0) ? true : false;
+}
+
+void help_handler_disable_err(bool disableErrorOutput) {
+    printErr = disableErrorOutput;
+}
+
+void help_handler_print_err(void) {
+    for (size_t i = 0; err_t.count != i; err_t.count--) {
+        print_pipe(err_t.err[err_t.count]);
+    }
+}
+
+char* help_handler_get_err(void) {
+    if (err_t.count > 0) {
+        err_t.count--;
+        return err_t.err[err_t.count];
+    }
+
+    return NULL;
+}
+
 static int err_buf_put(const char* s) {
     if (err_t.count >= MAX_STRING_COUNT) {
         err_t.count = 0; }
@@ -442,10 +465,7 @@ static size_t trim(char *out, size_t len, const char *str) {
     return out_size;
 }
 
-/*
- * Static functions. 
- * These are called from the two help_handler functions, split up for code reuse
- */
+//The two functions below are called from the two main help_handler functions, split up for code reuse
 static int return_result(int result_help, int result_ver) {
     if (result_help > 0 && result_ver > 0) { return dialogHelpVer; }
     else if (result_help > 0) { return dialogHelp;
@@ -606,29 +626,6 @@ static int help_handler_sub(int argc, char** argv) {
 /**** PUBLIC FUNCTIONS ****/
 /*                        */
 /**************************/
-bool help_handler_is_err(int errorCode) {
-    return (errorCode < 0) ? true : false;
-}
-
-void help_handler_disable_err(bool disableErrorOutput) {
-    printErr = disableErrorOutput;
-}
-
-void help_handler_print_err(void) {
-    for (size_t i = 0; err_t.count != i; err_t.count--) {
-        print_pipe(err_t.err[err_t.count]);
-    }
-}
-
-char* help_handler_get_err(void) {
-    if (err_t.count > 0) {
-        err_t.count--;
-        return err_t.err[err_t.count];
-    }
-
-    return NULL;
-}
-
 #ifdef HELP_HANDLER_OVERLOAD_SUPPORTED
 void help_handler_pipe_s(const char* output_pipe) {
 #else
@@ -669,12 +666,15 @@ int help_handler_config(int option_flags) {
     if (option_flags & DISABLE_EXTRA_STRINGS) {     options.extra_strings = false; }
     if (option_flags & UNKNOWN_ARGS_HELP) {         options.unknown_args_help = true; }
 
-    if (!option_flags & DISABLE_NO_ARGS_HELP &&
-        !option_flags & DISABLE_EXTRA_STRINGS &&
-        !option_flags & UNKNOWN_ARGS_HELP) {
+    if (!(option_flags & DISABLE_NO_ARGS_HELP) &&
+        !(option_flags & DISABLE_EXTRA_STRINGS) &&
+        !(option_flags & UNKNOWN_ARGS_HELP)) {
 
         print_err("invalid flag passed", __LINE__, warning);
+        return helpHandlerFailure;
     }
+
+    return helpHandlerSuccess;
 }
 
 #ifdef HELP_HANDLER_OVERLOAD_SUPPORTED
