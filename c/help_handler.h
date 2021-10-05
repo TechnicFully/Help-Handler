@@ -161,10 +161,10 @@ static const char* newline = "\n";
 #endif
 
 static bool printErr = false;
-static struct err_t { //Ring buffer for error messages
+static struct err { //Ring buffer for error messages
     char err[MAX_STRING_COUNT][MAX_STRING_LEN];
     size_t count;
-} err_t = { {{0}}, 0 };
+} err = { {{0}}, 0 };
 
 /*
  * These enums below are used for verbosity/changeability internally, in place of what'd otherwise be magic numbers
@@ -328,26 +328,26 @@ void help_handler_disable_err(bool disableErrorOutput) {
 }
 
 void help_handler_print_err(void) {
-    for (size_t i = 0; err_t.count != i; err_t.count--) {
-        print_pipe(err_t.err[err_t.count]);
+    for (size_t i = 0; err.count != i; err.count--) {
+        print_pipe(err.err[err.count]);
     }
 }
 
 char* help_handler_get_err(void) {
-    if (err_t.count > 0) {
-        err_t.count--;
-        return err_t.err[err_t.count];
+    if (err.count > 0) {
+        err.count--;
+        return err.err[err.count];
     }
 
     return NULL;
 }
 
 static int err_buf_put(const char* s) {
-    if (err_t.count >= MAX_STRING_COUNT) {
-        err_t.count = 0; }
+    if (err.count >= MAX_STRING_COUNT) {
+        err.count = 0; }
 
-    help_handler_strcpy(err_t.err[err_t.count], MAX_STRING_LEN, s);
-    err_t.count++;
+    help_handler_strcpy(err.err[err.count], MAX_STRING_LEN, s);
+    err.count++;
 
     return helpHandlerSuccess;
 }
