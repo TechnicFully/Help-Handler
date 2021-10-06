@@ -21,7 +21,7 @@ This library isn't meant to be another argparse or a derivative, but a one-file 
 - C+\+{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- C++11
 - Java{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- 7
 - Lua{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- 5.3.5 (Older versions untested)
-- Python - 2.xx through 3.xx
+- Python - 2.7.17 through 3.xx
 {blank}
 
 Usage
@@ -43,7 +43,7 @@ helpHandler::handle(argc, argv, "Usage: Test\n");
 ##### Python
 [source,python]
 ---------------
-help_handler("Usage: Test")
+HelpHandler.handle("Usage: Test")
 ---------------
 ##### Java
 [source,java]
