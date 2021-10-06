@@ -138,8 +138,10 @@ class HelpHandler():
         global _verGlob
         if foundMatchHelp and foundMatchVer:
             if _appNameGlob:
-                print(_appNameGlob + " " + _verGlob)
-                print(help_dialogue)
+                print(_appNameGlob + " ", end='')
+
+            print(_verGlob)
+            print(help_dialogue)
         elif foundMatchHelp == True:
             if _appNameGlob:
                 print(_appNameGlob + " ", end='')
