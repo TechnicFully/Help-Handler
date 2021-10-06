@@ -1,0 +1,54 @@
+:toc:
+:blank: pass:[ +]
+
+image:https://www.dropbox.com/s/qvtu9z2c4xekaww/f6d766cccecd96c622788a4aa99b438d1ab4abc9faee901949ea14beec23b5ee.png?raw=1[alt="HelpHandler"]
+
+
+
+
+Requirements
+------------
+##### Python 2.7.17 and above
+
+
+Usage
+------
+The only function needed after importing help_handler.py is ```HelpHandler.handle(help_dialogue)```, no need to create a class instance. Beyond that, most users will only be concerned with ```HelpHandler.config(bool extra_strings, bool no_arg_help, bool unknown_arg_help)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. You can refer to the _examples_ folder for more advanced usage.
+
+Basic usage example:
+[source,python]
+----------
+HelpHandler.handle("Usage: Test")
+----------
+An exception will be thrown if an error occurs, and the number of arguments matched will be returned on success (0 if none).
+
+
+
+Functions
+---------
+[source,python]
+----------
+HelpHandler.handle(string help_dialogue)
+HelpHandler.handleFile(string file_name)
+HelpHandler.version(string|number version)
+HelpHandler.config(bool extra_strings, bool no_arg_help, bool unknown_arg_help) #By default, they are    true, true, false
+HelpHandler.info(string app_name, string|number version)
+HelpHandler.name(string app_name)
+----------
+
+
+Contributing
+------------
+If you'd like to submit a bugfix, I'd be glad to take a pull request or fix it myself given adequate description of the cause of the issue. If you'd like a feature added, it will be  considered so long as it's within the scope of this project.
+
+
+License
+-------
+Distributed under the MIT License. See link:https://github.com/Inaff/Help-Handler/blob/master/LICENSE[here] for more information.
+
+
+Contact
+------
+keatonsquires97@gmail.com
+
+
