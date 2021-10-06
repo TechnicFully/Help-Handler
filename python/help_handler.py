@@ -23,104 +23,155 @@ SOFTWARE.
 '''
 
 from __future__ import print_function #For compatibility between Python 2 and 3 print functions
-import sys, re, warnings #sys is for grabbing arguments
+import os
+import sys, re, warnings
 
 
-noArgHelpGlob = True;
-extraStringsGlob = True;
-unknownArgHelpGlob = False;
-verGlob = "No version available";
+#Settings
+_extraStringsGlob = True
+_noArgHelpGlob = True
+_unknownArgHelpGlob = False
 
-help_ignore_warnings = False
-
-
-def _warning_formatted(message, category, filename, lineno, file=None, line=None):
-        return '%s at line %s: %s\n' % (filename, lineno, message)
-
-warnings.formatwarning = _warning_formatted
+#User data
+_verGlob = "No version available"
+_appNameGlob = ""
 
 
 
 
-def help_handler_config(noArgHelp=None, extraStrings=None, unknownArgHelp=None):
-    global noArgHelpGlob
-    global unknownArgHelpGlob
-    global extraStringsGlob
-    global verGlob
+class HelpHandler():
+    @staticmethod
+    def config(no_arg_help, extra_strings=None, unknown_arg_help=None):
+        #Error checking
+        if not (isinstance(no_arg_help, int)):
+            raise TypeError("argument noArgHelp is not of type bool or int")
+        if not (isinstance(extra_strings, int)):
+            raise TypeError("argument extraStrings is not of type bool or int")
+        if not (isinstance(unknown_arg_help, int)):
+            raise TypeError("argument unknownArgHelp is not of type bool or int")
 
 
-    if (isinstance(noArgHelp, int)):
-        noArgHelpGlob = noArgHelp
-    else:
-        if (False == help_ignore_warnings):
-            warnings.warn("argument noArgHelp is not of type bool or int")
+        global _extraStringsGlob
+        global _noArgHelpGlob
+        global _unknownArgHelpGlob
 
-    if (isinstance(extraStrings, int)):
-        extraStringsGlob = True
-    else:
-        if (False == help_ignore_warnings):
-            warnings.warn("argument extraStrings is not of type bool or int")
-
-    if (isinstance(unknownArgHelp, int)):
-        unknownArgHelpGlob = unknownArgHelp
-    else:
-        if (False == help_ignore_warnings):
-            warnings.warn("argument unknownArgHelp is not of type bool or int")
-
-    return
+        _extraStringsGlob   = extra_strings
+        _noArgHelpGlob      = no_arg_help
+        _unknownArgHelpGlob = unknown_arg_help
 
 
-def help_handler_version(ver):
-    global verGlob
+    @staticmethod
+    def version(version):
+        #Error checking
+        if not version:
+            raise ValueError("given version string is empty")
 
-    if sys.version_info.major >= 3:
-        if (isinstance(ver, str)):
-            verGlob = ver
-        else:
-            if (False == help_ignore_warnings):
-                warnings.warn("argument ver is not of type str")
-    elif sys.version_info.major <= 2:
-        if (isinstance(ver, basestring)):
-            verGlob = ver
-        else:
-            if (False == help_ignore_warnings):
-                warnings.warn("argument ver is not of type str")
+        if sys.version_info.major >= 3:
+            if not (isinstance(version, str), isinstance(version, int), isinstance(version, float)):
+                raise TypeError("argument version is not of type string, int, or double")
+        elif sys.version_info.major <= 2:
+            if not (isinstance(version, basestring), isinstance(version, int), isinstance(version, float)):
+                raise TypeError("argument version is not of type string, int, or double")
 
 
-def help_handler(helpDialogue, version=None):
-    if not helpDialogue:
-        helpDialogue = "No usage help is available"
-    if (len(sys.argv) == 1 and noArgHelpGlob == True):
-        print(helpDialogue)
-        return
-    
-    helpRegex    = "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)"
-    versionRegex = "-{0,}v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)"
-    foundRegexMatch = False
-
-    if extraStringsGlob == True:
-        helpRegex    += "|-{0,}h{1,}$"
-        versionRegex += "|^-{0,}v$"
-
-    for arg in sys.argv[1:]:
-        if re.match(versionRegex, arg, flags=re.IGNORECASE):
-            print(verGlob)
-            foundRegexMatch = True
-    for arg in sys.argv[1:]:
-        if re.match(helpRegex, arg, flags=re.IGNORECASE):
-            print(helpDialogue)
-            foundRegexMatch = True
-
-    if foundRegexMatch == True: 
-        return
+        global _verGlob
+        _verGlob = version
 
 
-    if unknownArgHelpGlob == True:
-        if (len(sys.argv) > 2):
-            print("Unknown arguments given")
-        else:
-            print("Unknown argument given")
+    @staticmethod
+    def name(app_name):
+        #Error checking
+        if not app_name:
+            raise ValueError("given app name string is empty")
+        
+        if sys.version_info.major >= 3:
+            if not (isinstance(app_name, str)):
+                raise TypeError("argument appName is not of type string")
+        elif sys.version_info.major <= 2:
+            if not (isinstance(app_name, basestring)):
+                raise TypeError("argument appname is not of type basestring")
 
-    return
 
+        global _appNameGlob
+        _appNameGlob = app_name
+
+
+    @staticmethod
+    def info(app_name, version):
+        HelpHandler.name(app_name)
+        HelpHandler.version(version)
+
+
+    @staticmethod
+    def handle(help_dialogue):
+        if not help_dialogue:
+            help_dialogue = "No usage help is available"
+        if (len(sys.argv) == 1 and _noArgHelpGlob == True):
+            print(help_dialogue)
+            return
+        
+        #Set regex
+        helpRegex    = "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)"
+        versionRegex = "-{0,}v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)"
+
+        global _extraStringsGlob
+        if _extraStringsGlob == True:
+            helpRegex    += "|-{0,}h{1,}$"
+            versionRegex += "|^-{0,}v$"
+
+
+        #Match and count arguments
+        foundMatchHelp = False
+        foundMatchVer  = False
+        matches = 0
+        for arg in sys.argv[1:]:
+            if re.match(versionRegex, arg, flags=re.IGNORECASE):
+                foundMatchVer = True
+                matches += 1
+        for arg in sys.argv[1:]:
+            if re.match(helpRegex, arg, flags=re.IGNORECASE):
+                foundMatchHelp = True
+                matches += 1
+
+        #Print respective output if arguments found and return number of args matched
+        global _appNameGlob
+        global _verGlob
+        if foundMatchHelp and foundMatchVer:
+            if _appNameGlob:
+                print(_appNameGlob + " " + _verGlob)
+                print(help_dialogue)
+        elif foundMatchHelp == True:
+            if _appNameGlob:
+                print(_appNameGlob + " ", end='')
+            print(help_dialogue)
+        elif foundMatchVer == True:
+            print(_verGlob)
+        
+        if foundMatchHelp or foundMatchVer:
+            return matches
+
+
+        #Nothing matched
+        if _unknownArgHelpGlob == True:
+            if (len(sys.argv) > 2):
+                print("Unknown arguments given")
+            else:
+                print("Unknown argument given")
+
+        return 0
+
+
+    @staticmethod
+    def handleFile(file_name):
+        if not os.path.exists(file_name):
+            if sys.version_info.major >= 3:
+                raise FileNotFoundError("given file name does not refer to an existing file")
+            elif sys.version_info.major <= 2:
+                raise IOError("given file name does not refer to an existing file")
+
+        contents = open(file_name, 'r').read()
+        if re.search(r'^\s*$', contents):
+            raise EOFError("given file name was found, but contains no data")
+
+        return HelpHandler.handle(contents)
 
