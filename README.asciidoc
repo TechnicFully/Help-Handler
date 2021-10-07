@@ -48,7 +48,7 @@ HelpHandler.handle("Usage: Test")
 ##### Java
 [source,java]
 -------------
-HelpHandler.handle("Usage: Test");
+HelpHandler.handle(args, "Usage: Test");
 -------------
 ##### Lua
 [source,lua]
