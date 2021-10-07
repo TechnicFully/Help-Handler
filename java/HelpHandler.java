@@ -41,12 +41,9 @@ public class HelpHandler {
     private static double  verNum = 0;
     private static String  name = "";
 
-    private static enum varType {
-        verStr,
-        verNum,
-    }
-
-    private static varType mostRecentVer = varType.verStr;
+    final private static int typeVerStr = 0;
+    final private static int typeVerNum = 1;
+    private static  int mostRecentVer = typeVerStr;
 
 
     static String readFile(String path, Charset encoding) throws IOException {
@@ -65,11 +62,11 @@ public class HelpHandler {
             throw new RuntimeException("given version string is empty"); }
 
         verStr = version;
-        mostRecentVer = varType.verStr;
+        mostRecentVer = typeVerStr;
     }
     public static void version(final Double version) {
         verNum = version;
-        mostRecentVer = varType.verNum;
+        mostRecentVer = typeVerNum;
     }
 
     public static void name(final String appName) throws RuntimeException {
@@ -119,7 +116,8 @@ public class HelpHandler {
             return 0; }
 
 
-        final String functionName = "HelpHandler." + new Object(){}.getClass().getEnclosingMethod().getName() + " ";
+        final String functionName = "HelpHandler.handle() ";
+
 
         //Error checks
         if (args == null) {
@@ -129,12 +127,12 @@ public class HelpHandler {
 
 
         //Set regex
-        String regexHelp    = "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)";
-        String regexVer     = "-{0,}v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)";
+        String regexHelp = "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)";
+        String regexVer  = "-{0,}v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)";
 
         if (optExtraStrings == true) {
-            regexHelp    += "|-{0,}h{1,}$";
-            regexVer += "|^-{0,}v$";
+            regexHelp += "|-{0,}h{1,}$";
+            regexVer  += "|^-{0,}v$";
         }
 
 
@@ -162,9 +160,9 @@ public class HelpHandler {
             System.out.println(verStr);
             System.out.println(helpDialogue);
         } else if (matchedVer == true) {
-            if (mostRecentVer == varType.verStr) {
+            if (mostRecentVer == typeVerStr) {
                 System.out.println(verStr);
-            } else if (mostRecentVer == varType.verNum) {
+            } else if (mostRecentVer == typeVerNum) {
                 System.out.println(verNum); }
             System.out.flush(); 
         } else if (matchedHelp == true) {
