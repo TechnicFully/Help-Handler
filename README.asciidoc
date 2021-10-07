@@ -7,7 +7,7 @@ image:https://www.dropbox.com/s/qvtu9z2c4xekaww/f6d766cccecd96c622788a4aa99b438d
 '''
 
 
-Raison D'etre
+Raison D'être
 -------------
 Having used countless programs from the commandline, the lack of user friendliness has always been frustrating, as well as the amount of boilerplate that would be copy/pasted from other projects to handle the very basic task of telling a user how to use the program, and what version of the program they're using is. I came across various projects for handling arguments, but none for help/version dialogue specifically, let alone in the many various programming languages that one may use. In many popular projects, simply trying to get usage help is a roll of the dice as to what argument works (nano doesn't support "help", openssl and gcc _only_ support "help" and "--help" respectively, etc.), and are case-sensitive which is not user friendly. Even Python's argparse throws "unrecognized arguments" for anything but "--help".
 
