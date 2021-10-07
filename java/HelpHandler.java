@@ -23,6 +23,11 @@
 
 
 import java.util.regex.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
+import java.io.IOException;
 
 
 
@@ -34,7 +39,7 @@ public class HelpHandler {
     
     private static String  verStr = "No version is available";
     private static double  verNum = 0;
-
+    private static String  name = "";
 
     private static enum varType {
         verStr,
@@ -44,22 +49,46 @@ public class HelpHandler {
     private static varType mostRecentVer = varType.verStr;
 
 
+    static String readFile(String path, Charset encoding) throws IOException {
+        byte[] encoded = Files.readAllBytes(Paths.get(path));
+        if (encoded.length <= 0) {
+            throw new IOException("given usage file is empty");
+        }
 
+        return new String(encoded, encoding);
+    }
 
-    public static void version(final String ver) throws RuntimeException {
-        if (ver == null) {
+    public static void version(final String version) throws RuntimeException {
+        if (version == null) {
             throw new RuntimeException("given version string is null"); }
-        if (ver.length() <= 0) {
+        if (version.length() <= 0) {
             throw new RuntimeException("given version string is empty"); }
 
-        verStr = ver;
+        verStr = version;
         mostRecentVer = varType.verStr;
     }
-    public static void version(final Double ver) {
-        verNum = ver;
+    public static void version(final Double version) {
+        verNum = version;
         mostRecentVer = varType.verNum;
     }
 
+    public static void name(final String appName) throws RuntimeException {
+        if (appName == null) {
+            throw new RuntimeException("given app name string is null"); }
+        if (appName.length() <= 0) {
+            throw new RuntimeException("given app name string is empty"); }
+
+        name = appName;
+    }
+
+    public static void info(final String appName, final String version) throws RuntimeException {
+        HelpHandler.name(appName);
+        HelpHandler.version(version);
+    }
+    public static void info(final String appName, final Double version) throws RuntimeException {
+        HelpHandler.name(appName);
+        HelpHandler.version(version);
+    }
 
     public static void config(final boolean noArgHelp) {
         optNoArgHelp = noArgHelp;
@@ -92,75 +121,85 @@ public class HelpHandler {
 
         final String functionName = "HelpHandler." + new Object(){}.getClass().getEnclosingMethod().getName() + " ";
 
-        /****************/
-        /* Error checks */
-        /****************/
+        //Error checks
         if (args == null) {
             throw new RuntimeException(functionName + "argument vector is null"); }
         if (args.length < 0) {
             throw new RuntimeException(functionName + "argument vector count is below 0 (should always be at least 0)"); }
 
-        /*******/
-        /* Run */
-        /*******/
-        String regexVersion = "-{0,}v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)";
+
+        //Set regex
         String regexHelp    = "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)";
+        String regexVer     = "-{0,}v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)";
 
         if (optExtraStrings == true) {
-            regexVersion += "|^-{0,}v$";
             regexHelp    += "|-{0,}h{1,}$";
+            regexVer += "|^-{0,}v$";
         }
 
-        boolean matchedVersion = false;
-        boolean matchedHelp = false;
-        int matches = 0;
 
+        //Match and count arguments
+        boolean matchedHelp = false;
+        boolean matchedVer = false;
+        int matches = 0;
         for (int i = 0; i < args.length; i++) {
             if (args[i] == null) {
-                throw new RuntimeException(functionName + "argument index " + i + "is null despite being of length greater than 0"); }
+                throw new RuntimeException(functionName + "argument index " + i + " is null despite being of length greater than 0"); }
             if (Pattern.matches(regexHelp, args[i].toLowerCase())) { //Might switch to setting the CASE_INSENSITIVE regex flag as it seems to be ~50ns faster
                 matchedHelp = true;
                 matches++; } 
-            if (Pattern.matches(regexVersion, args[i].toLowerCase())) {
-                matchedVersion = true;
+            if (Pattern.matches(regexVer, args[i].toLowerCase())) {
+                matchedVer = true;
                 matches++; } 
         }
 
-        if (matchedVersion == true) {
+        //Print respective output if arguments found and return number of args matched
+        if (matchedHelp && matchedVer) {
+            if (name.length() > 0) {
+                System.out.print(name + " ");
+            }
+            
+            System.out.println(verStr);
+            System.out.println(helpDialogue);
+        } else if (matchedVer == true) {
             if (mostRecentVer == varType.verStr) {
                 System.out.println(verStr);
             } else if (mostRecentVer == varType.verNum) {
                 System.out.println(verNum); }
-            System.out.flush(); }
-        if (matchedHelp == true) {
+            System.out.flush(); 
+        } else if (matchedHelp == true) {
+            if (name.length() > 0) {
+                System.out.print(name + " ");
+            }
+
             System.out.println(helpDialogue);
             System.out.flush(); }
 
-        if (matchedVersion == true || matchedHelp == true) {
-            return matches; }
-
-
-        if (optUnknownArgHelp == true && args.length > 0) {
-            System.out.flush();
-            return 0;
+        if (matchedVer == true || matchedHelp == true) {
+            return matches; 
         }
 
 
+        //Nothing matched
+        if (optUnknownArgHelp == true) {
+            String result = (args.length > 2) ? "Unknown arguments given" : "Unknown argument given";
+            System.out.println(result);
+            System.out.flush();
+        }
+
+        
         return 0;
     }
-    public static int handle(final String args[], String help, final String version) throws RuntimeException {
-        verStr = version;
-        mostRecentVer = varType.verStr;
-        return HelpHandler.handle(args, help);
-    }
-    public static int handle(final String args[], String help, final Double version) throws RuntimeException {
-        verNum = version;
-        mostRecentVer = varType.verNum;
-        return HelpHandler.handle(args, help);
+
+
+    public static int handleFile(final String args[], final String file_name) throws Exception {
+        Path path = Paths.get(file_name);
+        if (Files.notExists(path)) {
+            throw new IOException("given file name does not refer to an existing file");
+        }
+
+        String contents = readFile(file_name, Charset.defaultCharset());
+        return HelpHandler.handle(args, contents);
     }
 
 }
-
-
-
-
