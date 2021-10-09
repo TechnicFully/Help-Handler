@@ -79,11 +79,11 @@ HelpHandler.info = function(app_name, version)
     HelpHandler.ver(version)
 end
 
-HelpHandler.handle = function(help)
-    if help == nil or help == '' then
-        help = "No usage help is available"
+HelpHandler.handle = function(help_dialogue)
+    if help_dialogue == nil or help == '' then
+        help_dialogue = "No usage help is available"
     end
-    if type(help) ~= "string" then
+    if type(help_dialogue) ~= "string" then
         error("Help argument given is not a string")
     end
 
@@ -101,7 +101,7 @@ HelpHandler.handle = function(help)
             io.write("\n")
         end
 
-        print(help)
+        print(help_dialogue)
         return
     end
 
@@ -135,7 +135,7 @@ HelpHandler.handle = function(help)
         print(info_t.version)
     end
     if matchHelp == true then
-        print(help)
+        print(help_dialogue)
     end
     
     if unknown_arg ~= nil and type(unknown_arg) ~= "string" then
@@ -155,7 +155,7 @@ HelpHandler.handle = function(help)
     return matches
 end
 
-HelpHandler.handleFile = function(file_name, unknown_arg)
+HelpHandler.handleFile = function(file_name)
     local f = io.open(file_name, "r")
     if not f then
         error("File could not be opened")
