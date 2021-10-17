@@ -86,10 +86,10 @@ class HelpHandler():
         
         if sys.version_info.major >= 3:
             if not (isinstance(app_name, str)):
-                raise TypeError("argument appName is not of type string")
+                raise TypeError("argument app name is not of type string")
         elif sys.version_info.major <= 2:
             if not (isinstance(app_name, basestring)):
-                raise TypeError("argument appname is not of type basestring")
+                raise TypeError("argument app name is not of type basestring")
 
 
         global _appNameGlob
