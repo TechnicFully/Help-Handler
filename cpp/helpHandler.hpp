@@ -163,12 +163,8 @@ namespace helpHandler {
 
         //End
         if (options_t.unknownArgHelp == true && argc > 1) {
-            if (argc > 2) {
-                std::cout << "Unknown arguments given" << NEWLINE; 
-            } else {
-                std::cout << "Unknown argument given" << NEWLINE; }
-
-            return 0;
+            argc > 2 ? std::cout << "Unknown arguments given" : std::cout << "Unknown argument given";
+            std::cout << NEWLINE; }
         }
 
         return 0;
@@ -267,4 +263,6 @@ namespace helpHandler {
         return;
     }
 }
-#endif  /* HELP_HANDLER_HPP */
+
+#undef NEWLINE
+#endif /* HELP_HANDLER_HPP */
