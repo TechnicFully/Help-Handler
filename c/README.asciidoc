@@ -22,7 +22,7 @@ Requirements
 
 Usage
 ------
-The only function needed after including help_handler.h is ```help_handler(int argc, char** argv, const char* help_dialogue)```. Beyond that, most users will only be concerned with ```help_handler_config(int option_flags)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. As a bonus, functions support type overloading if your compiler standard is C11 or above. You can refer to the _examples_ folder for more advanced usage.
+The only function needed after including help_handler.h is ```help_handler(int argc, char** argv, const char* help_dialogue)```. Beyond that, most users will only be concerned with ```help_handler_config(int option_flags)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. As a bonus, functions support type overloading if your compiler standard is set to C11 or above (See below). You can refer to the _examples_ folder for more advanced usage.
 
 Basic usage example:
 [source,C]
@@ -71,8 +71,10 @@ DISABLE_NO_ARGS_HELP    //Disable help dialogue output when no arguments are pas
 UNKNOWN_ARGS_HELP       //Enable dialogue output when an unknown argument is passed
 ```
 
-You may define these macros prior to including help_handler.h to disable the corresponding warning level:
+You may define these macros prior to including help_handler.h:
 ```
+HELP_HANDLER_NO_OVERLOADING
+
 HELP_HANDLER_IGNORE_WARN
 HELP_HANDLER_IGNORE_ERR 
 HELP_HANDLER_IGNORE_ALL
