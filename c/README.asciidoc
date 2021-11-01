@@ -74,7 +74,6 @@ UNKNOWN_ARGS_HELP       //Enable dialogue output when an unknown argument is pas
 You may define these macros prior to including help_handler.h:
 ```
 HELP_HANDLER_NO_OVERLOADING
-
 HELP_HANDLER_IGNORE_WARN
 HELP_HANDLER_IGNORE_ERR 
 HELP_HANDLER_IGNORE_ALL
