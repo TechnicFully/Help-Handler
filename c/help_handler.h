@@ -48,11 +48,13 @@ static const int helpHandlerFailure = -1;
 /* * * * INTERNAL MACROS * * * */
 /* * * * * * * * * * * * * * * */
 //C++ does not support the _Generic macro. This is important for C++-like function overloading for ease-of-use for library users
+#ifndef HELP_HANDLER_NO_OVERLOAD
 #ifndef __cplusplus
 #ifdef __STDC__
 #ifdef __STDC_VERSION__
 #if (__STDC_VERSION__ >= 201112L)
 #define HELP_HANDLER_OVERLOAD_SUPPORTED
+#endif
 #endif
 #endif
 #endif
@@ -851,7 +853,8 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
     if (result == 0) {
         print_unknown(argc); }
 
-    print_pipe(newline);
+    if (result >= 0 && result != helpHandlerSuccess) {
+        print_pipe(newline); }
 
     free(help);
     return helpHandlerSuccess;
