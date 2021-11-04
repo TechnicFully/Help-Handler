@@ -260,13 +260,6 @@ namespace helpHandler {
         helpHandler::version(version);
     }
 
-    void config(bool extraStrings=true, bool noArgHelp=true, bool unknownArgHelp=false) noexcept {
-        if (options_t.extraStrings != extraStrings) options_t.extraStrings = extraStrings;
-        if (options_t.noArgHelp != noArgHelp) options_t.noArgHelp = noArgHelp;
-        if (options_t.unknownArgHelp != unknownArgHelp)  options_t.unknownArgHelp = unknownArgHelp;
-        return;
-    }
-
     int config(int option_flags) {
         if (option_flags & DISABLE_NO_ARGS_HELP) {     options_t.noArgHelp = false; }
         if (option_flags & DISABLE_EXTRA_STRINGS) {    options_t.extraStrings = false; }
