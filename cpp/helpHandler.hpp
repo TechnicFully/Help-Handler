@@ -45,6 +45,10 @@
     std::flush;
 #endif
 
+int DISABLE_EXTRA_STRINGS    = 0x00000001;
+int DISABLE_NO_ARGS_HELP     = 0000000010;
+int ENABLE_UNKNOWN_ARGS_HELP = 0000000100;
+
 
 //Using globals instead of macros to avoid undefs/polluting namespace where possible
 enum varTypes {
@@ -164,7 +168,7 @@ namespace helpHandler {
         //End
         if (options_t.unknownArgHelp == true && argc > 1) {
             argc > 2 ? std::cout << "Unknown arguments given" : std::cout << "Unknown argument given";
-            std::cout << NEWLINE; }
+            std::cout << NEWLINE;
         }
 
         return 0;
@@ -261,6 +265,21 @@ namespace helpHandler {
         if (options_t.noArgHelp != noArgHelp) options_t.noArgHelp = noArgHelp;
         if (options_t.unknownArgHelp != unknownArgHelp)  options_t.unknownArgHelp = unknownArgHelp;
         return;
+    }
+
+    int config(int option_flags) {
+        if (option_flags & DISABLE_NO_ARGS_HELP) {     options_t.noArgHelp = false; }
+        if (option_flags & DISABLE_EXTRA_STRINGS) {    options_t.extraStrings = false; }
+        if (option_flags & ENABLE_UNKNOWN_ARGS_HELP) { options_t.unknownArgHelp = true; }
+
+        if (!(option_flags & DISABLE_NO_ARGS_HELP) &&
+            !(option_flags & DISABLE_EXTRA_STRINGS) &&
+            !(option_flags & ENABLE_UNKNOWN_ARGS_HELP)) {
+
+            throw std::invalid_argument("invalid flag passed");
+        }
+
+        return EXIT_SUCCESS;
     }
 }
 
