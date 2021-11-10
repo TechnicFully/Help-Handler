@@ -60,11 +60,13 @@ class HelpHandler():
     def config(no_arg_help=True, extra_strings=True, unknown_arg_help=False, disable_output=False):
         #Error checking
         if not (isinstance(no_arg_help, int)):
-            raise TypeError("argument noArgHelp is not of type bool or int")
+            raise TypeError("argument no_arg_help is not of type bool or int")
         if not (isinstance(extra_strings, int)):
-            raise TypeError("argument extraStrings is not of type bool or int")
+            raise TypeError("argument extra_strings is not of type bool or int")
         if not (isinstance(unknown_arg_help, int)):
-            raise TypeError("argument unknownArgHelp is not of type bool or int")
+            raise TypeError("argument unknown_arg_help is not of type bool or int")
+        if not (isinstance(disable_output, int)):
+            raise TypeError("argument disable_output is not of type bool or int")
 
 
         global _extraStringsGlob
@@ -76,7 +78,7 @@ class HelpHandler():
         _noArgHelpGlob      = no_arg_help
         _unknownArgHelpGlob = unknown_arg_help
         _disableOutput      = disable_output
-
+        
 
     @staticmethod
     def version(version):

@@ -6,8 +6,7 @@ from help_handler import *
 
 
 def main():
-    HelpHandler.version("1.0")
-    HelpHandler.handle("Usage: Help")
+    HelpHandler.handle(args=)
 
 
 if __name__ == "__main__":
