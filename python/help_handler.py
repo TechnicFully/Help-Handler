@@ -38,6 +38,7 @@ _extraStringsGlob = True
 _noArgHelpGlob = True
 _unknownArgHelpGlob = False
 _disableOutput = False
+_matchNoHyphens = True
 
 #User data
 _verGlob = "No version available"
@@ -57,7 +58,7 @@ class HelpHandler():
                 print(string, end='')
 
     @staticmethod
-    def config(no_arg_help=True, extra_strings=True, unknown_arg_help=False, disable_output=False):
+    def config(no_arg_help=True, extra_strings=True, unknown_arg_help=False, disable_output=False, match_no_hyphens=True):
         #Error checking
         if not (isinstance(no_arg_help, int)):
             raise TypeError("argument no_arg_help is not of type bool or int")
@@ -67,18 +68,22 @@ class HelpHandler():
             raise TypeError("argument unknown_arg_help is not of type bool or int")
         if not (isinstance(disable_output, int)):
             raise TypeError("argument disable_output is not of type bool or int")
+        if not (isinstance(match_no_hyphens, int)):
+            raise TypeError("argument match_no_hyphens is not of type bool or int")
 
 
         global _extraStringsGlob
         global _noArgHelpGlob
         global _unknownArgHelpGlob
         global _disableOutput
+        global _matchNoHyphens
 
         _extraStringsGlob   = extra_strings
         _noArgHelpGlob      = no_arg_help
         _unknownArgHelpGlob = unknown_arg_help
         _disableOutput      = disable_output
-        
+        _matchNoHyphens     = match_no_hyphens
+
 
     @staticmethod
     def version(version):
@@ -133,14 +138,19 @@ class HelpHandler():
             return
         
         #Set regex
-        helpRegex    = "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)"
-        versionRegex = "-{0,}v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)"
+        numHyphens = 0
+        if _matchNoHyphens == False:
+            numHyphens = 1
+        numHyphens = str(numHyphens)
+
+        helpRegex    = "-{" + numHyphens + ",}h{1,}e{1,}l{1,}p{1,}(.*)"
+        versionRegex = "-{" + numHyphens + ",}v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)"
 
         global _extraStringsGlob
         if _extraStringsGlob == True:
-            helpRegex    += "|-{0,}h{1,}$"
-            versionRegex += "|^-{0,}v$"
-
+            helpRegex    += "|-{" + numHyphens + ",}h{1,}$"
+            versionRegex += "|^-{" + numHyphens + ",}v$"
+            
 
         #Match and count arguments
         foundMatchHelp = False
