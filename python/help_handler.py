@@ -27,10 +27,17 @@ import os
 import sys, re, warnings
 
 
+#User variables
+found_all     = 0xff
+found_help    = 0xfe
+found_version = 0xfd
+found_none    = 0xf0
+
 #Settings
 _extraStringsGlob = True
 _noArgHelpGlob = True
 _unknownArgHelpGlob = False
+_disableOutput = False
 
 #User data
 _verGlob = "No version available"
@@ -41,7 +48,16 @@ _appNameGlob = ""
 
 class HelpHandler():
     @staticmethod
-    def config(no_arg_help, extra_strings=None, unknown_arg_help=None):
+    def __print(string, newline=True):
+        global _disableOutput
+        if _disableOutput != True:
+            if newline == True:
+                print(string)
+            else:
+                print(string, end='')
+
+    @staticmethod
+    def config(no_arg_help=True, extra_strings=True, unknown_arg_help=False, disable_output=False):
         #Error checking
         if not (isinstance(no_arg_help, int)):
             raise TypeError("argument noArgHelp is not of type bool or int")
@@ -54,10 +70,12 @@ class HelpHandler():
         global _extraStringsGlob
         global _noArgHelpGlob
         global _unknownArgHelpGlob
+        global _disableOutput
 
         _extraStringsGlob   = extra_strings
         _noArgHelpGlob      = no_arg_help
         _unknownArgHelpGlob = unknown_arg_help
+        _disableOutput      = disable_output
 
 
     @staticmethod
@@ -104,10 +122,12 @@ class HelpHandler():
 
     @staticmethod
     def handle(help_dialogue):
+        global _disableOutput
+        
         if not help_dialogue:
             help_dialogue = "No usage help is available"
-        if (len(sys.argv) == 1 and _noArgHelpGlob == True):
-            print(help_dialogue)
+        if (len(sys.argv) == 1) and (_noArgHelpGlob == True) and (_disableOutput != True):
+            HelpHandler.__print(help_dialogue)
             return
         
         #Set regex
@@ -134,34 +154,39 @@ class HelpHandler():
                 matches += 1
 
         #Print respective output if arguments found and return number of args matched
-        global _appNameGlob
-        global _verGlob
+        if _disableOutput != True:
+            global _appNameGlob
+            global _verGlob
+            if foundMatchHelp and foundMatchVer:
+                if _appNameGlob:
+                    HelpHandler.__print(_appNameGlob + " ", False)
+
+                HelpHandler.__print(_verGlob)
+                HelpHandler.__print(help_dialogue)
+            elif foundMatchHelp == True:
+                if _appNameGlob:
+                    HelpHandler.__print(_appNameGlob + " ", False)
+                HelpHandler.__print(help_dialogue)
+            elif foundMatchVer == True:
+                HelpHandler.__print(_verGlob)
+
+
+        #Return
         if foundMatchHelp and foundMatchVer:
-            if _appNameGlob:
-                print(_appNameGlob + " ", end='')
+            return found_all
+        if foundMatchHelp:
+            return found_help
+        elif foundMatchVer:
+            return found_version
+        else:
+            #Nothing matched
+            if _unknownArgHelpGlob == True and _disableOutput != True:
+                if (len(sys.argv) > 2):
+                    HelpHandler.__print("Unknown arguments given")
+                else:
+                    HelpHandler.__print("Unknown argument given")
 
-            print(_verGlob)
-            print(help_dialogue)
-        elif foundMatchHelp == True:
-            if _appNameGlob:
-                print(_appNameGlob + " ", end='')
-            print(help_dialogue)
-        elif foundMatchVer == True:
-            print(_verGlob)
-        
-        if foundMatchHelp or foundMatchVer:
-            return matches
-
-
-        #Nothing matched
-        if _unknownArgHelpGlob == True:
-            if (len(sys.argv) > 2):
-                print("Unknown arguments given")
-            else:
-                print("Unknown argument given")
-
-        return 0
-
+            return found_none
 
     @staticmethod
     def handleFile(file_name):
