@@ -37,7 +37,7 @@ Functions
 ----------
 int helpHandler::handle(int argc, char** argv, std::string helpDialogue);
 int helpHandler::handleFile(int argc, char** argv, const std::string& fileName);
-void helpHandler::config(bool extraStrings=true, bool noArgHelp=true, bool unknownArgHelp=false);
+void helpHandler::config(int flags);
 void helpHandler::info(const std::string& appName, std::string|double|unsigned int  version="");
 void helpHandler::name(const std::string& appName);
 void helpHandler::version(std::string|double|unsigned int  version);
