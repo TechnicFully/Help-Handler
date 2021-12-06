@@ -28,17 +28,17 @@ Usage
 ------
 Only one function call is required after importing/including the respective language's Help-Handler file. Most users will only be concerned with the _config()_ function to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v), and _version()_ to pass your program's version.
 
-You can refer to the readme and _examples_ folder in each respective language's folder for basic and more advanced usage, though there are few functions.
+You can refer to the readme and _examples_ folder in each language's folder for basic and more advanced usage, though there are few functions.
 
 ##### C
 [source,C]
 ----------
-help_handler(argc, argv, "Usage: Test\n"); 
+help_handler(argc, argv, "Usage: Test"); 
 ----------
 ##### C++
 [source,CPP]
 ------------
-helpHandler::handle(argc, argv, "Usage: Test\n");
+helpHandler::handle(argc, argv, "Usage: Test");
 ------------
 ##### Python
 [source,python]
