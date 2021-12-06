@@ -11,14 +11,22 @@ Requirements
 ##### Python 2.7.17 and above
 
 
-Usage
-------
-The only function needed after importing help_handler.py is ```HelpHandler.handle(help_dialogue)```, no need to create a class instance. Beyond that, most users will only be concerned with ```HelpHandler.config(bool extra_strings, bool no_arg_help, bool unknown_arg_help)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. You can refer to the _examples_ folder for more advanced usage.
+Usage Example
+-------------
+The only function needed after importing help_handler.py is ```HelpHandler.handle(help_dialogue)```, no need to create a class instance. Beyond that, most users will only be concerned with the config function to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
 
-Basic usage example:
+Copy-paste example:
 [source,python]
 ----------
-HelpHandler.handle("Usage: Test")
+from help_handler import *
+
+
+def main():
+    HelpHandler.version("1.0")
+    HelpHandler.handle("Usage: Help")
+
+if __name__ == "__main__":
+    main()
 ----------
 An exception will be thrown if an error occurs, and the number of arguments matched will be returned on success (0 if none).
 
@@ -31,10 +39,20 @@ Functions
 HelpHandler.handle(string help_dialogue)
 HelpHandler.handleFile(string file_name)
 HelpHandler.version(string|number version)
-HelpHandler.config(bool extra_strings, bool no_arg_help, bool unknown_arg_help) #By default, they are    true, true, false
+HelpHandler.config(no_arg_help=True, extra_strings=True, unknown_arg_help=False, disable_output=False, match_no_hyphens=True)
 HelpHandler.info(string app_name, string|number version)
 HelpHandler.name(string app_name)
 ----------
+
+Configuration
+-------------
+The config function is where you configure most settings. The parameters are as follows...
+
+- no arg help       - Print help dialogue when no arguments are given to the program
+- extra strings     - Where or not to match h, -h, --h, v, -v, and --v which may conflict with argument options
+- unknown arg help  - Whether to print a dialogue when an unknown argument is passed. You would typically whitelist your program's options in combination with this
+- disable output    - Disables all library output, e.g. if you want to simply know if a user passed a help or version argument and do your own outputting
+- match no hyphens  - Whether to match for arguments that don't begin with a hyphen (True) or to only match arguments that begin with at least one hyphen (False). By default this is True 
 
 
 Contributing
