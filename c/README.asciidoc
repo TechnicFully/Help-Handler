@@ -81,7 +81,7 @@ HELP_HANDLER_IGNORE_ALL
 
 Known limitations & issues
 --------------------------
-- MSVC only supports ANSI C90 and is therefore currently unsupported, but may eventually be, likely as its own seperate file.
+- MSVC compiles with a number of warnings currently.
 - Non-POSIX systems don't have regex argument matching, as the regex library (_regex.h_) is a POSIX C library, and Windows does not even have a system library for this. A third party library will be embedded for those systems in the future.
 
 
