@@ -41,6 +41,7 @@ public class HelpHandler {
     private static double  verNum = 0;
     private static String  name = "";
 
+    
     final private static int typeVerStr = 0;
     final private static int typeVerNum = 1;
     private static  int mostRecentVer = typeVerStr;
@@ -49,17 +50,17 @@ public class HelpHandler {
     static String readFile(String path, Charset encoding) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         if (encoded.length <= 0) {
-            throw new IOException("given usage file is empty");
+            throw new IOException("usage file is empty");
         }
 
         return new String(encoded, encoding);
     }
 
-    public static void version(final String version) throws RuntimeException {
+    public static void version(final String version) throws IllegalArgumentException {
         if (version == null) {
-            throw new RuntimeException("given version string is null"); }
+            throw new IllegalArgumentException("version string is null"); }
         if (version.length() <= 0) {
-            throw new RuntimeException("given version string is empty"); }
+            throw new IllegalArgumentException("version string is empty"); }
 
         verStr = version;
         mostRecentVer = typeVerStr;
@@ -69,20 +70,20 @@ public class HelpHandler {
         mostRecentVer = typeVerNum;
     }
 
-    public static void name(final String appName) throws RuntimeException {
+    public static void name(final String appName) throws IllegalArgumentException {
         if (appName == null) {
-            throw new RuntimeException("given app name string is null"); }
+            throw new IllegalArgumentException("app name string is null"); }
         if (appName.length() <= 0) {
-            throw new RuntimeException("given app name string is empty"); }
+            throw new IllegalArgumentException("app name string is empty"); }
 
         name = appName;
     }
 
-    public static void info(final String appName, final String version) throws RuntimeException {
+    public static void info(final String appName, final String version) throws IllegalArgumentException {
         HelpHandler.name(appName);
         HelpHandler.version(version);
     }
-    public static void info(final String appName, final Double version) throws RuntimeException {
+    public static void info(final String appName, final Double version) throws IllegalArgumentException {
         HelpHandler.name(appName);
         HelpHandler.version(version);
     }
@@ -191,9 +192,16 @@ public class HelpHandler {
 
 
     public static int handleFile(final String args[], final String file_name) throws Exception {
+        if (file_name == null) {
+            throw new IllegalArgumentException("file name is null");
+        }
+        if (file_name.length() <= 0) {
+            throw new IllegalArgumentException("file name is empty");
+        }
+
         Path path = Paths.get(file_name);
         if (Files.notExists(path)) {
-            throw new IOException("given file name does not refer to an existing file");
+            throw new IOException("file name does not refer to an existing file");
         }
 
         String contents = readFile(file_name, Charset.defaultCharset());
