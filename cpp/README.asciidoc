@@ -20,7 +20,7 @@ Requirements
 
 Usage
 ------
-The only function needed after including helpHandler.hpp is ```helpHandler::handle(int argc, char** argv, std::string help_dialogue)```. Beyond that, most users will only be concerned with ```helpHandler::config(bool extraStrings, bool noArgHelp, bool unknownArgHelp)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. You can refer to the _examples_ folder for more advanced usage.
+The only function needed after including helpHandler.hpp is ```helpHandler::handle(int argc, char** argv, std::string help_dialogue)```. Beyond that, most users will only be concerned with the config function ```helpHandler::config(int flags)``` to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
 
 Basic usage example:
 [source,CPP]

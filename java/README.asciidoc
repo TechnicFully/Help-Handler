@@ -13,7 +13,7 @@ Requirements
 
 Usage
 ------
-The only function needed after compiling HelpHandler.java is ```HelpHandler.handle(final String args[], String helpDialogue)```. Beyond that, most users will only be concerned with ```HelpHandler.config(bool noArgHelp, bool extraStrings, bool unknownArgHelp)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. You can refer to the _examples_ folder for more advanced usage.
+The only function needed after compiling HelpHandler.java is ```HelpHandler.handle(final String args[], String helpDialogue)```. Beyond that, most users will only be concerned with ```HelpHandler.config(bool noArgHelp, bool extraStrings, bool unknownArgHelp)``` to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
 
 Basic usage example:
 [source,CPP]
