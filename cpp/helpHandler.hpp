@@ -48,6 +48,7 @@
 int DISABLE_EXTRA_STRINGS    = 0x00000001;
 int DISABLE_NO_ARGS_HELP     = 0000000010;
 int ENABLE_UNKNOWN_ARGS_HELP = 0000000100;
+int DISABLE_MATCH_HYPHENS    = 0000001000;
 
 
 //Using globals instead of macros to avoid undefs/polluting namespace where possible
@@ -72,6 +73,7 @@ static struct info_t {
 static struct options_t {
     bool noArgHelp      = true;
     bool extraStrings   = true;
+    bool matchHyphens   = true;
     bool unknownArgHelp = false;
 } options_t;
 
@@ -102,6 +104,7 @@ namespace helpHandler {
             std::cout << help << NEWLINE;
             return EXIT_SUCCESS; }
 
+
         /****************/
         /* Error checks */
         /****************/
@@ -117,6 +120,7 @@ namespace helpHandler {
                 throw std::invalid_argument("Argument count (argc) is 0 or less (should always be at least 1)..."); }
         }
 
+
         /*******/
         /* Run */
         /*******/
@@ -124,13 +128,32 @@ namespace helpHandler {
         bool matchedHelp = false;
         bool matchedVer  = false;
 
-        //Match arguments
-        std::vector<std::string> arguments(argv+1, argv+argc); //Start from argv+1 to skip binary name
-        std::string helpExpression = "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)";
-        if (options_t.extraStrings == true) { helpExpression += "|-{0,}h{1,}$"; }
-        std::string versionExpression = "-{0,}v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)";
-        if (options_t.extraStrings == true) { versionExpression += "|^-{0,}v$"; }
+        //Construct regex
+        std::string helpExpression = "";
+        std::string versionExpression = "";
 
+        if (options_t.matchHyphens == true) { 
+            helpExpression += "-{0,}";
+            versionExpression += "-{0,}"; }
+
+        helpExpression += "h{1,}e{1,}l{1,}p{1,}(.*)";
+        versionExpression += "v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)";
+
+        if (options_t.extraStrings == true) { 
+            helpExpression += "|";
+            versionExpression += "|";
+
+            if (options_t.matchHyphens) {
+                helpExpression += "-{0,}";
+                versionExpression += "-{0,}";
+            }
+
+            helpExpression += "h{1,}$"; 
+            versionExpression += "v{1,}$";
+        }
+
+        //Match for arguments
+        std::vector<std::string> arguments(argv+1, argv+argc); //Start from argv+1 to skip binary name
         for (auto arg: arguments) {
                 std::regex helpRegex(helpExpression, std::regex_constants::icase);
                 if (std::regex_match(arg, helpRegex) == true) {
@@ -174,6 +197,7 @@ namespace helpHandler {
         return 0;
     }
 
+
     int handleFile(int argc, char** argv, const std::string& fileName) {
         std::ifstream f;
         std::string s;
@@ -193,6 +217,7 @@ namespace helpHandler {
         return helpHandler::handle(argc, argv, s);
     } 
 
+
     void version(double version) noexcept {
         info_t.versionDouble = version;
         most_recent_t.ver = versionDouble;
@@ -210,6 +235,7 @@ namespace helpHandler {
         most_recent_t.ver = versionStr;
     }
 
+
     int handle(int argc, char** argv, std::string helpDialogue, std::string version) {
         helpHandler::version(version);
         return helpHandler::handle(argc, argv, helpDialogue);
@@ -223,6 +249,7 @@ namespace helpHandler {
         helpHandler::version(version);
         return helpHandler::handle(argc, argv, helpDialogue);
     }
+
 
     int handleFile(int argc, char** argv, const std::string& fileName, std::string version) {
         helpHandler::version(version);
@@ -246,6 +273,7 @@ namespace helpHandler {
         info_t.name = trim(appName);
     }
 
+
     void info(const std::string& appName, std::string version) {
         helpHandler::name(appName);
         helpHandler::version(version);
@@ -260,16 +288,18 @@ namespace helpHandler {
         helpHandler::version(version);
     }
 
+
     int config(int option_flags) {
-        if (option_flags & DISABLE_NO_ARGS_HELP) {     options_t.noArgHelp = false; }
-        if (option_flags & DISABLE_EXTRA_STRINGS) {    options_t.extraStrings = false; }
-        if (option_flags & ENABLE_UNKNOWN_ARGS_HELP) { options_t.unknownArgHelp = true; }
+        if (option_flags & DISABLE_NO_ARGS_HELP)        { options_t.noArgHelp       = false; }
+        if (option_flags & DISABLE_EXTRA_STRINGS)       { options_t.extraStrings    = false; }
+        if (option_flags & DISABLE_MATCH_HYPHENS)       { options_t.matchHyphens    = false; }
+        if (option_flags & ENABLE_UNKNOWN_ARGS_HELP)    { options_t.unknownArgHelp  = true;  }
 
         if (!(option_flags & DISABLE_NO_ARGS_HELP) &&
             !(option_flags & DISABLE_EXTRA_STRINGS) &&
+            !(option_flags & DISABLE_MATCH_HYPHENS) &&
             !(option_flags & ENABLE_UNKNOWN_ARGS_HELP)) {
-
-            throw std::invalid_argument("invalid flag passed");
+                throw std::invalid_argument("invalid flag passed");
         }
 
         return EXIT_SUCCESS;
