@@ -46,7 +46,7 @@ HelpHandler.name(string app_name)
 
 Configuration
 -------------
-The config function is where you configure most settings. The parameters are as follows...
+The `config` function is where you configure most settings. The parameters are as follows...
 
 - no arg help       - Print help dialogue when no arguments are given to the program
 - extra strings     - Where or not to match h, -h, --h, v, -v, and --v which may conflict with argument options
