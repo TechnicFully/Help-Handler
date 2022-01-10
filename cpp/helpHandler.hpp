@@ -46,9 +46,9 @@
 #endif
 
 int DISABLE_EXTRA_STRINGS    = 0x00000001;
-int DISABLE_NO_ARGS_HELP     = 0000000010;
-int ENABLE_UNKNOWN_ARGS_HELP = 0000000100;
-int DISABLE_MATCH_HYPHENS    = 0000001000;
+int DISABLE_NO_ARGS_HELP     = 0x00000010;
+int ENABLE_UNKNOWN_ARGS_HELP = 0x00000100;
+int DISABLE_MATCH_HYPHENS    = 0x00001000;
 
 
 //Using globals instead of macros to avoid undefs/polluting namespace where possible
