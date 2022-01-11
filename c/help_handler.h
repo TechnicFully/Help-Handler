@@ -453,7 +453,10 @@ static size_t trim(char *out, size_t len, const char *str) {
     //Trim leading whitespace
     while(isspace((unsigned char)*str)) { str++; };
     //Trim trailing space
-    end = str + strlen(str) - 1;
+    end = str + strlen(str);
+    if (strlen(str) >= 2) {
+        end = end - 1;
+    }
     while(isspace((unsigned char)*end)) { end--; };
     end++;
 
@@ -462,7 +465,7 @@ static size_t trim(char *out, size_t len, const char *str) {
 
     //Copy trimmed string and add null terminator
     memcpy(out, str, out_size);
-    out[out_size] = 0;
+    out[out_size] = '\0';
 
     return out_size;
 }
@@ -693,7 +696,8 @@ int help_handler_version_s(const char* ver) { //Parent function
 //Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number.
 int help_handler_version(const char* ver) {
 #endif
-    if (string_check(ver, __LINE__, error, "ver") == EXIT_FAILURE) { return helpHandlerFailure; }
+    if (string_check(ver, __LINE__, error, "ver") != EXIT_SUCCESS) { 
+        return helpHandlerFailure; }
     if (strlen(ver)+1 >= sizeof(info.ver_str)) {
         print_err("given version string is larger than allowed", __LINE__, error);
         return helpHandlerFailure; }
@@ -702,7 +706,12 @@ int help_handler_version(const char* ver) {
     if (version == NULL) {
         print_err("failed to allocate memory for version string", __LINE__, error);
         return helpHandlerFailure; }
+
     trim(version, strlen(ver)+1, ver);
+    if (strlen(version) <= 0) { 
+        free(version);
+        return helpHandlerFailure; }
+
     help_handler_strcpy(info.ver_str, sizeof(info.ver_str), version);
     most_recent.ver = versionStr;
 
@@ -736,12 +745,18 @@ int help_handler_name(const char* app_name) {
     char* name = (char*)malloc(strlen(app_name)+1);
     if (name == NULL) {
         print_err("failed to allocate memory for app_name", __LINE__, error);
-        free(name);
         return helpHandlerFailure; }
+
     trim(name, strlen(app_name)+1, app_name);
+    if (strlen(name) <= 0) {
+        free(name);
+        return helpHandlerFailure;
+    }
+
     help_handler_strcpy(info.name, sizeof(info.name), name);
     most_recent.name = nameChar;
 
+    free(name);
     return helpHandlerSuccess;
 }
 //Defines your program name which will be output when help dialogue is output, i.e. --help (but not version info, i.e. --version)
@@ -817,7 +832,6 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
     //The C standard states it is undefined behavior to pass anything except a null-terminated string to printf. Most libc implementations will print "(null)" in such circumstances, but not all
     if (help == NULL) {
         print_err("failed to allocate memory for help dialogue", __LINE__, error);
-        free(help);
         return helpHandlerFailure; }
 
     if (string_check(help_dialogue, __LINE__, silent, NULL) == EXIT_SUCCESS) {
