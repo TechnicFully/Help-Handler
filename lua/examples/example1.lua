@@ -4,5 +4,4 @@ require "HelpHandler"
 
 
 
-HelpHandler.version("1.0")
-HelpHandler.handle("Usage: test")
+HelpHandler.handle("usage: help dialogue example")

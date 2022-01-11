@@ -6,8 +6,7 @@
 
 
 int main(int argc, char** argv) {
-    help_handler_version("1.0");
-    help_handler(argc, argv, "Usage: Help");
+    help_handler(argc, argv, "usage: help dialogue example");
 
     return EXIT_SUCCESS;
 }
