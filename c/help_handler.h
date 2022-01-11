@@ -820,7 +820,9 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
         free(help);
         return helpHandlerFailure; }
 
-    help_handler_strcpy(help, strlen(help_dialogue)+1, help_dialogue);
+    if (string_check(help_dialogue, __LINE__, silent, NULL) == EXIT_SUCCESS) {
+        help_handler_strcpy(help, strlen(help_dialogue)+1, help_dialogue);
+    }
 
     if (argc == 1 && options.no_args_help == true) {
         if (print_name()) { 
