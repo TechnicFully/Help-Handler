@@ -22,7 +22,7 @@ Requirements
 
 Usage
 ------
-The only function needed after including help_handler.h is ```help_handler(int argc, char** argv, const char* help_dialogue)```. Beyond that, most users will only be concerned with ```help_handler_config(int option_flags)``` to enable and disable various functionality to avoid output when unwanted. As a bonus, functions support type overloading if your compiler standard is set to C11 or above (See below). You can refer to the _examples_ folder for more advanced usage.
+The only function needed after including help_handler.h is `help_handler(int argc, char** argv, const char* help_dialogue)`. Beyond that, most users will only be concerned with ```help_handler_config(int option_flags)``` to enable and disable various functionality to avoid output when unwanted. As a bonus, functions support type overloading if your compiler standard is set to C11 or above (See below). You can refer to the _examples_ folder for more advanced usage.
 
 Basic usage example:
 [source,C]

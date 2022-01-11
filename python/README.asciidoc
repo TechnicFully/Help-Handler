@@ -13,7 +13,7 @@ Requirements
 
 Usage Example
 -------------
-The only function needed after importing help_handler.py is ```HelpHandler.handle(help_dialogue)```, no need to create a class instance. Beyond that, most users will only be concerned with the config function (see below) to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
+The only function needed after importing help_handler.py is `HelpHandler.handle(help_dialogue)`, no need to create a class instance. Beyond that, most users will only be concerned with the config function (see below) to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
 
 Copy-paste example:
 [source,python]
