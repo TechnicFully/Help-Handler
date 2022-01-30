@@ -31,7 +31,10 @@ import java.io.IOException;
 
 
 
-public class HelpHandler {  
+
+public class HelpHandler {
+    final public int helpHandlerNone   = 0; //Returned if no arguments were matched; otherwise the number of arguments matched are returned
+
     private static boolean optNoArgHelp = true;
     private static boolean optExtraStrings = true;
     private static boolean optUnknownArgHelp = false;
@@ -47,6 +50,7 @@ public class HelpHandler {
     private static  int mostRecentVer = typeVerStr;
 
 
+
     static String readFile(String path, Charset encoding) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         if (encoded.length <= 0) {
@@ -55,6 +59,7 @@ public class HelpHandler {
 
         return new String(encoded, encoding);
     }
+
 
     public static void version(final String version) throws IllegalArgumentException {
         if (version == null) {
@@ -70,6 +75,7 @@ public class HelpHandler {
         mostRecentVer = typeVerNum;
     }
 
+
     public static void name(final String appName) throws IllegalArgumentException {
         if (appName == null) {
             throw new IllegalArgumentException("app name string is null"); }
@@ -78,6 +84,7 @@ public class HelpHandler {
 
         name = appName;
     }
+
 
     public static void info(final String appName, final String version) throws IllegalArgumentException {
         HelpHandler.name(appName);
@@ -88,20 +95,20 @@ public class HelpHandler {
         HelpHandler.version(version);
     }
 
+
     public static void config(final boolean noArgHelp) {
         optNoArgHelp = noArgHelp;
 
         return;
     }
     public static void config(final boolean noArgHelp, final boolean extraStrings) {
-        optNoArgHelp = noArgHelp;
+        config(noArgHelp);
         optExtraStrings = extraStrings;
 
         return;
     }
     public static void config(final boolean noArgHelp, final boolean extraStrings, final boolean unknownArgHelp) {
-        optNoArgHelp = noArgHelp;
-        optExtraStrings = extraStrings;
+        config(noArgHelp, extraStrings);
         optUnknownArgHelp = unknownArgHelp;
 
         return;
@@ -114,17 +121,16 @@ public class HelpHandler {
         if (args.length == 0 && optNoArgHelp == true ) {
             System.out.println(helpDialogue);
             System.out.flush();
-            return 0; }
+            return helpHandlerNone; }
 
 
-        final String functionName = "HelpHandler.handle() ";
 
 
         //Error checks
         if (args == null) {
-            throw new RuntimeException(functionName + "argument vector is null"); }
+            throw new RuntimeException("argument vector is null"); }
         if (args.length < 0) {
-            throw new RuntimeException(functionName + "argument vector count is below 0 (should always be at least 0)"); }
+            throw new RuntimeException("argument vector count is below 0 (should always be at least 0)"); }
 
 
         //Set regex
@@ -143,7 +149,7 @@ public class HelpHandler {
         int matches = 0;
         for (int i = 0; i < args.length; i++) {
             if (args[i] == null) {
-                throw new RuntimeException(functionName + "argument index " + i + " is null despite being of length greater than 0"); }
+                throw new RuntimeException("argument index " + i + " is null despite being of length greater than 0"); }
             if (Pattern.matches(regexHelp, args[i].toLowerCase())) { //Might switch to setting the CASE_INSENSITIVE regex flag as it seems to be ~50ns faster
                 matchedHelp = true;
                 matches++; } 
@@ -187,7 +193,7 @@ public class HelpHandler {
         }
 
         
-        return 0;
+        return helpHandlerNone;
     }
 
 
