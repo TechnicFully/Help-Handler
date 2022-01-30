@@ -9,26 +9,35 @@ image:https://www.dropbox.com/s/qvtu9z2c4xekaww/f6d766cccecd96c622788a4aa99b438d
 Requirements
 ------------
 ##### Compiler
-- Java release 7
+- Java release 7+
 
 Usage
 ------
 The only function needed after compiling HelpHandler.java is `HelpHandler.handle(final String args[], String helpDialogue)`. Beyond that, most users will only be concerned with ```HelpHandler.config(bool noArgHelp, bool extraStrings, bool unknownArgHelp)``` to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
 
 Basic usage example:
-[source,CPP]
-----------
-helpHandler.handle(args, "Usage: Test");
-----------
-An exception will be thrown if an error occurs, and the number of arguments matched will be returned on success (0 if none).
+[source,java]
+-------------
+public class main {
+    public static void main(final String args[]) {
+        try {
+            HelpHandler.handle(args, "usage: help dialogue example");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+-------------
+
+An exception will be thrown if an error occurs, and the number of arguments matched will be returned on success (0 if none, also defined by the variable helpHandlerNone)
 
 
 
 Functions
 ---------
-[source,CPP]
+[source,java]
 ----------
-int helpHandler.handle(final String args[], String helpDialogue, String|Double  version) throws RuntimeException; //Version arguments is optional
+int helpHandler.handle(final String args[], String helpDialogue) throws RuntimeException; //Version arguments is optional
 void helpHandler.config(bool extraStrings=true, bool noArgHelp=true, bool unknownArgHelp=false); //noArgHelp and unknownArgHelp are optional
 void helpHandler.version(String|double  ver); //throws RuntimeException if string is passed
 
