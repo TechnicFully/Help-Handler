@@ -33,7 +33,7 @@ import java.io.IOException;
 
 
 public class HelpHandler {
-    final public int helpHandlerNone   = 0; //Returned if no arguments were matched; otherwise the number of arguments matched are returned
+    final static public int helpHandlerNone   = 0; //Returned if no arguments were matched; otherwise the number of arguments matched are returned
 
     private static boolean optNoArgHelp = true;
     private static boolean optExtraStrings = true;
