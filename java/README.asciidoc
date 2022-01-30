@@ -37,9 +37,12 @@ Functions
 ---------
 [source,java]
 ----------
-int helpHandler.handle(final String args[], String helpDialogue) throws RuntimeException; //Version arguments is optional
+int  helpHandler.handle(final String args[], String helpDialogue) throws RuntimeException;
+int  handleFile(String args[], String file_name)
 void helpHandler.config(bool extraStrings=true, bool noArgHelp=true, bool unknownArgHelp=false); //noArgHelp and unknownArgHelp are optional
-void helpHandler.version(String|double  ver); //throws RuntimeException if string is passed
+void helpHandler.version(String|double  version); //Can throw RuntimeException if string is passed
+void name(String appName);
+void info(String appName, String version);
 
 
 ----------
