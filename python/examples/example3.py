@@ -6,6 +6,8 @@ from help_handler import *
 
 
 def main():
+    HelpHandler.name("TestApp") #This must also come before HelpHandler.handle, however it doesn't matter if it's called/set before or after help_handler_version()
+    HelpHandler.version("1.0")
     HelpHandler.handle("usage: help dialogue example")
 
 
