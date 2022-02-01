@@ -124,8 +124,6 @@ public class HelpHandler {
             return helpHandlerNone; }
 
 
-
-
         //Error checks
         if (args == null) {
             throw new RuntimeException("argument vector is null"); }
@@ -157,6 +155,7 @@ public class HelpHandler {
                 matchedVer = true;
                 matches++; } 
         }
+
 
         //Print respective output if arguments found and return number of args matched
         if (matchedHelp && matchedVer) {
