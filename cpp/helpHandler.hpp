@@ -65,7 +65,7 @@ static struct most_recent_t {
 
 static struct info_t {
     std::string name        = "";
-    std::string versionStr  = "";
+    std::string versionStr  = "No version is available";
     unsigned int versionInt = 0;
     double versionDouble    = 0;
 } info_t;
