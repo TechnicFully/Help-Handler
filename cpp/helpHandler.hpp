@@ -51,36 +51,34 @@ int ENABLE_UNKNOWN_ARGS_HELP = 0x00000100;
 int DISABLE_MATCH_HYPHENS    = 0x00001000;
 
 
-//Using globals instead of macros to avoid undefs/polluting namespace where possible
-enum varTypes {
-    versionStr,
-    versionInt,
-    versionDouble,
-};
-
-static struct most_recent_t {
-    unsigned int name = 0;
-    unsigned int ver = versionStr;
-} most_recent_t;
-
-static struct info_t {
-    std::string name        = "";
-    std::string versionStr  = "No version is available";
-    unsigned int versionInt = 0;
-    double versionDouble    = 0;
-} info_t;
-
-static struct options_t {
-    bool noArgHelp      = true;
-    bool extraStrings   = true;
-    bool matchHyphens   = true;
-    bool unknownArgHelp = false;
-} options_t;
-
-
-
 
 namespace helpHandler {
+    enum class versionT {
+        stringT,
+        integerT,
+        doubleT,
+    };
+
+    static struct most_recent_t {
+        unsigned int name = 0;
+        versionT ver = versionT::stringT;
+    } most_recent_t;
+
+    static struct info_t {
+        std::string name        = "";
+        std::string versionStr  = "No version is available";
+        unsigned int versionInt = 0;
+        double versionDouble    = 0;
+    } info_t;
+
+    static struct options_t {
+        bool noArgHelp      = true;
+        bool extraStrings   = true;
+        bool matchHyphens   = true;
+        bool unknownArgHelp = false;
+    } options_t;
+
+
     /*****************/
     /**** PRIVATE ****/
     /*****************/
@@ -170,9 +168,9 @@ namespace helpHandler {
         if (matches > 0) {
             if (matchedVer == true) {
                 switch (most_recent_t.ver) {
-                    case versionStr: std::cout << trim(info_t.versionStr); break;
-                    case versionInt: std::cout << info_t.versionInt; break; 
-                    case versionDouble: std::cout << info_t.versionDouble; break;
+                    case versionT::stringT: std::cout << trim(info_t.versionStr); break;
+                    case versionT::integerT: std::cout << info_t.versionInt; break; 
+                    case versionT::doubleT: std::cout << info_t.versionDouble; break;
                 }
 
             }
@@ -220,19 +218,19 @@ namespace helpHandler {
 
     void version(double version) noexcept {
         info_t.versionDouble = version;
-        most_recent_t.ver = versionDouble;
+        most_recent_t.ver = versionT::doubleT;
     } void version(unsigned int version) noexcept {
         info_t.versionInt = version;
-        most_recent_t.ver = versionInt;
+        most_recent_t.ver = versionT::integerT;
     } void version(int version) noexcept {
         info_t.versionInt = version;
-        most_recent_t.ver = versionInt;
+        most_recent_t.ver = versionT::integerT;
     } void version(std::string version) { //Parent
         if (version.empty()) {
             throw std::invalid_argument("Version string was given, but is empty"); }
         
         info_t.versionStr = trim(version);
-        most_recent_t.ver = versionStr;
+        most_recent_t.ver = versionT::stringT;
     }
 
 
