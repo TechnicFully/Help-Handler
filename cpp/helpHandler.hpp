@@ -32,7 +32,7 @@
 #include <iostream>
 #include <stdexcept>
 
-//C++'s std::endl doesn't change it's newline feed to the appropriate host OS's, so we use our own
+//C++'s std::endl doesn't change its newline feed to the appropriate host OS's, so we use our own
 #ifdef _WIN32
 #define NEWLINE \
     "\r\n" \
