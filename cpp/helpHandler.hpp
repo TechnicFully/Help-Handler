@@ -45,10 +45,10 @@
     std::flush;
 #endif
 
-int DISABLE_EXTRA_STRINGS    = 0x00000001;
 int DISABLE_NO_ARGS_HELP     = 0x00000010;
-int ENABLE_UNKNOWN_ARGS_HELP = 0x00000100;
-int DISABLE_MATCH_HYPHENS    = 0x00001000;
+int DISABLE_EXTRA_STRINGS    = 0x00000001;
+int DISABLE_MATCH_HYPHENS    = 0x00000100;
+int ENABLE_UNKNOWN_ARGS_HELP = 0x00001000;
 int ENABLE_HYPHENS_ONLY      = 0x00002000; //Value being higher than match_hyphens is intentional, to override in case both are set
 
 
@@ -84,15 +84,18 @@ namespace helpHandler {
     /*****************/
     /**** PRIVATE ****/
     /*****************/
-    static std::string trim(const std::string& str) {
-        size_t first = str.find_first_not_of(' ');
+    static std::string trim(const std::string& s) {
+        size_t first = s.find_first_not_of(' ');
         if (std::string::npos == first) {
-            return str; }
+            return s; }
             
-        size_t last = str.find_last_not_of(' ');
-        return str.substr(first, (last - first + 1));
+        size_t last = s.find_last_not_of(' ');
+        return s.substr(first, (last - first + 1));
     }
 
+    static std::string expression_append(const std::string& s) {
+        
+    }
 
     /****************/
     /**** PUBLIC ****/
