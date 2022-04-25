@@ -49,6 +49,7 @@ int DISABLE_EXTRA_STRINGS    = 0x00000001;
 int DISABLE_NO_ARGS_HELP     = 0x00000010;
 int ENABLE_UNKNOWN_ARGS_HELP = 0x00000100;
 int DISABLE_MATCH_HYPHENS    = 0x00001000;
+int ENABLE_HYPHENS_ONLY      = 0x00002000; //Value being higher than match_hyphens is intentional, to override in case both are set
 
 
 
@@ -75,6 +76,7 @@ namespace helpHandler {
         bool noArgHelp      = true;
         bool extraStrings   = true;
         bool matchHyphens   = true;
+        bool hyphensOnly    = false;
         bool unknownArgHelp = false;
     } options_t;
 
@@ -129,25 +131,39 @@ namespace helpHandler {
         //Construct regex
         std::string helpExpression = "";
         std::string versionExpression = "";
+        std::string hyphensExpression = "";
+    
 
-        if (options_t.matchHyphens == true) { 
-            helpExpression += "-{0,}";
-            versionExpression += "-{0,}"; }
+        if (options_t.hyphensOnly == true) {
+            std::cout << "Hyphens only";
+            hyphensExpression = "-{1,}";
+        } else if (options_t.matchHyphens == true) {
+            std::cout << "All hyphens";
+            hyphensExpression = "-{0,}";
+        }
 
-        helpExpression += "h{1,}e{1,}l{1,}p{1,}(.*)";
-        versionExpression += "v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)";
+
+        if (options_t.matchHyphens == true || options_t.hyphensOnly == true) {
+                helpExpression      += hyphensExpression;
+                versionExpression   += hyphensExpression;
+        }
+
+
+        helpExpression      += "h{1,}e{1,}l{1,}p{1,}(.*)";
+        versionExpression   += "v{1,}e{1,}r{1,}s{1,}i{1,}o{1,}n{1,}(.*)";
+
 
         if (options_t.extraStrings == true) { 
-            helpExpression += "|";
-            versionExpression += "|";
+            helpExpression      += "|";
+            versionExpression   += "|";
 
-            if (options_t.matchHyphens) {
-                helpExpression += "-{0,}";
-                versionExpression += "-{0,}";
+            if (options_t.matchHyphens == true || options_t.hyphensOnly == true) {
+                helpExpression      += hyphensExpression;
+                versionExpression   += hyphensExpression;
             }
 
-            helpExpression += "h{1,}$"; 
-            versionExpression += "v{1,}$";
+            helpExpression      += "h{1,}$"; 
+            versionExpression   += "v{1,}$";
         }
 
         //Match for arguments
@@ -291,13 +307,15 @@ namespace helpHandler {
         if (option_flags & DISABLE_NO_ARGS_HELP)        { options_t.noArgHelp       = false; }
         if (option_flags & DISABLE_EXTRA_STRINGS)       { options_t.extraStrings    = false; }
         if (option_flags & DISABLE_MATCH_HYPHENS)       { options_t.matchHyphens    = false; }
+        if (option_flags & ENABLE_HYPHENS_ONLY)         { options_t.hyphensOnly     = true; }
         if (option_flags & ENABLE_UNKNOWN_ARGS_HELP)    { options_t.unknownArgHelp  = true;  }
 
         if (!(option_flags & DISABLE_NO_ARGS_HELP) &&
             !(option_flags & DISABLE_EXTRA_STRINGS) &&
             !(option_flags & DISABLE_MATCH_HYPHENS) &&
-            !(option_flags & ENABLE_UNKNOWN_ARGS_HELP)) {
-                throw std::invalid_argument("invalid flag passed");
+            !(option_flags & ENABLE_UNKNOWN_ARGS_HELP) && 
+            !(option_flags & ENABLE_HYPHENS_ONLY)) {
+                throw std::invalid_argument("invalid config flag passed");
         }
 
         return EXIT_SUCCESS;
