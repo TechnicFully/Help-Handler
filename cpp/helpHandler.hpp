@@ -229,7 +229,7 @@ namespace helpHandler {
         while(getline(f, line)) {
             s += line; }
 
-         f.close();
+        f.close();
 
         return helpHandler::handle(argc, argv, s);
     } 
