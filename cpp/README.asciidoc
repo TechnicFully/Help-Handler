@@ -55,8 +55,6 @@ void helpHandler::config(int flags);
 void helpHandler::info(const std::string& appName, std::string|double|unsigned int  version="");
 void helpHandler::name(const std::string& appName);
 void helpHandler::version(std::string|double|unsigned int  version);
-
-
 ----------
 
 
@@ -69,6 +67,8 @@ The `config` function is used to configure output functionality. The possible pa
 - DISABLE_MATCH_HYPHENS - Disable matching of arguments with hyphens (i.e., Help Handler will match "help", but not "--help")
 - ENABLE_HYPHENS_ONLY - Only match arguments that begin with one or more hyphens
 - ENABLE_UNKNOWN_ARGS_HELP - Print dialogue when an unknown argument is passed. You would typically whitelist your program's option flags in combination with this
+
+
 Contributing
 ------------
 If you'd like to submit a bugfix, I'd be glad to take a pull request or fix it myself given adequate description of the cause of the issue. If you'd like a feature added, it will be  considered so long as it's within the scope of this project.
