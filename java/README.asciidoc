@@ -55,7 +55,7 @@ If you'd like to submit a bugfix, I'd be glad to take a pull request or fix it m
 
 License
 -------
-Distributed under the MIT License. See link:https://github.com/Inaff/Help-Handler/blob/master/LICENSE[here] for more information.
+Distributed under the MIT License. See link:https://github.com/TechnicFully/Help-Handler/blob/master/LICENSE[here] for more information.
 
 
 Contact

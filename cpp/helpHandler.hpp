@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2021 Inaff
+ * Copyright (c) 2022 TechnicFully
  
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -93,9 +93,6 @@ namespace helpHandler {
         return s.substr(first, (last - first + 1));
     }
 
-    static std::string expression_append(const std::string& s) {
-        
-    }
 
     /****************/
     /**** PUBLIC ****/

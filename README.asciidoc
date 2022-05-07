@@ -59,7 +59,7 @@ HelpHandler.handle("Usage: Test")
 
 Example
 -------
-image:https://github.com/Inaff/Help-Handler/blob/master/example.png?raw=true[alt="example terminal screenshot"]
+image:https://github.com/TechnicFully/Help-Handler/blob/master/example.png?raw=true[alt="example terminal screenshot"]
 
 
 Planned Features
@@ -75,7 +75,7 @@ If you'd like to submit a bugfix, I'd be glad to take a pull request or fix it m
 
 License
 -------
-Distributed under the MIT License. See link:https://github.com/Inaff/Help-Handler/blob/master/LICENSE[here] for more information.
+Distributed under the MIT License. See link:https://github.com/TechnicFully/Help-Handler/blob/master/LICENSE[here] for more information.
 
 
 Contact
