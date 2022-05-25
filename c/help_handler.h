@@ -934,7 +934,7 @@ int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
     free(help);
     return helpHandlerSuccess;
 }
-//This function like help_handler(), will processes and outputs the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this.
+//This function like help_handler(), will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this.
 int help_handler_f(int argc, char** argv, const char* file_name) {
     if (string_check(file_name, __LINE__, error, "file_name") == EXIT_FAILURE) {
         return helpHandlerFailure; }
