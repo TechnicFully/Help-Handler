@@ -32,6 +32,11 @@
 #include <iostream>
 #include <stdexcept>
 
+#define HELP_HANDLER_VERSION_RELEASE 0
+#define HELP_HANDLER_VERSION_MAJOR 0.1
+#define HELP_HANDLER_VERSION_MINOR 0
+#define HELP_HANDLER_VERSION_STR "0.1.0"
+
 //C++'s std::endl doesn't change its newline feed to the appropriate host OS's, so we use our own
 #ifdef _WIN32
 #define NEWLINE \
@@ -253,13 +258,7 @@ namespace helpHandler {
     int handle(int argc, char** argv, std::string helpDialogue, std::string version) {
         helpHandler::version(version);
         return helpHandler::handle(argc, argv, helpDialogue);
-    } int handle(int argc, char** argv, std::string helpDialogue, double version) {
-        helpHandler::version(version);
-        return helpHandler::handle(argc, argv, helpDialogue);
-    } int handle(int argc, char** argv, std::string helpDialogue, unsigned int version) {
-        helpHandler::version(version);
-        return helpHandler::handle(argc, argv, helpDialogue);
-    } int handle(int argc, char** argv, std::string helpDialogue, int version) {
+    }
         helpHandler::version(version);
         return helpHandler::handle(argc, argv, helpDialogue);
     }
