@@ -32,8 +32,9 @@
  * These should be the only relevant variables to any library user not trying to change functionality
  */
 
-#define HELP_HANDLER_VERSION_MAJOR 0.1
-#define HELP_HANDLER_VERSION_MINOR 0
+#define HELP_HANDLER_VERSION_MAJOR 0
+#define HELP_HANDLER_VERSION_MINOR 1
+#define HELP_HANDLER_VERSION_BUGFIX 0
 #define HELP_HANDLER_VERSION_STR "0.1.0"
 
 //Parameters for help_handler_config()
