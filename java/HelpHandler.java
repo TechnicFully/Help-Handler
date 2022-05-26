@@ -60,7 +60,7 @@ public class HelpHandler {
         return new String(encoded, encoding);
     }
 
-
+    //Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
     public static void version(final String version) throws IllegalArgumentException {
         if (version == null) {
             throw new IllegalArgumentException("version string is null"); }
@@ -70,12 +70,13 @@ public class HelpHandler {
         verStr = version;
         mostRecentVer = typeVerStr;
     }
+    //Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
     public static void version(final Double version) {
         verNum = version;
         mostRecentVer = typeVerNum;
     }
 
-
+    //Defines your program name which will be output alongside help dialogue
     public static void name(final String appName) throws IllegalArgumentException {
         if (appName == null) {
             throw new IllegalArgumentException("app name string is null"); }
@@ -85,28 +86,31 @@ public class HelpHandler {
         name = appName;
     }
 
-
+    //A single function for passing your program's name as well as its version
     public static void info(final String appName, final String version) throws IllegalArgumentException {
         HelpHandler.name(appName);
         HelpHandler.version(version);
     }
+    //A single function for passing your program's name as well as its version
     public static void info(final String appName, final Double version) throws IllegalArgumentException {
         HelpHandler.name(appName);
         HelpHandler.version(version);
     }
 
-
+    //For configuring functionality that might conflict/clutter other program output
     public static void config(final boolean noArgHelp) {
         optNoArgHelp = noArgHelp;
 
         return;
     }
+    //For configuring functionality that might conflict/clutter other program output
     public static void config(final boolean noArgHelp, final boolean extraStrings) {
         config(noArgHelp);
         optExtraStrings = extraStrings;
 
         return;
     }
+    //For configuring functionality that might conflict/clutter other program output
     public static void config(final boolean noArgHelp, final boolean extraStrings, final boolean unknownArgHelp) {
         config(noArgHelp, extraStrings);
         optUnknownArgHelp = unknownArgHelp;
@@ -114,7 +118,7 @@ public class HelpHandler {
         return;
     }
 
-
+    //This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
     public static int handle(final String args[], String helpDialogue) throws RuntimeException {
         if (helpDialogue.length() <= 0)
             helpDialogue = "No usage help is available";
@@ -195,7 +199,7 @@ public class HelpHandler {
         return helpHandlerNone;
     }
 
-
+    //This function like helpHandler.handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
     public static int handleFile(final String args[], final String file_name) throws Exception {
         if (file_name == null) {
             throw new IllegalArgumentException("file name is null");

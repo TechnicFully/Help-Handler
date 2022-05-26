@@ -637,10 +637,10 @@ static int help_handler_sub(int argc, char** argv) {
 /*                        */
 /**************************/
 #ifdef HELP_HANDLER_OVERLOAD_SUPPORTED
-//Change Help-Handler's output data stream. You can pass either "stdout" or "stderr" as strings, or Help-Handler's outStdout/outStderr variables.
+//Change Help-Handler's output data stream. You can pass either "stdout" or "stderr" as strings, or Help-Handler's outStdout/outStderr variables
 void help_handler_pipe_s(const char* output_pipe) {
 #else
-//Change Help-Handler's output data stream. You can pass "stdout" or "stderr" as strings.
+//Change Help-Handler's output data stream. You can pass "stdout" or "stderr" as strings
 void help_handler_pipe(const char* output_pipe) {
 #endif
     if (string_check(output_pipe, __LINE__, warning, "output_pipe") == EXIT_FAILURE) {
@@ -663,7 +663,7 @@ void help_handler_pipe(const char* output_pipe) {
     #endif
 }
 
-//Change Help-Handler's output data stream. You can pass the predefined variables outStderr or outStdout.
+//Change Help-Handler's output data stream. You can pass the predefined variables outStderr or outStdout
 void help_handler_pipe_i(int output_pipe) {
     if (output_pipe == outStdout) {
         outputPipe = output_pipe;
@@ -695,10 +695,10 @@ int help_handler_config(int option_flags) {
 }
 
 #ifdef HELP_HANDLER_OVERLOAD_SUPPORTED
-//Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number which you can pass as either a string, unsigned int, or double.
+//Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number which you can pass as either a string, unsigned int, or double
 int help_handler_version_s(const char* ver) { //Parent function
 #else
-//Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number.
+//Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
 int help_handler_version(const char* ver) {
 #endif
     if (string_check(ver, __LINE__, error, "ver") != EXIT_SUCCESS) { 
@@ -723,12 +723,12 @@ int help_handler_version(const char* ver) {
     free(version);
     return helpHandlerSuccess;
 }
-//Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number.
+//Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
 void help_handler_version_i(unsigned int ver) {
     info.ver_int = ver;
     most_recent.ver = versionInt;
 }
-//Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number.
+//Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
 void help_handler_version_d(double ver) {
     info.ver_double = ver;
     most_recent.ver = versionDouble;
@@ -736,10 +736,10 @@ void help_handler_version_d(double ver) {
 
 
 #ifdef HELP_HANDLER_OVERLOAD_SUPPORTED
-//Defines your program name which will be output when help dialogue is output, i.e. --help (but not version info, i.e. --version)
+//Defines your program name which will be output alongside help dialogue
 int help_handler_name_s(const char* app_name) { //Parent function
 #else
-//Defines your program name which will be output when help dialogue is output, i.e. --help (but not version info, i.e. --version)
+//Defines your program name which will be output alongside help dialogue
 int help_handler_name(const char* app_name) {
 #endif
     if (string_check(app_name, __LINE__, error, "app_name") == EXIT_FAILURE) { return helpHandlerFailure; }
@@ -764,7 +764,7 @@ int help_handler_name(const char* app_name) {
     free(name);
     return helpHandlerSuccess;
 }
-//Defines your program name which will be output when help dialogue is output, i.e. --help (but not version info, i.e. --version)
+//Defines your program name which will be output alongside help dialogue
 int help_handler_name_w(const wchar_t* app_name) { //Parent function
     if (string_check_w(app_name, __LINE__, error, "app_name") == EXIT_FAILURE) { return helpHandlerFailure; }
     if (wcslen(app_name)+1 >= sizeof(info.name)) {
@@ -817,10 +817,10 @@ int help_handler_info_wd(wchar_t* app_name, double ver) {
 
 
 #ifdef HELP_HANDLER_OVERLOAD_SUPPORTED
-//This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this.
+//This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
 int help_handler_s(int argc, char** argv, const char* help_dialogue) {
 #else
-//This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this.
+//This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
 int help_handler(int argc, char** argv, const char* help_dialogue) {
 #endif
     char* help = (char*)malloc(strlen("No usage help is available")+1); //Cast to silence C++ warning
@@ -935,7 +935,7 @@ int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
     free(help);
     return helpHandlerSuccess;
 }
-//This function like help_handler(), will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this.
+//This function like help_handler(), will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
 int help_handler_f(int argc, char** argv, const char* file_name) {
     if (string_check(file_name, __LINE__, error, "file_name") == EXIT_FAILURE) {
         return helpHandlerFailure; }

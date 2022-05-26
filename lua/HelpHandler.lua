@@ -38,17 +38,15 @@ local options_t = {
 
 
 
-
+--Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
 HelpHandler.version = function(version)
     if type(version) ~= "number" and type(version) ~= "string" then
         error("Version argument given is not a string or number")
     end
 
     info_t.version = version
-end 
-HelpHandler.ver = function(version)
-    HelpHandler.version(version)
-end 
+end
+
 
 HelpHandler.config = function(extra_strings, no_arg_help, unknown_arg_help)
     if type(extra_strings) ~= "boolean" and type(extra_strings) ~= "number" then error("Argument no_arg_help is not a bool or number") end
@@ -60,6 +58,7 @@ HelpHandler.config = function(extra_strings, no_arg_help, unknown_arg_help)
     if unknown_arg_help ~= nil then options_t.unknown_arg_help = unknown_arg_help end
 end
 
+--Defines your program name which will be output alongside help dialogue
 HelpHandler.name = function(app_name)
     if app_name == nil then
         error("App name called, but is nil")
@@ -74,11 +73,13 @@ HelpHandler.name = function(app_name)
     info_t.name = app_name
 end
 
+--A single function for passing your program's name as well as its version
 HelpHandler.info = function(app_name, version)
     HelpHandler.name(app_name)
     HelpHandler.ver(version)
 end
 
+--This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
 HelpHandler.handle = function(help_dialogue)
     if help_dialogue == nil or help == '' then
         help_dialogue = "No usage help is available"
@@ -155,6 +156,7 @@ HelpHandler.handle = function(help_dialogue)
     return matches
 end
 
+--This function like helpHandler.handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
 HelpHandler.handleFile = function(file_name)
     local f = io.open(file_name, "r")
     if not f then

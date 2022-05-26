@@ -57,8 +57,17 @@ class HelpHandler():
             else:
                 print(string, end='')
 
+    '''For configuring functionality that might conflict/clutter other program output. The parameters are as follows...
+        no_arg_help         - Disable printing of help dialogue when no arguments are given
+        extra_strings       - Disable matching of h, -h, --h, v, -v and --v which may conflict with your program’s flags
+        match_hyphens       - Disable matching of arguments with hyphens (i.e., Help Handler will match "help", but not "--help")
+        unknown_arg_help    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this  
+        hyphens_only        - Only match arguments that begin with one or more hyphens
+        disable_output      - Disable all output of HelpHandler
+
+    '''
     @staticmethod
-    def config(no_arg_help=True, extra_strings=True, unknown_arg_help=False, disable_output=False, match_no_hyphens=True):
+    def config(no_arg_help=True, extra_strings=True, match_no_hyphens=True, unknown_arg_help=False, disable_output=False):
         #Error checking
         if not (isinstance(no_arg_help, int)):
             raise TypeError("argument no_arg_help is not of type bool or int")
@@ -84,7 +93,7 @@ class HelpHandler():
         _disableOutput      = disable_output
         _matchNoHyphens     = match_no_hyphens
 
-
+    #Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
     @staticmethod
     def version(version):
         #Error checking
@@ -102,7 +111,7 @@ class HelpHandler():
         global _verGlob
         _verGlob = version
 
-
+    #Defines your program name which will be output alongside help dialogue
     @staticmethod
     def name(app_name):
         #Error checking
@@ -120,13 +129,13 @@ class HelpHandler():
         global _appNameGlob
         _appNameGlob = app_name
 
-
+    #A single function for passing your program's name as well as its version
     @staticmethod
     def info(app_name, version):
         HelpHandler.name(app_name)
         HelpHandler.version(version)
 
-
+    #This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
     @staticmethod
     def handle(help_dialogue):
         global _disableOutput
@@ -200,6 +209,7 @@ class HelpHandler():
 
             return found_none
 
+    #This function like helpHandler.handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
     @staticmethod
     def handleFile(file_name):
         if not os.path.exists(file_name):
