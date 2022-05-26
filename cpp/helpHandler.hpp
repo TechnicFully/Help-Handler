@@ -259,6 +259,7 @@ namespace helpHandler {
         helpHandler::version(version);
         return helpHandler::handle(argc, argv, helpDialogue);
     }
+    int handle(int argc, char** argv, std::string helpDialogue, double version) {
         helpHandler::version(version);
         return helpHandler::handle(argc, argv, helpDialogue);
     }
@@ -268,12 +269,6 @@ namespace helpHandler {
         helpHandler::version(version);
         return helpHandler::handleFile(argc, argv, fileName);
     } int handleFile(int argc, char** argv, const std::string& fileName, double version) {
-        helpHandler::version(version);
-        return helpHandler::handleFile(argc, argv, fileName);
-    } int handleFile(int argc, char** argv, const std::string& fileName, unsigned int version) {
-        helpHandler::version(version);
-        return helpHandler::handleFile(argc, argv, fileName);
-    } int handleFile(int argc, char** argv, const std::string& fileName, int version) {
         helpHandler::version(version);
         return helpHandler::handleFile(argc, argv, fileName);
     }
