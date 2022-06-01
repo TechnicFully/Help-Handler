@@ -118,6 +118,10 @@ namespace helpHandler {
 
         namespace utility {
             static std::string trim(const std::string& s) {
+                if (s.find_first_not_of(' ') == std::string::npos) {
+                    return "";
+                }
+
                 size_t first = s.find_first_not_of(' ');
                 if (std::string::npos == first) {
                     return s; }
@@ -270,11 +274,11 @@ namespace helpHandler {
         if (option_flags & ENABLE_HYPHENS_ONLY)         { options_t.hyphensOnly     = true; }
         if (option_flags & ENABLE_UNKNOWN_ARGS_HELP)    { options_t.unknownArgHelp  = true;  }
 
-        if (!(option_flags & DISABLE_NO_ARGS_HELP) &&
-            !(option_flags & DISABLE_EXTRA_STRINGS) &&
-            !(option_flags & DISABLE_MATCH_HYPHENS) &&
-            !(option_flags & ENABLE_UNKNOWN_ARGS_HELP) && 
-            !(option_flags & ENABLE_HYPHENS_ONLY)) {
+        if ((option_flags != (option_flags & DISABLE_NO_ARGS_HELP)) &&
+            (option_flags != (option_flags & DISABLE_EXTRA_STRINGS)) &&
+            (option_flags != (option_flags & DISABLE_MATCH_HYPHENS)) &&
+            (option_flags != (option_flags & ENABLE_UNKNOWN_ARGS_HELP)) && 
+            (option_flags != (option_flags & ENABLE_HYPHENS_ONLY))) {
                 throw std::invalid_argument("invalid config flag passed");
         }
     }
@@ -317,6 +321,8 @@ namespace helpHandler {
     }
     //Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
     void version(std::string version) { //Parent
+        version = utility::trim(version);
+
         if (version.empty()) {
             throw std::invalid_argument("Version string was given, but is empty"); }
         
@@ -353,7 +359,9 @@ namespace helpHandler {
     }
 
     //Defines your program name which will be output alongside help dialogue
-    void name(const std::string& appName) { //Parent
+    void name(std::string appName) { //Parent
+        appName = utility::trim(appName);
+
         if (appName.empty()) {
             throw std::invalid_argument("App name was given, but is empty");
         }
