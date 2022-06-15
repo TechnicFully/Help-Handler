@@ -40,7 +40,9 @@
 //Parameters for help_handler_config()
 int DISABLE_EXTRA_STRINGS    = 0x00000001;
 int DISABLE_NO_ARGS_HELP     = 0000000010;
-int UNKNOWN_ARGS_HELP        = 0000000100;
+int DISABLE_MATCH_HYPHENS    = 0x00000100;
+int ENABLE_UNKNOWN_ARGS_HELP = 0x00001000;
+int ENABLE_HYPHENS_ONLY      = 0x00010000; //Value being higher than match_hyphens is intentional, to override in case both are set
 
 //Return values
 static const int helpHandlerSuccess = 0; //This should remain 0, as it's also used to indicate no arguments were matched
@@ -167,7 +169,7 @@ static const char* newline = "\r\n";
 static const char* newline = "\n";
 #endif
 
-static bool printErr = false;
+static bool printErr = true;
 static struct err { //Ring buffer for error messages
     char err[MAX_STRING_COUNT][MAX_STRING_LEN];
     size_t count;
@@ -217,8 +219,10 @@ static struct info { //Probably best to malloc this struct in the future, though
 static struct options {
     bool no_args_help;
     bool extra_strings;
+    bool disable_match_hyphens;
+    bool hyphens_only;
     bool unknown_args_help;
-} options = { true, true, false }; 
+} options = { true, true, false, false, false }; 
 
 
 bool help_handler_is_err(int errorCode); //Forward declaration so private/static functions can use this to check for errors
@@ -331,7 +335,7 @@ bool help_handler_is_err(int errorCode) {
 }
 
 void help_handler_disable_err(bool disableErrorOutput) {
-    printErr = disableErrorOutput;
+    disableErrorOutput == true ? printErr = false : printErr = true;
 }
 
 void help_handler_print_err(void) {
@@ -395,19 +399,24 @@ static int string_check(const char* s, int s_line, int err_val, const char* var_
     char err_msg[MAX_STRING_LEN];
 
     if (var_name == NULL) {
-        string_check(s, s_line, err_val, "variable"); }
+        string_check(s, s_line, err_val, "variable");
+    }
 
     if (var_name != NULL) {
         help_handler_strcpy(err_msg, sizeof(err_msg), var_name); //TODO: fix overflow
     }
+
     if (s == NULL) {
         help_handler_strcat(err_msg, sizeof(err_msg), " is NULL");
         print_err(err_msg, s_line,  err_val);
-        return EXIT_FAILURE; }
+        return EXIT_FAILURE;
+    }
+
     if (s[0] == '\0') {
         help_handler_strcat(err_msg, sizeof(err_msg), "is empty");
         print_err(err_msg, s_line,  err_val);
-        return EXIT_FAILURE; } 
+        return EXIT_FAILURE;
+    } 
 
     return EXIT_SUCCESS;
 }
@@ -516,9 +525,15 @@ static bool print_name(void) {
 }
 
 static void print_unknown(int argc) {
-    if (true == options.unknown_args_help) {
+    printf("%d", options.unknown_args_help);
+    if (options.unknown_args_help == true) {
         argc > 2 ? print_pipe("Unknown arguments given") : print_pipe("Unknown argument given");
     }
+}
+
+//Arrange code/logic below so as to only use append() (simpler)
+static size_t append(char* s, const char* a) {
+    return 0;
 }
 
 static int arg_match(int argc, char** argv, const char* regex_string, const char* fallback_string) {
@@ -638,13 +653,13 @@ static int help_handler_sub(int argc, char** argv) {
 /**************************/
 #ifdef HELP_HANDLER_OVERLOAD_SUPPORTED
 //Change Help-Handler's output data stream. You can pass either "stdout" or "stderr" as strings, or Help-Handler's outStdout/outStderr variables
-void help_handler_pipe_s(const char* output_pipe) {
+int help_handler_pipe_s(const char* output_pipe) {
 #else
 //Change Help-Handler's output data stream. You can pass "stdout" or "stderr" as strings
-void help_handler_pipe(const char* output_pipe) {
+int help_handler_pipe(const char* output_pipe) {
 #endif
     if (string_check(output_pipe, __LINE__, warning, "output_pipe") == EXIT_FAILURE) {
-        return; }
+        return helpHandlerFailure; }
 
     #if defined _WIN32 || defined _WIN64
     if (_stricmp(output_pipe, "stdout") == 0) {
@@ -661,6 +676,8 @@ void help_handler_pipe(const char* output_pipe) {
     } else {
         outputPipe = outDefault; }
     #endif
+
+    return helpHandlerSuccess;
 }
 
 //Change Help-Handler's output data stream. You can pass the predefined variables outStderr or outStdout
@@ -679,17 +696,21 @@ void help_handler_pipe_i(int output_pipe) {
 //      DISABLE_EXTRA_STRINGS  - Disable matching of the following strings: h, -h, --h, v, -v, --v
 //      UNKNOWN_ARGS_HELP      - Enable dialogue (not help dialogue) output when an unknown argument is passed
 int help_handler_config(int option_flags) {
-    if (option_flags & DISABLE_NO_ARGS_HELP) {      options.no_args_help = false; }
-    if (option_flags & DISABLE_EXTRA_STRINGS) {     options.extra_strings = false; }
-    if (option_flags & UNKNOWN_ARGS_HELP) {         options.unknown_args_help = true; }
+    if ((option_flags != (option_flags & DISABLE_NO_ARGS_HELP)) &&
+        (option_flags != (option_flags & DISABLE_EXTRA_STRINGS)) &&
+        (option_flags != (option_flags & ENABLE_UNKNOWN_ARGS_HELP)) &&
+        (option_flags != (option_flags & ENABLE_HYPHENS_ONLY)) &&
+        (option_flags != (option_flags & DISABLE_MATCH_HYPHENS))) {
 
-    if (!(option_flags & DISABLE_NO_ARGS_HELP) &&
-        !(option_flags & DISABLE_EXTRA_STRINGS) &&
-        !(option_flags & UNKNOWN_ARGS_HELP)) {
-
-        print_err("invalid flag passed", __LINE__, warning);
-        return helpHandlerFailure;
+            print_err("invalid flag passed", __LINE__, warning);
+            return helpHandlerFailure;
     }
+
+    if (option_flags & DISABLE_NO_ARGS_HELP)        {  options.no_args_help = false; }
+    if (option_flags & DISABLE_EXTRA_STRINGS)       {  options.extra_strings = false; }
+    if (option_flags & ENABLE_UNKNOWN_ARGS_HELP)    {  options.unknown_args_help = true; }
+    if (option_flags & ENABLE_HYPHENS_ONLY)         {  options.hyphens_only = true; }
+    if (option_flags & DISABLE_MATCH_HYPHENS)       {  options.disable_match_hyphens = true; }
 
     return helpHandlerSuccess;
 }
@@ -823,29 +844,34 @@ int help_handler_s(int argc, char** argv, const char* help_dialogue) {
 //This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
 int help_handler(int argc, char** argv, const char* help_dialogue) {
 #endif
-    char* help = (char*)malloc(strlen("No usage help is available")+1); //Cast to silence C++ warning
+    /*  For the help dialgoue, we first allocate a placeholder output which is used
+        if help_dialogue is empty/null, then we check it succeeded, and then copy */
+    const char* placeholder_dialogue = "No usage help is available";
+    size_t size = 0;
+
+    if (string_check(help_dialogue, __LINE__, silent, NULL) == EXIT_FAILURE) {
+        size = strlen(placeholder_dialogue)+1;
+    } else {
+        size = strlen(help_dialogue)+1;
+    }
+
+    char* help = (char*)malloc(size); //Cast to silence C++ warning
     if (string_check(help_dialogue, __LINE__, silent, NULL) == EXIT_SUCCESS) {
-        char* tmp = (char*)realloc(help, strlen(help_dialogue)+1);
-        if (tmp == NULL) {  
-            free(help);
-            return helpHandlerFailure; 
-        }
-        
-        help = tmp;
+        help_handler_strcpy(help, size, help_dialogue);
+    } else {
+        help_handler_strcpy(help, size, placeholder_dialogue);
     }
 
     //The C standard states it is undefined behavior to pass anything except a null-terminated string to printf. Most libc implementations will print "(null)" in such circumstances, but not all
     if (help == NULL) {
         print_err("failed to allocate memory for help dialogue", __LINE__, error);
-        return helpHandlerFailure; }
-
-    if (string_check(help_dialogue, __LINE__, silent, NULL) == EXIT_SUCCESS) {
-        help_handler_strcpy(help, strlen(help_dialogue)+1, help_dialogue);
+        return helpHandlerFailure;
     }
 
     if (argc == 1 && options.no_args_help == true) {
         if (print_name()) { 
             print_pipe(" "); }
+
         print_pipe(help); 
         print_pipe(newline);
  
@@ -943,7 +969,9 @@ int help_handler_f(int argc, char** argv, const char* file_name) {
     #ifdef HELP_HANDLER_SECURE_VARIANTS
     FILE* fp = NULL;
     int err = fopen_s(&fp, file_name, "rb");
-    if (err < 0) { return helpHandlerFailure; }
+    if (err < 0) {
+        print_err(strerror(errno), __LINE__, error);
+        return helpHandlerFailure; }
     #else
     FILE* fp = fopen(file_name, "rb"); //Windows mangles newlines in r, so use rb
     #endif
@@ -953,20 +981,25 @@ int help_handler_f(int argc, char** argv, const char* file_name) {
 
     fseek(fp, 0L, SEEK_END);
     long size = ftell(fp);
+    if (size == 0) {
+        print_err("given help file is empty", __LINE__, error);
+        fclose(fp);
+        return helpHandlerFailure; }
     if (size == -1L) {
         print_err(strerror(errno), __LINE__, error);
         fclose(fp);
         return helpHandlerFailure; }
+
     rewind(fp);
 
-    char* contents = NULL;
-    if ((contents = (char*)malloc((unsigned long)size+1)) == NULL) { 
+    char* contents = (char*)malloc((unsigned long)size+1);
+    if (contents == NULL) { 
         print_err("failed to allocate memory", __LINE__, error);
         fclose(fp);
         return helpHandlerFailure; }
 
     size_t n_items = fread(contents, 1, (size_t)size, fp);
-    if (n_items == 0) {
+    if (n_items != (size_t)size) {
         print_err("given help file is empty", __LINE__, warning); }
     if ((long)n_items < size) {
         print_err(strerror(errno), __LINE__, error);
@@ -978,6 +1011,7 @@ int help_handler_f(int argc, char** argv, const char* file_name) {
         free(contents);
         return helpHandlerFailure; }
 
+    contents[size] = '\0'; //null delimit string as fread does not do this by default
     int return_val = help_handler(argc, argv, (const char*)contents);
     free(contents);
 
