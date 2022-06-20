@@ -1000,7 +1000,7 @@ int help_handler_f(int argc, char** argv, const char* file_name) {
 
     size_t n_items = fread(contents, 1, (size_t)size, fp);
     if (n_items != (size_t)size) {
-        print_err("given help file is empty", __LINE__, warning); }
+        print_err("failed to read file contents", __LINE__, warning); }
     if ((long)n_items < size) {
         print_err(strerror(errno), __LINE__, error);
         free(contents);
