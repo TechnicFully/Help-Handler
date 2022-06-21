@@ -189,16 +189,17 @@ enum varTypes {
     versionStr,
     versionInt,
     versionDouble, };
-enum returnVal {
-    dialogHelp = 1,
-    dialogVer,
-    dialogHelpVer, };
 enum errTypes {
     silent = 0,
     warning,
     error, };
 
-static int  outputPipe = outDefault; //Used by print_pipe()
+
+int dialogueNone    = 0x00000000;
+int dialogueHelp    = 0x00000001;
+int dialogueVersion = 0x00000010;
+
+static int outputPipe = outDefault; //Used by print_pipe()
 
 /*
  * User info/setting structs
@@ -224,6 +225,45 @@ static struct options {
     bool unknown_args_help;
 } options = { true, true, false, false, false }; 
 
+#ifdef HELP_HANDLER_DEBUG
+#define NRM  "\x1B[0m"
+#define RED  "\x1B[31m"
+#define GRN  "\x1B[32m"
+#define YEL  "\x1B[33m"
+#define BLU  "\x1B[34m"
+#define MAG  "\x1B[35m"
+#define CYN  "\x1B[36m"
+#define WHT  "\x1B[37m"
+
+#define HELP_DEBUG_TRACE(...) do { \
+    fprintf(stderr, "%sTRACE  %s - File: %s, line %d", MAG, PARENT_FUNC_NAME, __FILE__, __LINE__); \
+    fprintf(stderr, __VA_ARGS__); \
+    fprintf(stderr, "%s\n", NRM); \
+} while (0)
+
+#define HELP_DEBUG_INFO(...) do { \
+    fprintf(stderr, "%sINFO   %s at line %d:  ", BLU, __FILE__, __LINE__); \
+    fprintf(stderr, __VA_ARGS__);  \
+    fprintf(stderr, "%s\n", NRM); \
+} while (0)
+
+#define HELP_DEBUG_WARN(...) do { \
+    fprintf(stderr, "%sWARN   %s at line %d:  ", YEL, __FILE__, __LINE__); \
+    fprintf(stderr, __VA_ARGS__);  \
+    fprintf(stderr, "%s\n", NRM); \
+} while (0)
+
+#define HELP_DEBUG_ERROR(...) do { \
+    fprintf(stderr, "%sERROR  %s at line %d:  ", RED, __FILE__, __LINE__); \
+    fprintf(stderr, __VA_ARGS__);  \
+    fprintf(stderr, "%s\n", NRM); \
+} while (0)
+#else
+#define HELP_DEBUG_TRACE(...)
+#define HELP_DEBUG_INFO(...)
+#define HELP_DEBUG_WARN(...)
+#define HELP_DEBUG_ERROR(...)
+#endif
 
 bool help_handler_is_err(int errorCode); //Forward declaration so private/static functions can use this to check for errors
 
@@ -335,7 +375,7 @@ bool help_handler_is_err(int errorCode) {
 }
 
 void help_handler_disable_err(bool disableErrorOutput) {
-    disableErrorOutput == true ? printErr = false : printErr = true;
+    disableErrorOutput == true ? (printErr = false) : (printErr = true);
 }
 
 void help_handler_print_err(void) {
@@ -485,14 +525,6 @@ static size_t trim(char *out, size_t len, const char *str) {
 }
 
 //The two functions below are called from the two main help_handler functions, split up for code reuse
-static int return_result(int result_help, int result_ver) {
-    if (result_help > 0 && result_ver > 0) { return dialogHelpVer; }
-    else if (result_help > 0) { return dialogHelp;
-    } else if (result_ver > 0) { return dialogVer;
-    } else if (result_help == 0 && result_ver == 0) { return 0;
-    } else { return 0; }
-}
-
 static bool print_ver(void) {
     if (most_recent.ver == versionStr) {
         print_pipe(info.ver_str);
@@ -515,25 +547,51 @@ static bool print_ver(void) {
 
 static bool print_name(void) {
     if (strlen(info.name) > 0 && most_recent.name == nameChar) {
+        HELP_DEBUG_INFO("Printing program name");
         print_pipe(info.name);
         return true;
     } else if (wcslen(info.name_w) > 0 && most_recent.name == nameWChar) {
+        HELP_DEBUG_INFO("Printing program name (wide)");
         print_pipe_w(info.name_w);
         return true; }
+
 
     return false;
 }
 
 static void print_unknown(int argc) {
-    printf("%d", options.unknown_args_help);
     if (options.unknown_args_help == true) {
+        HELP_DEBUG_INFO("Printing unknown arguments dialogue");
         argc > 2 ? print_pipe("Unknown arguments given") : print_pipe("Unknown argument given");
     }
 }
 
 //Arrange code/logic below so as to only use append() (simpler)
-static size_t append(char* s, const char* a) {
-    return 0;
+static char* append(char* dst, const char* append) {
+    size_t size = strlen(dst) + strlen(append) + 1;
+    char *new_string = (char*)malloc(size);
+
+    if (new_string == NULL) {
+        print_err("failed to append string", __LINE__, error);
+        return NULL;
+    }
+
+    strcpy(new_string, dst);
+    strcat(new_string, append);
+
+    return new_string;
+}
+
+static bool matches(int var, int value) {
+    if (var == helpHandlerFailure || value == helpHandlerFailure) {
+        return false;
+    }
+
+    if (var & value) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 static int arg_match(int argc, char** argv, const char* regex_string, const char* fallback_string) {
@@ -547,9 +605,11 @@ static int arg_match(int argc, char** argv, const char* regex_string, const char
         if (argc < INT_MIN) {
             print_err("argument count (argc) is smaller than the limit of int type", __LINE__, error);
         } else {
-            print_err("argument count (argc) is 0 or less (should always be at least 1)..", __LINE__, error); }
+            print_err("argument count (argc) is 0 or less (should always be at least 1)..", __LINE__, error); 
+        }
 
-        return helpHandlerFailure; }
+        return helpHandlerFailure;
+    }
 
     if (argv == NULL) {
         print_err("argument vector (argv) is NULL", __LINE__, error);
@@ -565,6 +625,7 @@ static int arg_match(int argc, char** argv, const char* regex_string, const char
         #ifdef HELP_HANDLER_POSIX_C
         if (regex_string != NULL) {
             if (regex_match(argv[i], regex_string) == EXIT_SUCCESS) {
+                HELP_DEBUG_INFO("Matched argument %s", argv[i]);
                 return i; }
         }
         #else
@@ -576,6 +637,7 @@ static int arg_match(int argc, char** argv, const char* regex_string, const char
             #endif
 
             if (result == 0) {
+                HELP_DEBUG_INFO("Matched argument %s", argv[i])
                 return i; }
         }
         #endif
@@ -587,6 +649,8 @@ static int arg_match(int argc, char** argv, const char* regex_string, const char
 static int help_handler_sub(int argc, char** argv) {
     //Avoiding this ifdef by embedding regex functionality in the future for Windows would be great
     #ifndef HELP_HANDLER_POSIX_C
+    HELP_DBEUG_INFO("Not using regex");
+
     //Casts to silence C++ warnings
     char* help_lex[] = {
         (char*)"h", (char*)"-h", (char*)"--h",
@@ -607,17 +671,32 @@ static int help_handler_sub(int argc, char** argv) {
         help_lex[0] = "";help_lex[1] = "";help_lex[2] = ""; 
         i = 3; } //First three elements of help/ver array should be abbreviated terms, hence setting the array index to the fourth element
 
-    int result_help = 0, result_ver = 0;
+    int result = 0;
+    int dialogueMatches = dialogueNone;
     for (int temp = i; temp != sizeof(help_lex)/sizeof(help_lex[0]); temp++) {
-        result_help = arg_match(argc, argv, NULL, help_lex[temp]);
-        if (help_handler_is_err(result_help)) { return result_help; }
-        if (result_help > 0) { break; }
+        result = arg_match(argc, argv, NULL, help_lex[temp]);
+
+        if (help_handler_is_err(dialogueMatches)) {
+            return result;
+        }
+
+        if (result > 0) {
+            dialogueMatches |= dialogueHelp;
+            break;
+        }
     }
 
     for (int temp = i; temp != sizeof(ver_lex)/sizeof(ver_lex[0]); temp++) {
-        result_ver = arg_match(argc, argv, NULL, ver_lex[temp]);
-        if (help_handler_is_err(result_ver)) { return result_ver; }
-        if (result_ver > 0) { break; }
+        result = arg_match(argc, argv, NULL, ver_lex[temp]);
+
+        if (help_handler_is_err(result)) { 
+            return result;
+        }
+
+        if (result > 0) {
+            dialogueMatches |= dialogueVersion;
+            break;
+        }
     }
 
     #else //HELP_HANDLER_POSIX_C
@@ -631,16 +710,23 @@ static int help_handler_sub(int argc, char** argv) {
         help_handler_strcpy(help_lex, sizeof(help_lex), "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)"); 
         help_handler_strcpy(ver_lex, sizeof(ver_lex), "-{0,}v{1,}e{1,}r{1,}s{0,}i{0,}o{0,}n{0,}(.*)"); }
 
-    int result_help = arg_match(argc, argv, help_lex, NULL);
-    if (help_handler_is_err(result_help)) { return result_help; }
-    int result_ver  = arg_match(argc, argv, ver_lex, NULL);
-    if (help_handler_is_err(result_ver)) { return result_ver; }
+    int result = 0;
+    int dialogueMatches = dialogueNone;
+
+    //arg_match should only return an error if there's an issue with argc or argv itself
+    result = arg_match(argc, argv, help_lex, NULL);
+    if (help_handler_is_err(result)) { return result; }
+    if (result > 0) {
+        dialogueMatches |= dialogueHelp;
+    }
+    result = arg_match(argc, argv, ver_lex, NULL);
+    if (help_handler_is_err(result)) { return result; }
+    if (result > 0) {
+        dialogueMatches |= dialogueVersion;
+    }
     #endif //HELP_HANDLER_POSIX_C
 
-    int r = return_result(result_help, result_ver);
-    if (r != 0) { return r; }
-
-    return helpHandlerSuccess;
+    return (dialogueMatches != 0) ? dialogueMatches : helpHandlerSuccess;
 }
 
 
@@ -775,6 +861,7 @@ int help_handler_name(const char* app_name) {
 
     trim(name, strlen(app_name)+1, app_name);
     if (strlen(name) <= 0) {
+        HELP_DEBUG_INFO("Program name is empty");
         free(name);
         return helpHandlerFailure;
     }
@@ -844,6 +931,7 @@ int help_handler_s(int argc, char** argv, const char* help_dialogue) {
 //This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
 int help_handler(int argc, char** argv, const char* help_dialogue) {
 #endif
+    HELP_DEBUG_INFO("Starting argument processing");
     /*  For the help dialgoue, we first allocate a placeholder output which is used
         if help_dialogue is empty/null, then we check it succeeded, and then copy */
     const char* placeholder_dialogue = "No usage help is available";
@@ -881,29 +969,42 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
 
     //Should probably find a better way to handle this than int variables as flags, to make it easier to expand
     int result = help_handler_sub(argc, argv);
-    if (result == dialogHelpVer) {
+
+    HELP_DEBUG_INFO("Arguments processed with a return value of 0x%08x", result);
+
+    if (matches(result, dialogueHelp) && matches(result, dialogueVersion)) {
+        HELP_DEBUG_INFO("Printing help and version");
+        printf("NOOOIWEJHFIOE\n");
         if (print_name()) {
             print_pipe(" "); }
         print_ver();
         print_pipe(newline);
         print_pipe(help);
-    } else if (result == dialogHelp) {
+    } else if (matches(result, dialogueHelp)) {
+        HELP_DEBUG_INFO("Printing help");
         if (print_name()) {
             print_pipe(" "); }
         print_pipe(help);
-    } else if (result == dialogVer) {
+    } else if (matches(result, dialogueVersion)) {
+        HELP_DEBUG_INFO("Printing version");
         print_ver();
     } else if (help_handler_is_err(result)) {
+        HELP_DEBUG_ERROR("help_handler_sub returned error value %d", result);
         free(help);
-        return result; }
+        return result;
+    }
 
     if (result == 0) {
+        HELP_DEBUG_INFO("No matches found");
         print_unknown(argc); }
 
     if (result >= 0 && result != helpHandlerSuccess) {
         print_pipe(newline); }
 
+
+    HELP_DEBUG_INFO("Deallocating help dialogue memory");
     free(help);
+    HELP_DEBUG_INFO("Finished argument processing");
     return helpHandlerSuccess;
 }
 //This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this.
@@ -937,17 +1038,17 @@ int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
 
     //Should probably find a better way to handle this than variables as flags, to make it easier to expand
     int result = help_handler_sub(argc, argv);
-    if (result == dialogHelpVer) {
+    if (matches(result, dialogueHelp) && matches(result, dialogueVersion)) {
         if (print_name()) {
             print_pipe(" Version "); }
         print_ver();
         print_pipe(newline);
         print_pipe_w(help);
-    } else if (result == dialogHelp) {
+    } else if (matches(result, dialogueHelp)) {
         if (print_name()) {
             print_pipe(" "); }
         print_pipe_w(help);
-    } else if (result == dialogVer) {
+    } else if (matches(result, dialogueVersion)) {
         print_ver();
     } else if (help_handler_is_err(result)) {
         free(help);
