@@ -97,15 +97,21 @@ class HelpHandler():
     @staticmethod
     def version(version):
         #Error checking
-        if not version:
-            raise ValueError("given version string is empty")
-
         if sys.version_info.major >= 3:
             if not (isinstance(version, str), isinstance(version, int), isinstance(version, float)):
                 raise TypeError("argument version is not of type string, int, or double")
         elif sys.version_info.major <= 2:
             if not (isinstance(version, basestring), isinstance(version, int), isinstance(version, float)):
                 raise TypeError("argument version is not of type string, int, or double")
+
+        if isinstance(version, list) or isinstance(version, tuple) or isinstance(version, dict):
+            raise TypeError("argument version is not of type string, int, or double")
+
+        if type(version) == type(True):
+            raise TypeError("argument version should not be of type boolean")
+
+        if not version:
+            raise ValueError("given version string is empty")
 
 
         global _verGlob
@@ -115,9 +121,6 @@ class HelpHandler():
     @staticmethod
     def name(app_name):
         #Error checking
-        if not app_name:
-            raise ValueError("given app name string is empty")
-        
         if sys.version_info.major >= 3:
             if not (isinstance(app_name, str)):
                 raise TypeError("argument app name is not of type string")
@@ -125,6 +128,9 @@ class HelpHandler():
             if not (isinstance(app_name, basestring)):
                 raise TypeError("argument app name is not of type basestring")
 
+        if not app_name:
+            raise ValueError("given app name string is empty")
+        
 
         global _appNameGlob
         _appNameGlob = app_name
@@ -218,8 +224,11 @@ class HelpHandler():
             elif sys.version_info.major <= 2:
                 raise IOError("given file name does not refer to an existing file")
 
-        contents = open(file_name, 'r').read()
+        f = open(file_name, 'r')
+        contents = f.read()
+
         if re.search(r'^\s*$', contents):
+            f.close()
             raise EOFError("given file name was found, but contains no data")
 
         return HelpHandler.handle(contents)
