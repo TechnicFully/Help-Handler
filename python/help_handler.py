@@ -36,9 +36,11 @@ found_none    = 0xf0
 #Settings
 _extraStringsGlob = True
 _noArgHelpGlob = True
+_matchHyphens = True
+_hyphensOnly = False
 _unknownArgHelpGlob = False
 _disableOutput = False
-_matchNoHyphens = True
+
 
 #User data
 _verGlob = "No version available"
@@ -58,40 +60,44 @@ class HelpHandler():
                 print(string, end='')
 
     '''For configuring functionality that might conflict/clutter other program output. The parameters are as follows...
-        no_arg_help         - Disable printing of help dialogue when no arguments are given
-        extra_strings       - Disable matching of h, -h, --h, v, -v and --v which may conflict with your program’s flags
-        match_hyphens       - Disable matching of arguments with hyphens (i.e., Help Handler will match "help", but not "--help")
-        unknown_arg_help    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this  
+        no_arg_help         - Print help dialogue when no arguments are given
+        extra_strings       - Whether to match for h, -h, --h, v, -v and --v specifically (which may conflict with your program’s flags)
+        match_hyphens       - Match arguments beginning with hyphens (i.e., "help" vs "--help")
         hyphens_only        - Only match arguments that begin with one or more hyphens
+        unknown_arg_help    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
         disable_output      - Disable all output of HelpHandler
-
     '''
     @staticmethod
-    def config(no_arg_help=True, extra_strings=True, match_no_hyphens=True, unknown_arg_help=False, disable_output=False):
+    def config(no_arg_help=True, extra_strings=True, match_hyphens=True, hyphens_only=False, unknown_arg_help=False, disable_output=False):
         #Error checking
         if not (isinstance(no_arg_help, int)):
             raise TypeError("argument no_arg_help is not of type bool or int")
         if not (isinstance(extra_strings, int)):
             raise TypeError("argument extra_strings is not of type bool or int")
+        if not (isinstance(match_hyphens, int)):
+            raise TypeError("argument match_hyphens is not of type bool or int")
+        if not (isinstance(hyphens_only, int)):
+            raise TypeError("argument hyphens_only is not of type bool or int")
         if not (isinstance(unknown_arg_help, int)):
             raise TypeError("argument unknown_arg_help is not of type bool or int")
         if not (isinstance(disable_output, int)):
             raise TypeError("argument disable_output is not of type bool or int")
-        if not (isinstance(match_no_hyphens, int)):
-            raise TypeError("argument match_no_hyphens is not of type bool or int")
 
 
         global _extraStringsGlob
         global _noArgHelpGlob
         global _unknownArgHelpGlob
+        global _matchHyphens
+        global _hyphensOnly
         global _disableOutput
-        global _matchNoHyphens
 
         _extraStringsGlob   = extra_strings
         _noArgHelpGlob      = no_arg_help
+        _matchHyphens       = match_hyphens
+        _hyphensOnly        = hyphensOnly
         _unknownArgHelpGlob = unknown_arg_help
         _disableOutput      = disable_output
-        _matchNoHyphens     = match_no_hyphens
+
 
     #Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
     @staticmethod
@@ -148,13 +154,13 @@ class HelpHandler():
         
         if not help_dialogue:
             help_dialogue = "No usage help is available"
-        if (len(sys.argv) == 1) and (_noArgHelpGlob == True) and (_disableOutput != True):
+        if (len(sys.argv) == 1) and (_noArgHelpGlob == True) and (_disableOutput == False):
             HelpHandler.__print(help_dialogue)
             return
         
         #Set regex
         numHyphens = 0
-        if _matchNoHyphens == False:
+        if _matchHyphens == False:
             numHyphens = 1
         numHyphens = str(numHyphens)
 
