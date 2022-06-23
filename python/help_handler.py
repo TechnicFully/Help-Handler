@@ -237,5 +237,6 @@ class HelpHandler():
             f.close()
             raise EOFError("given file name was found, but contains no data")
 
+        f.close()
         return HelpHandler.handle(contents)
 
