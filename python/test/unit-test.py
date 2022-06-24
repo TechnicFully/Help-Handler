@@ -41,6 +41,11 @@ class HelpHandlerTests(unittest.TestCase):
             with self.assertRaises(IOError):
                 HelpHandler.handleFile("emptyTestFile.txt")
 
+        try:
+            HelpHandler.handleFile("filledTestFile.txt")
+        except Exception as e:
+            self.fail("function threw exception unexpectedly")
+
 
     def test_config(self):
         with self.assertRaises(TypeError):
@@ -147,4 +152,5 @@ class HelpHandlerTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    HelpHandler.config(disable_output=True)
     unittest.main()
