@@ -94,7 +94,7 @@ class HelpHandler():
         _extraStringsGlob   = extra_strings
         _noArgHelpGlob      = no_arg_help
         _matchHyphens       = match_hyphens
-        _hyphensOnly        = hyphensOnly
+        _hyphensOnly        = hyphens_only
         _unknownArgHelpGlob = unknown_arg_help
         _disableOutput      = disable_output
 
