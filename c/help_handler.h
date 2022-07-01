@@ -368,7 +368,6 @@ static int help_handler_strcat(char* dst, size_t dst_size, const char* src) {
 
     return helpHandlerSuccess;
 }
-
 static char* help_handler_strerror(int error) {
     #ifdef HELP_HANDLER_SECURE_VARIANTS
     char e[MAX_STRING_LEN];
@@ -525,7 +524,7 @@ static size_t trim(char *out, size_t len, const char *str) {
     end++;
 
     //Set output size to minimum of trimmed string length and buffer size minus 1
-    out_size = (end-str) < (unsigned int)len-1 ? (unsigned int)(end-str) : len-1;
+    out_size = (unsigned int)(end-str) < (unsigned int)len-1 ? (unsigned int)(end-str) : len-1;
 
     //Copy trimmed string and add null terminator
     memcpy(out, str, out_size);
@@ -540,15 +539,23 @@ static bool print_ver(void) {
         print_pipe(info.ver_str);
         return true;
     } else if (most_recent.ver == versionInt) {
-        //Max number of digits a 64-bit int can hold. Calculating this maximum at compile-time would be prudent
-        char n[20];
+        //Max number of digits a 64-bit int can hold (plus null terminator). Calculating this maximum at compile-time would be prudent
+        char n[21];
+        #ifdef HELP_HANDLER_SECURE_VARIANTS
+        sprintf_s(n, sizeof(n), "%d", info.ver_int);
+        #else
         sprintf(n, "%d", info.ver_int);
+        #endif
         print_pipe(n);
         return true;
     } else if (most_recent.ver == versionDouble) {
         //Maximum value for an IEEE 754 64-bit double is 1.8 × 10308, but cap to 20 digits (plus decimal point) for the time being
         char n[21]; 
+        #ifdef HELP_HANDLER_SECURE_VARIANTS
+        sprintf_s(n, sizeof(n), "%lf", info.ver_double);
+        #else
         sprintf(n, "%lf", info.ver_double);
+        #endif
         print_pipe(n);
         return true; }
 
@@ -584,7 +591,8 @@ static size_t append(char* dst, const char* append) {
         return 0;
     }
 
-    dst = strcat(dst, append);
+    int e = help_handler_strcat(dst, dst_size, append);
+    if (e == helpHandlerFailure) { return e; }
 
     return size;
 }
@@ -919,7 +927,11 @@ int help_handler_name_w(const wchar_t* app_name) { //Parent function
         print_err("given app name (wchar type) is larger than allowed", __LINE__, warning);
         return helpHandlerFailure; }
 
+    #ifdef HELP_HANDLER_SECURE_VARIANTS
+    wcscpy_s(info.name_w, sizeof(info.name_w), app_name);
+    #else
     wcscpy(info.name_w, app_name);
+    #endif
     most_recent.name = nameWChar;
 
     return helpHandlerSuccess;
@@ -1048,7 +1060,8 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
 }
 //This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this.
 int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
-    wchar_t* help = (wchar_t*)malloc(wcslen(L"No usage help is available")); //Cast to silence C++ warning
+    const wchar_t* placeholder_dialogue = L"No usage help is available";
+    wchar_t* help = (wchar_t*)malloc(wcslen(placeholder_dialogue)); //Cast to silence C++ warning
     if (string_check_w(help_dialogue, __LINE__, silent, NULL) == EXIT_SUCCESS) {
         wchar_t* tmp = (wchar_t*)realloc(help, wcslen(help_dialogue)+1);
         if (tmp == NULL) {
@@ -1064,7 +1077,11 @@ int help_handler_w(int argc, char** argv, const wchar_t* help_dialogue) {
         print_err("failed to allocate memory for help dialogue", __LINE__, error);
         return helpHandlerFailure; } 
 
+    #ifdef HELP_HANDLER_SECURE_VARIANTS
+    wcscpy_s(help, wcslen(placeholder_dialogue), help_dialogue);
+    #else
     wcscpy(help, help_dialogue);
+    #endif
 
     if (argc == 1 && options.no_args_help == true) {
         if (print_name()) { 
