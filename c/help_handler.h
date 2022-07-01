@@ -350,7 +350,7 @@ static int help_handler_strcpy(char* dst, size_t dst_size, const char* src) {
     if (bounds_check(dst_size, src) == helpHandlerFailure) { return helpHandlerFailure; }
     
     #ifdef HELP_HANDLER_SECURE_VARIANTS
-    strcpy_s(dst_size, src);
+    strcpy_s(dst, dst_size, src);
     #else
     strcpy(dst, src);
     #endif
@@ -361,12 +361,22 @@ static int help_handler_strcat(char* dst, size_t dst_size, const char* src) {
     if (bounds_check(dst_size, src) == helpHandlerFailure) { return helpHandlerFailure; }
 
     #ifdef HELP_HANDLER_SECURE_VARIANTS
-    strcat_s(dst_size, src);
+    strcat_s(dst, dst_size, src);
     #else
     strcat(dst, src);
     #endif
 
     return helpHandlerSuccess;
+}
+
+static char* help_handler_strerror(int error) {
+    #ifdef HELP_HANDLER_SECURE_VARIANTS
+    char e[MAX_STRING_LEN];
+    int strerror_err = strerror_s(e, sizeof(e), error);
+    return (strerror_err == 0) ? e : ""; 
+    #else
+    return strerror(error);
+    #endif
 }
 
 
@@ -567,19 +577,16 @@ static void print_unknown(int argc) {
 }
 
 //Arrange code/logic below so as to only use append() (simpler)
-static char* append(char* dst, const char* append) {
-    size_t size = strlen(dst) + strlen(append) + 1;
-    char *new_string = (char*)malloc(size);
-
-    if (new_string == NULL) {
-        print_err("failed to append string", __LINE__, error);
-        return NULL;
+static size_t append(char* dst, const char* append) {
+    size_t dst_size = strlen(dst);
+    size_t size = dst_size + strlen(append) + 1;
+    if (size > MAX_STRING_LEN) {
+        return 0;
     }
 
-    strcpy(new_string, dst);
-    strcat(new_string, append);
+    dst = strcat(dst, append);
 
-    return new_string;
+    return size;
 }
 
 static bool matches(int var, int value) {
@@ -637,7 +644,7 @@ static int arg_match(int argc, char** argv, const char* regex_string, const char
             #endif
 
             if (result == 0) {
-                HELP_DEBUG_INFO("Matched argument %s", argv[i])
+                HELP_DEBUG_INFO("Matched argument %s", argv[i]);
                 return i; }
         }
         #endif
@@ -649,7 +656,7 @@ static int arg_match(int argc, char** argv, const char* regex_string, const char
 static int help_handler_sub(int argc, char** argv) {
     //Avoiding this ifdef by embedding regex functionality in the future for Windows would be great
     #ifndef HELP_HANDLER_POSIX_C
-    HELP_DBEUG_INFO("Not using regex");
+    HELP_DEBUG_INFO("Not using regex");
 
     //Casts to silence C++ warnings
     char* help_lex[] = {
@@ -701,15 +708,38 @@ static int help_handler_sub(int argc, char** argv) {
 
     #else //HELP_HANDLER_POSIX_C
 
-    char help_lex[MAX_STRING_LEN];
-    char ver_lex[MAX_STRING_LEN];
-    if (options.extra_strings == true) {
-        help_handler_strcpy(help_lex, sizeof(help_lex), "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)|-{0,}h{1,}$");
-        help_handler_strcpy(ver_lex, sizeof(ver_lex), "-{0,}v{1,}e{1,}r{1,}s{0,}i{0,}o{0,}n{0,}(.*)|^-{0,}v$");
-    } else {
-        help_handler_strcpy(help_lex, sizeof(help_lex), "-{0,}h{1,}e{1,}l{1,}p{1,}(.*)"); 
-        help_handler_strcpy(ver_lex, sizeof(ver_lex), "-{0,}v{1,}e{1,}r{1,}s{0,}i{0,}o{0,}n{0,}(.*)"); }
+    char help_lex[MAX_STRING_LEN] = {0};
+    char ver_lex[MAX_STRING_LEN] = {0};
+    
+    if (options.hyphens_only == true) {
+        strcat(help_lex, "-{1,}");
+        strcat(ver_lex, "-{1,}");
+    } else if (options.disable_match_hyphens == false) {
+        strcat(help_lex, "[^-]+");
+        strcat(ver_lex, "-[^-]+");
+    }
 
+    strcat(help_lex, "h{1,}e{1,}l{1,}p{1,}(.*)");
+    strcat(ver_lex, "v{1,}e{1,}r{1,}s{0,}i{0,}o{0,}n{0,}(.*)");
+
+    if (options.extra_strings == true) {
+        strcat(help_lex, "|");
+        strcat(ver_lex, "|");
+
+        if (options.hyphens_only == true) {
+            strcat(help_lex, "-{1,}");
+            strcat(ver_lex, "-{1,}");
+        } else if (options.disable_match_hyphens == false) {
+            strcat(help_lex, "-{0,}");
+            strcat(ver_lex, "-{0,}");
+        }
+
+        strcat(help_lex, "h{1,}$");
+        strcat(ver_lex, "v{1,}$");
+    }
+
+    HELP_DEBUG_INFO("Constructed help regex: %s", help_lex);
+    HELP_DEBUG_INFO("Constructed version regex: %s", ver_lex);
     int result = 0;
     int dialogueMatches = dialogueNone;
 
@@ -792,11 +822,21 @@ int help_handler_config(int option_flags) {
             return helpHandlerFailure;
     }
 
-    if (option_flags & DISABLE_NO_ARGS_HELP)        {  options.no_args_help = false; }
-    if (option_flags & DISABLE_EXTRA_STRINGS)       {  options.extra_strings = false; }
-    if (option_flags & ENABLE_UNKNOWN_ARGS_HELP)    {  options.unknown_args_help = true; }
-    if (option_flags & ENABLE_HYPHENS_ONLY)         {  options.hyphens_only = true; }
-    if (option_flags & DISABLE_MATCH_HYPHENS)       {  options.disable_match_hyphens = true; }
+    if (option_flags & DISABLE_NO_ARGS_HELP) {
+        HELP_DEBUG_INFO("Setting NO_ARGS_HELP");
+        options.no_args_help = false; }
+    if (option_flags & DISABLE_EXTRA_STRINGS) {
+        HELP_DEBUG_INFO("Setting DISABLE_EXTRA_STRINGS");
+        options.extra_strings = false; }
+    if (option_flags & ENABLE_UNKNOWN_ARGS_HELP) {
+        HELP_DEBUG_INFO("Setting UNKNOWN_ARGS_HELP");
+        options.unknown_args_help = true; }
+    if (option_flags & ENABLE_HYPHENS_ONLY) {
+        HELP_DEBUG_INFO("Setting ENABLE_HYPHENS_ONLY");
+        options.hyphens_only = true; }
+    if (option_flags & DISABLE_MATCH_HYPHENS) {
+        HELP_DEBUG_INFO("setting DISABLE_MATCH_HYPHENS");
+        options.disable_match_hyphens = true; }
 
     return helpHandlerSuccess;
 }
@@ -974,7 +1014,6 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
 
     if (matches(result, dialogueHelp) && matches(result, dialogueVersion)) {
         HELP_DEBUG_INFO("Printing help and version");
-        printf("NOOOIWEJHFIOE\n");
         if (print_name()) {
             print_pipe(" "); }
         print_ver();
@@ -1069,15 +1108,15 @@ int help_handler_f(int argc, char** argv, const char* file_name) {
 
     #ifdef HELP_HANDLER_SECURE_VARIANTS
     FILE* fp = NULL;
-    int err = fopen_s(&fp, file_name, "rb");
-    if (err < 0) {
-        print_err(strerror(errno), __LINE__, error);
+    int e = fopen_s(&fp, file_name, "rb");
+    if (e < 0) {
+        print_err(help_handler_strerror(errno), __LINE__, error);
         return helpHandlerFailure; }
     #else
     FILE* fp = fopen(file_name, "rb"); //Windows mangles newlines in r, so use rb
     #endif
     if (fp == NULL) {
-        print_err(strerror(errno), __LINE__, error);
+        print_err(help_handler_strerror(errno), __LINE__, error);
         return helpHandlerFailure; }
 
     fseek(fp, 0L, SEEK_END);
@@ -1087,7 +1126,7 @@ int help_handler_f(int argc, char** argv, const char* file_name) {
         fclose(fp);
         return helpHandlerFailure; }
     if (size == -1L) {
-        print_err(strerror(errno), __LINE__, error);
+        print_err(help_handler_strerror(errno), __LINE__, error);
         fclose(fp);
         return helpHandlerFailure; }
 
@@ -1103,12 +1142,12 @@ int help_handler_f(int argc, char** argv, const char* file_name) {
     if (n_items != (size_t)size) {
         print_err("failed to read file contents", __LINE__, warning); }
     if ((long)n_items < size) {
-        print_err(strerror(errno), __LINE__, error);
+        print_err(help_handler_strerror(errno), __LINE__, error);
         free(contents);
         fclose(fp);
         return helpHandlerFailure; }
     if (fclose(fp) == EOF) {
-        print_err(strerror(errno), __LINE__, error);
+        print_err(help_handler_strerror(errno), __LINE__, error);
         free(contents);
         return helpHandlerFailure; }
 
