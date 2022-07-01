@@ -583,20 +583,6 @@ static void print_unknown(int argc) {
     }
 }
 
-//Arrange code/logic below so as to only use append() (simpler)
-static size_t append(char* dst, const char* append) {
-    size_t dst_size = strlen(dst);
-    size_t size = dst_size + strlen(append) + 1;
-    if (size > MAX_STRING_LEN) {
-        return 0;
-    }
-
-    int e = help_handler_strcat(dst, dst_size, append);
-    if (e == helpHandlerFailure) { return e; }
-
-    return size;
-}
-
 static bool matches(int var, int value) {
     if (var == helpHandlerFailure || value == helpHandlerFailure) {
         return false;
@@ -720,30 +706,30 @@ static int help_handler_sub(int argc, char** argv) {
     char ver_lex[MAX_STRING_LEN] = {0};
     
     if (options.hyphens_only == true) {
-        strcat(help_lex, "-{1,}");
-        strcat(ver_lex, "-{1,}");
+        help_handler_strcat(help_lex, sizeof(help_lex), "-{1,}");
+        help_handler_strcat(ver_lex, sizeof(ver_lex), "-{1,}");
     } else if (options.disable_match_hyphens == false) {
-        strcat(help_lex, "[^-]+");
-        strcat(ver_lex, "-[^-]+");
+        help_handler_strcat(help_lex, sizeof(help_lex), "[^-]+");
+        help_handler_strcat(ver_lex, sizeof(ver_lex), "-[^-]+");
     }
 
-    strcat(help_lex, "h{1,}e{1,}l{1,}p{1,}(.*)");
-    strcat(ver_lex, "v{1,}e{1,}r{1,}s{0,}i{0,}o{0,}n{0,}(.*)");
+    help_handler_strcat(help_lex, sizeof(help_lex), "h{1,}e{1,}l{1,}p{1,}(.*)");
+    help_handler_strcat(ver_lex, sizeof(ver_lex), "v{1,}e{1,}r{1,}s{0,}i{0,}o{0,}n{0,}(.*)");
 
     if (options.extra_strings == true) {
-        strcat(help_lex, "|");
-        strcat(ver_lex, "|");
+        help_handler_strcat(help_lex, sizeof(help_lex), "|");
+        help_handler_strcat(ver_lex, sizeof(ver_lex), "|");
 
         if (options.hyphens_only == true) {
-            strcat(help_lex, "-{1,}");
-            strcat(ver_lex, "-{1,}");
+            help_handler_strcat(help_lex, sizeof(help_lex), "-{1,}");
+            help_handler_strcat(ver_lex, sizeof(ver_lex), "-{1,}");
         } else if (options.disable_match_hyphens == false) {
-            strcat(help_lex, "-{0,}");
-            strcat(ver_lex, "-{0,}");
+            help_handler_strcat(help_lex, sizeof(help_lex), "-{0,}");
+            help_handler_strcat(ver_lex, sizeof(ver_lex), "-{0,}");
         }
 
-        strcat(help_lex, "h{1,}$");
-        strcat(ver_lex, "v{1,}$");
+        help_handler_strcat(help_lex, sizeof(help_lex),"h{1,}$");
+        help_handler_strcat(ver_lex, sizeof(ver_lex), "v{1,}$");
     }
 
     HELP_DEBUG_INFO("Constructed help regex: %s", help_lex);
