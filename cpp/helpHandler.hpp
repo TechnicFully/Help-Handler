@@ -262,11 +262,11 @@ namespace helpHandler {
     }
 
     //For configuring functionality that might conflict/clutter other program output. You may pass the following flags...
-    //      DISABLE_NO_ARGS_HELP   - Disable printing of help dialogue when no arguments are given
-    //      DISABLE_EXTRA_STRINGS  - Disable matching of h, -h, --h, v, -v and --v which may conflict with your program’s flags
-    //      DISABLE_MATCH_HYPHENS - Disable matching of arguments with hyphens (i.e., Help Handler will match "help", but not "--help")
-    //      ENABLE_HYPHENS_ONLY    - Only match arguments that begin with one or more hyphens
-    //      ENABLE_UNKNOWN_ARGS_HELP - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this  
+    //      DISABLE_NO_ARGS_HELP     - Disable printing of help dialogue when no arguments are given
+    //      DISABLE_EXTRA_STRINGS    - Disable matching of h, -h, --h, v, -v and --v which may conflict with your program’s flags
+    //      DISABLE_MATCH_HYPHENS    - Disable matching of arguments with hyphens (i.e., Help Handler will match "help", but not "--help")
+    //      ENABLE_HYPHENS_ONLY      - Only match arguments that begin with one or more hyphens
+    //      ENABLE_UNKNOWN_ARGS_HELP - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
     void config(int option_flags) {
         if (option_flags & DISABLE_NO_ARGS_HELP)        { options_t.noArgHelp       = false; }
         if (option_flags & DISABLE_EXTRA_STRINGS)       { options_t.extraStrings    = false; }
