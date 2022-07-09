@@ -539,8 +539,8 @@ static bool print_ver(void) {
         print_pipe(info.ver_str);
         return true;
     } else if (most_recent.ver == versionInt) {
-        //Max number of digits a 64-bit int can hold (plus null terminator). Calculating this maximum at compile-time would be prudent
-        char n[21];
+        //Max number of digits a 32-bit int can hold (plus null terminator). Calculating this maximum at compile-time would be prudent
+        char n[11];
         #ifdef HELP_HANDLER_SECURE_VARIANTS
         sprintf_s(n, sizeof(n), "%d", info.ver_int);
         #else
@@ -801,17 +801,18 @@ void help_handler_pipe_i(int output_pipe) {
     }
 }
 
-//For configuring functionality that might conflict/clutter other program output. You may pass the following flags...
-//      DISABLE_NO_ARGS_HELP   - Disable help dialogue output when no arguments are passed to your executable
-//      DISABLE_EXTRA_STRINGS  - Disable matching of the following strings: h, -h, --h, v, -v, --v
-//      UNKNOWN_ARGS_HELP      - Enable dialogue (not help dialogue) output when an unknown argument is passed
+    //For configuring functionality that might conflict/clutter other program output. You may pass the following flags...
+    //      DISABLE_NO_ARGS_HELP     - Disable printing of help dialogue when no arguments are given
+    //      DISABLE_EXTRA_STRINGS    - Disable matching of h, -h, --h, v, -v and --v which may conflict with your program’s flags
+    //      DISABLE_MATCH_HYPHENS    - Disable matching of arguments with hyphens (i.e., Help Handler will match "help", but not "--help")
+    //      ENABLE_HYPHENS_ONLY      - Only match arguments that begin with one or more hyphens
+    //      ENABLE_UNKNOWN_ARGS_HELP - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
 int help_handler_config(int option_flags) {
     if ((option_flags != (option_flags & DISABLE_NO_ARGS_HELP)) &&
         (option_flags != (option_flags & DISABLE_EXTRA_STRINGS)) &&
+        (option_flags != (option_flags & DISABLE_MATCH_HYPHENS)) &&
         (option_flags != (option_flags & ENABLE_UNKNOWN_ARGS_HELP)) &&
-        (option_flags != (option_flags & ENABLE_HYPHENS_ONLY)) &&
-        (option_flags != (option_flags & DISABLE_MATCH_HYPHENS))) {
-
+        (option_flags != (option_flags & ENABLE_HYPHENS_ONLY))) {
             print_err("invalid flag passed", __LINE__, warning);
             return helpHandlerFailure;
     }
