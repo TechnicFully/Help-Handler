@@ -129,11 +129,6 @@ namespace helpHandler {
                 size_t last = s.find_last_not_of(' ');
                 return s.substr(first, (last - first + 1));
             }
-
-
-            static std::string expression_append(const std::string& s) {
-                return "|" + s;
-            }
         }
     }
 
