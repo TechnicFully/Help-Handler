@@ -33,10 +33,27 @@ local info_t = {
 local options_t = {
     no_arg_help      = true,
     extra_strings    = true,
+    match_hyphens    = true,
+    hyphens_only     = false,
     unknown_arg_help = false,
 }
 
 
+---- Local functions
+local function match(regex)
+    matches = 0
+    for i = 1, #arg do
+        if (string.match(arg[i], regex)) then
+            matches = matches + 1
+        end 
+    end
+end
+
+
+
+
+
+---- Public function
 
 --Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
 HelpHandler.version = function(version)
@@ -47,22 +64,8 @@ HelpHandler.version = function(version)
     info_t.version = version
 end
 
-
-HelpHandler.config = function(extra_strings, no_arg_help, unknown_arg_help)
-    if type(extra_strings) ~= "boolean" and type(extra_strings) ~= "number" then error("Argument no_arg_help is not a bool or number") end
-    if type(no_arg_help) ~= "boolean" and type(no_arg_help) ~= "number" then error("Argument no_arg_help is not a bool or number") end
-    if type(unknown_arg_help) ~= "boolean" and type(unknown_arg_help) ~= "number" then error("Argument no_arg_help is not a bool or number") end
-    
-    if extra_strings ~= nil then options_t.extra_strings = extra_strings end
-    if no_arg_help ~= nil then options_t.unknown_arg_help = no_arg_help end
-    if unknown_arg_help ~= nil then options_t.unknown_arg_help = unknown_arg_help end
-end
-
 --Defines your program name which will be output alongside help dialogue
 HelpHandler.name = function(app_name)
-    if app_name == nil then
-        error("App name called, but is nil")
-    end
     if type(app_name) ~= "string" then
         error("App name given, but is not string type")
     end
@@ -77,6 +80,38 @@ end
 HelpHandler.info = function(app_name, version)
     HelpHandler.name(app_name)
     HelpHandler.ver(version)
+end
+
+--[[ For configuring functionality that might conflict/clutter other program output. The parameters are as follows...
+        no_arg_help         - Print help dialogue when no arguments are given
+        extra_strings       - Whether to match for h, -h, --h, v, -v and --v specifically (which may conflict with your program’s flags)
+        match_hyphens       - Match arguments beginning with hyphens (i.e., "help" vs "--help")
+        hyphens_only        - Only match arguments that begin with one or more hyphens
+        unknown_arg_help    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
+        disable_output      - Disable all output of HelpHandler
+--]]
+HelpHandler.config = function(extra_strings, no_arg_help, match_hyphens, hyphens_only, unknown_arg_help)
+    if type(extra_strings) == "nil" and
+        type(no_arg_help) == "nil" and
+        type(match_hyphens) == "nil" and
+        type(hyphens_only) == "nil" and
+        type(unknown_arg_help) == "nil" then
+            error("Invalid arguments passed")
+    end
+
+
+    if type(extra_strings) ~= "boolean" and type(extra_strings) ~= "nil" then error("Argument extra_strings is not a boolean") end
+    if type(no_arg_help) ~= "boolean" and type(no_arg_help) ~= "nil" then error("Argument no_arg_help is not a boolean") end
+    if type(match_hyphens) ~= "boolean" and type(match_hyphens) ~= "nil" then error("Argument match_hyphens is not a boolean") end
+    if type(hyphens_only) ~= "boolean" and type(hyphens_only) ~= "nil" then error("Argument hyphens_only is not a boolean") end
+    if type(unknown_arg_help) ~= "boolean" and type(unknown_arg_help) ~= "nil" then error("Argument unknown_arg_help is not a boolean") end
+
+
+    if extra_strings ~= nil then options_t.extra_strings = extra_strings end
+    if no_arg_help ~= nil then options_t.unknown_arg_help = no_arg_help end
+    if match_hyphens ~= nil then options_t.match_hyphens = match_hyphens end
+    if hyphens_only ~= nil then options_t.hyphens_only = hyphens_only end
+    if unknown_arg_help ~= nil then options_t.unknown_arg_help = unknown_arg_help end
 end
 
 --This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
@@ -158,6 +193,10 @@ end
 
 --This function like helpHandler.handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
 HelpHandler.handleFile = function(file_name)
+    if type(file_name) ~= "string" then
+        error("File name argument given is not a string")
+    end
+    
     local f = io.open(file_name, "r")
     if not f then
         error("File could not be opened")
