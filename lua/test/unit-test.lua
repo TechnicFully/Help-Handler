@@ -42,7 +42,11 @@ function test_handle()
     lu.assertErrorMsgContains("Help argument given is not a string", HelpHandler.handle, test_table)
 
 
+    arg[1] = "--version"
+    lu.assertEquals(HelpHandler.handle(), 1)
 
+    arg[1] = "--help"
+    lu.assertEquals(HelpHandler.handle(), 1)
 
     arg[1] = "--help"
     arg[2] = "--version"
