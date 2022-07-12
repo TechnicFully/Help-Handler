@@ -147,12 +147,15 @@ HelpHandler.handle = function(help_dialogue)
     end
 
     matchHelp, matchVer = false
-    if (match("-*h+e+l+p+", "-*h+") == true) then
+    matches = 0
+    if (match('-*h+e+l+p+', '-*h+') == true) then
         matchHelp = true
+        matches = matches + 1
     end 
 
-    if (match("-*v+e+r+s+i+o+n+", "-*v+") == true) then
+    if (match('-*v+e+r+s+i+o+n+', '-*v+') == true) then
         matchVer = true
+        matches = matches + 1
     end 
 
 
@@ -163,9 +166,6 @@ HelpHandler.handle = function(help_dialogue)
         print(help_dialogue)
     end
     
-    if unknown_arg ~= nil and type(unknown_arg) ~= "string" then
-        error("Unknown argument parameter was given, but is not type string")
-    end
         
     if options_t.unknown_arg_help == true and #arg > 0 then
         if #arg > 1 then
