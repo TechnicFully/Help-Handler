@@ -20,19 +20,19 @@ Requirements
 
 Usage
 ------
-The only function needed after including helpHandler.hpp is `helpHandler::handle(int argc, char** argv, std::string help_dialogue)`. Beyond that, most users will only be concerned with the config function ```helpHandler::config(int flags)``` to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
+The only function needed after including helpHandler.hpp is `helpHandler::handle(int argc, char** argv, std::string help_dialogue)`. Beyond that, most users will only be concerned with the `version` function and `config` function `helpHandler::config(int flags)` function (see below) to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
 
 Copy-paste example:
 [source,CPP]
 ----------
-#include "../helpHandler.hpp"
+#include "helpHandler.hpp"
 
 #include <exception>
 
 
 int main(int argc, char** argv) {
     try {
-        helpHandler::version("1.0");
+        helpHandler::version("1.0"); //This must come before the main helpHandler::handle function, which is what actually processes arguments
         helpHandler::handle(argc, argv, "usage: example");
     } catch(const std::exception& e) { std::cout << e.what(); }
     
@@ -60,13 +60,14 @@ void helpHandler::version(std::string|double|unsigned int  version);
 
 Configuration
 -------------
-The `config` function is used to configure output functionality. The possible parameters are as follows...
-
-- DISABLE_NO_ARGS_HELP - Disable printing of help dialogue when no arguments are given
-- DISABLE_EXTRA_STRINGS - Disable matching of h, -h, --h, v, -v and --v which may conflict with your program's flags
-- DISABLE_MATCH_HYPHENS - Disable matching of arguments with hyphens (i.e., Help Handler will match "help", but not "--help")
-- ENABLE_HYPHENS_ONLY - Only match arguments that begin with one or more hyphens
-- ENABLE_UNKNOWN_ARGS_HELP - Print dialogue when an unknown argument is passed. You would typically whitelist your program's option flags in combination with this
+The `config` function is used to configure output functionality. The passable parameters are as follows...
+```
+DISABLE_NO_ARGS_HELP     - Disable printing of help dialogue when no arguments are given
+DISABLE_EXTRA_STRINGS    - Disable matching of h, -h, --h, v, -v and --v which may conflict with your program’s flags
+DISABLE_MATCH_HYPHENS    - Disable matching of arguments with hyphens (i.e., Help Handler will match "help", but not "--help")
+ENABLE_HYPHENS_ONLY      - Only match arguments that begin with one or more hyphens
+ENABLE_UNKNOWN_ARGS_HELP - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
+```
 
 
 Contributing
