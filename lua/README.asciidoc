@@ -16,8 +16,6 @@ Usage
 ------
 The only function needed after importing the HelpHandler.lua module is `HelpHandler.handle(help_dialogue)`. Beyond that, most users will only be concerned with the `version` function and `config` functions (see below) to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
 
-Usage Example
--------------
 Copy-paste example:
 [source,lua]
 ----------
