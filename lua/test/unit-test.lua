@@ -35,6 +35,21 @@ function test_name()
 end
 
 
+function test_handle()
+    -- Nil and string values simply set the response to a default placeholder dialogue
+    lu.assertErrorMsgContains("Help argument given is not a string", HelpHandler.handle, true)
+    lu.assertErrorMsgContains("Help argument given is not a string", HelpHandler.handle, print)
+    lu.assertErrorMsgContains("Help argument given is not a string", HelpHandler.handle, test_table)
+
+
+
+
+    arg[1] = "--help"
+    arg[2] = "--version"
+    lu.assertEquals(HelpHandler.handle(), 2)
+end
+
+
 function test_config()
     lu.assertErrorMsgContains("Invalid arguments passed", HelpHandler.config, nil, nil, nil, nil, nil)
 
@@ -46,14 +61,6 @@ function test_config()
     lu.assertErrorMsgContains("Argument unknown_arg_help is not a boolean", HelpHandler.config, true, true, true, true, invalid_arg)
 
     --TODO: Test all parameters with types besides nil
-end
-
-
-function test_handle()
-    -- Nil and string values simply set the response to a default placeholder dialogue
-    lu.assertErrorMsgContains("Help argument given is not a string", HelpHandler.handle, true)
-    lu.assertErrorMsgContains("Help argument given is not a string", HelpHandler.handle, print)
-    lu.assertErrorMsgContains("Help argument given is not a string", HelpHandler.handle, test_table)
 end
 
 

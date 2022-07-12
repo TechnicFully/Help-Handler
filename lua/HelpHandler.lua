@@ -27,7 +27,7 @@ HelpHandler = {}
 
 local info_t = {
     name        = "",
-    version     = "",
+    version     = "No version is available",
 }
 
 local options_t = {
@@ -40,13 +40,18 @@ local options_t = {
 
 
 ---- Local functions
-local function match(regex)
-    matches = 0
+local function match(regex, optional_regex)
     for i = 1, #arg do
         if (string.match(arg[i], regex)) then
-            matches = matches + 1
-        end 
+            return true
+        end
+
+        if (string.match(arg[i], optional_regex)) then
+            return true
+        end    
     end
+
+    return false
 end
 
 
@@ -141,31 +146,15 @@ HelpHandler.handle = function(help_dialogue)
         return
     end
 
-    matches = 0
     matchHelp, matchVer = false
-    for i = 1, #arg do
-        if (string.match(arg[i], '-*h+e+l+p+')) then
-            matchHelp = true
-            matches = matches + 1
-        end 
-        if (options_t.extra_strings == true) then
-            if (string.match(arg[i], '-*h+')) then
-                matchHelp = true
-                matches = matches + 1
-            end
-        end
+    if (match("-*h+e+l+p+", "-*h+") == true) then
+        matchHelp = true
+    end 
 
-        if (string.match(arg[i], '-*v+e+r+s+i+o+n+')) then
-            matchVer = true
-            matches = matches + 1
-        end 
-        if (options_t.extra_strings == true) then
-            if (string.match(arg[i], '-*v+')) then
-                matchVer = true
-                matches = matches + 1
-            end
-        end
-    end
+    if (match("-*v+e+r+s+i+o+n+", "-*v+") == true) then
+        matchVer = true
+    end 
+
 
     if matchVer == true then
         print(info_t.version)
