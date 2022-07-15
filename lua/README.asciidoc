@@ -14,27 +14,30 @@ Requirements
 
 Usage
 ------
-The only function needed after including the HelpHandler.lua module is `HelpHandler.handle(help_dialogue)`. Beyond that, most users will only be concerned with ```helpHandler.config(boolean extraStrings, boolean noArgHelp, boolean unknownArgHelp)``` to enable/disable matching of arguments which might conflict with your program (h, -h, --h, v, -v, --v) and whether to output help dialogue when no arguments are given. You can refer to the _examples_ folder for more advanced usage.
+The only function needed after importing the HelpHandler.lua module is `HelpHandler.handle(help_dialogue)`. Beyond that, most users will only be concerned with the `version` function and `config` functions (see below) to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
 
-Basic usage example:
+Copy-paste example:
 [source,lua]
 ----------
-HelpHandler.handle("Usage: Test");
+require "HelpHandler"
+
+
+HelpHandler.version("1.0") --This must come before the main HelpHandler.handle function, which is what actually processes arguments
+HelpHandler.handle("usage: help dialogue example")
 ----------
 An error will be thrown if an error occurs, and the number of arguments matched will be returned on success (0 if none).
-
 
 
 Functions
 ---------
 [source,lua]
 ----------
-int HelpHandler.handle(string help_dialogue)
-int HelpHandler.handleFile(string fileName)
-void HelpHandler.config(boolean extraStrings (true), boolean noArgHelp (true), boolean unknownArgHelp (false))
-void HelpHandler.info(string appName, string|number version)
-void HelpHandler.name(string appName)
-void HelpHandler.version(string|number version)
+HelpHandler.handle(string help_dialogue)
+HelpHandler.handleFile(string file_name)
+HelpHandler.config(bool no_arg_help (true), bool extra_strings (true), bool match_hyphens (true), bool hyphens_only (false), bool unknown_arg_help (false))
+HelpHandler.name(string app_name)
+HelpHandler.version(string|number version)
+HelpHandler.info(string app_name, string|number version)
 ----------
 
 

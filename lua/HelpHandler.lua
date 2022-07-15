@@ -27,43 +27,50 @@ HelpHandler = {}
 
 local info_t = {
     name        = "",
-    version     = "",
+    version     = "No version is available",
 }
 
 local options_t = {
     no_arg_help      = true,
     extra_strings    = true,
+    match_hyphens    = true,
+    hyphens_only     = false,
     unknown_arg_help = false,
 }
 
 
+---- Local functions
+local function match(regex, optional_regex)
+    for i = 1, #arg do
+        if (string.match(arg[i], regex)) then
+            return true
+        end
+
+        if (string.match(arg[i], optional_regex)) then
+            return true
+        end    
+    end
+
+    return false
+end
 
 
+
+
+
+---- Public function
+
+--Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
 HelpHandler.version = function(version)
     if type(version) ~= "number" and type(version) ~= "string" then
         error("Version argument given is not a string or number")
     end
 
     info_t.version = version
-end 
-HelpHandler.ver = function(version)
-    HelpHandler.version(version)
-end 
-
-HelpHandler.config = function(extra_strings, no_arg_help, unknown_arg_help)
-    if type(extra_strings) ~= "boolean" and type(extra_strings) ~= "number" then error("Argument no_arg_help is not a bool or number") end
-    if type(no_arg_help) ~= "boolean" and type(no_arg_help) ~= "number" then error("Argument no_arg_help is not a bool or number") end
-    if type(unknown_arg_help) ~= "boolean" and type(unknown_arg_help) ~= "number" then error("Argument no_arg_help is not a bool or number") end
-    
-    if extra_strings ~= nil then options_t.extra_strings = extra_strings end
-    if no_arg_help ~= nil then options_t.unknown_arg_help = no_arg_help end
-    if unknown_arg_help ~= nil then options_t.unknown_arg_help = unknown_arg_help end
 end
 
+--Defines your program name which will be output alongside help dialogue
 HelpHandler.name = function(app_name)
-    if app_name == nil then
-        error("App name called, but is nil")
-    end
     if type(app_name) ~= "string" then
         error("App name given, but is not string type")
     end
@@ -74,11 +81,45 @@ HelpHandler.name = function(app_name)
     info_t.name = app_name
 end
 
+--A single function for passing your program's name as well as its version
 HelpHandler.info = function(app_name, version)
     HelpHandler.name(app_name)
     HelpHandler.ver(version)
 end
 
+--[[ For configuring functionality that might conflict/clutter other program output. The parameters are as follows...
+        no_arg_help         - Print help dialogue when no arguments are given
+        extra_strings       - Whether to match for h, -h, --h, v, -v and --v specifically (which may conflict with your program’s flags)
+        match_hyphens       - Match arguments beginning with hyphens (i.e., "help" vs "--help")
+        hyphens_only        - Only match arguments that begin with one or more hyphens
+        unknown_arg_help    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
+        disable_output      - Disable all output of HelpHandler
+--]]
+HelpHandler.config = function(extra_strings, no_arg_help, match_hyphens, hyphens_only, unknown_arg_help)
+    if type(extra_strings) == "nil" and
+        type(no_arg_help) == "nil" and
+        type(match_hyphens) == "nil" and
+        type(hyphens_only) == "nil" and
+        type(unknown_arg_help) == "nil" then
+            error("Invalid arguments passed")
+    end
+
+
+    if type(extra_strings) ~= "boolean" and type(extra_strings) ~= "nil" then error("Argument extra_strings is not a boolean") end
+    if type(no_arg_help) ~= "boolean" and type(no_arg_help) ~= "nil" then error("Argument no_arg_help is not a boolean") end
+    if type(match_hyphens) ~= "boolean" and type(match_hyphens) ~= "nil" then error("Argument match_hyphens is not a boolean") end
+    if type(hyphens_only) ~= "boolean" and type(hyphens_only) ~= "nil" then error("Argument hyphens_only is not a boolean") end
+    if type(unknown_arg_help) ~= "boolean" and type(unknown_arg_help) ~= "nil" then error("Argument unknown_arg_help is not a boolean") end
+
+
+    if extra_strings ~= nil then options_t.extra_strings = extra_strings end
+    if no_arg_help ~= nil then options_t.unknown_arg_help = no_arg_help end
+    if match_hyphens ~= nil then options_t.match_hyphens = match_hyphens end
+    if hyphens_only ~= nil then options_t.hyphens_only = hyphens_only end
+    if unknown_arg_help ~= nil then options_t.unknown_arg_help = unknown_arg_help end
+end
+
+--This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
 HelpHandler.handle = function(help_dialogue)
     if help_dialogue == nil or help == '' then
         help_dialogue = "No usage help is available"
@@ -105,31 +146,18 @@ HelpHandler.handle = function(help_dialogue)
         return
     end
 
-    matches = 0
     matchHelp, matchVer = false
-    for i = 1, #arg do
-        if (string.match(arg[i], '-*h+e+l+p+')) then
-            matchHelp = true
-            matches = matches + 1
-        end 
-        if (options_t.extra_strings == true) then
-            if (string.match(arg[i], '-*h+')) then
-                matchHelp = true
-                matches = matches + 1
-            end
-        end
+    matches = 0
+    if (match('-*h+e+l+p+', '-*h+') == true) then
+        matchHelp = true
+        matches = matches + 1
+    end 
 
-        if (string.match(arg[i], '-*v+e+r+s+i+o+n+')) then
-            matchVer = true
-            matches = matches + 1
-        end 
-        if (options_t.extra_strings == true) then
-            if (string.match(arg[i], '-*v+')) then
-                matchVer = true
-                matches = matches + 1
-            end
-        end
-    end
+    if (match('-*v+e+r+s+i+o+n+', '-*v+') == true) then
+        matchVer = true
+        matches = matches + 1
+    end 
+
 
     if matchVer == true then
         print(info_t.version)
@@ -138,9 +166,6 @@ HelpHandler.handle = function(help_dialogue)
         print(help_dialogue)
     end
     
-    if unknown_arg ~= nil and type(unknown_arg) ~= "string" then
-        error("Unknown argument parameter was given, but is not type string")
-    end
         
     if options_t.unknown_arg_help == true and #arg > 0 then
         if #arg > 1 then
@@ -155,7 +180,12 @@ HelpHandler.handle = function(help_dialogue)
     return matches
 end
 
+--This function like helpHandler.handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
 HelpHandler.handleFile = function(file_name)
+    if type(file_name) ~= "string" then
+        error("File name argument given is not a string")
+    end
+    
     local f = io.open(file_name, "r")
     if not f then
         error("File could not be opened")

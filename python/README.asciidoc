@@ -13,7 +13,7 @@ Requirements
 
 Usage Example
 -------------
-The only function needed after importing help_handler.py is `HelpHandler.handle(help_dialogue)`, no need to create a class instance. Beyond that, most users will only be concerned with the config function (see below) to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
+The only function needed after importing help_handler.py is `HelpHandler.handle(help_dialogue)`, no need to create a class instance. Beyond that, most users will only be concerned with the `version` function and `config` function (see below) to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
 
 Copy-paste example:
 [source,python]
@@ -22,7 +22,7 @@ from help_handler import *
 
 
 def main():
-    HelpHandler.version("1.0")
+    HelpHandler.version("1.0") #This must come before the main HelpHandler.handle function, which is what actually processes arguments
     HelpHandler.handle("Usage: Help")
 
 if __name__ == "__main__":
@@ -46,14 +46,15 @@ HelpHandler.name(string app_name)
 
 Configuration
 -------------
-The `config` function is where you configure most settings. The parameters are as follows...
-
-- no arg help       - Print help dialogue when no arguments are given to the program
-- extra strings     - Where or not to match h, -h, --h, v, -v, and --v which may conflict with argument options
-- unknown arg help  - Whether to print a dialogue when an unknown argument is passed. You would typically whitelist your program's options in combination with this
-- disable output    - Disables all library output, e.g. if you want to simply know if a user passed a help or version argument and do your own outputting
-- match no hyphens  - Whether to match for arguments that don't begin with a hyphen (True) or to only match arguments that begin with at least one hyphen (False). By default this is True 
-
+The `config` function is used to configure output functionality. The passable parameters are as follows...
+```
+no_arg_help         - Print help dialogue when no arguments are given
+extra_strings       - Whether to match for h, -h, --h, v, -v and --v specifically (which may conflict with your program’s flags)
+match_hyphens       - Match arguments beginning with hyphens (i.e., "help" vs "--help")
+hyphens_only        - Only match arguments that begin with one or more hyphens
+unknown_arg_help    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
+disable_output      - Disable all output of HelpHandler
+```
 
 Contributing
 ------------

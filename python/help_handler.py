@@ -36,9 +36,11 @@ found_none    = 0xf0
 #Settings
 _extraStringsGlob = True
 _noArgHelpGlob = True
+_matchHyphens = True
+_hyphensOnly = False
 _unknownArgHelpGlob = False
 _disableOutput = False
-_matchNoHyphens = True
+
 
 #User data
 _verGlob = "No version available"
@@ -57,40 +59,50 @@ class HelpHandler():
             else:
                 print(string, end='')
 
+    '''For configuring functionality that might conflict/clutter other program output. The parameters are as follows...
+        no_arg_help         - Print help dialogue when no arguments are given
+        extra_strings       - Whether to match for h, -h, --h, v, -v and --v specifically (which may conflict with your program’s flags)
+        match_hyphens       - Match arguments beginning with hyphens (i.e., "help" vs "--help")
+        hyphens_only        - Only match arguments that begin with one or more hyphens
+        unknown_arg_help    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
+        disable_output      - Disable all output of HelpHandler
+    '''
     @staticmethod
-    def config(no_arg_help=True, extra_strings=True, unknown_arg_help=False, disable_output=False, match_no_hyphens=True):
+    def config(no_arg_help=True, extra_strings=True, match_hyphens=True, hyphens_only=False, unknown_arg_help=False, disable_output=False):
         #Error checking
         if not (isinstance(no_arg_help, int)):
             raise TypeError("argument no_arg_help is not of type bool or int")
         if not (isinstance(extra_strings, int)):
             raise TypeError("argument extra_strings is not of type bool or int")
+        if not (isinstance(match_hyphens, int)):
+            raise TypeError("argument match_hyphens is not of type bool or int")
+        if not (isinstance(hyphens_only, int)):
+            raise TypeError("argument hyphens_only is not of type bool or int")
         if not (isinstance(unknown_arg_help, int)):
             raise TypeError("argument unknown_arg_help is not of type bool or int")
         if not (isinstance(disable_output, int)):
             raise TypeError("argument disable_output is not of type bool or int")
-        if not (isinstance(match_no_hyphens, int)):
-            raise TypeError("argument match_no_hyphens is not of type bool or int")
 
 
         global _extraStringsGlob
         global _noArgHelpGlob
         global _unknownArgHelpGlob
+        global _matchHyphens
+        global _hyphensOnly
         global _disableOutput
-        global _matchNoHyphens
 
         _extraStringsGlob   = extra_strings
         _noArgHelpGlob      = no_arg_help
+        _matchHyphens       = match_hyphens
+        _hyphensOnly        = hyphens_only
         _unknownArgHelpGlob = unknown_arg_help
         _disableOutput      = disable_output
-        _matchNoHyphens     = match_no_hyphens
 
 
+    #Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
     @staticmethod
     def version(version):
         #Error checking
-        if not version:
-            raise ValueError("given version string is empty")
-
         if sys.version_info.major >= 3:
             if not (isinstance(version, str), isinstance(version, int), isinstance(version, float)):
                 raise TypeError("argument version is not of type string, int, or double")
@@ -98,17 +110,23 @@ class HelpHandler():
             if not (isinstance(version, basestring), isinstance(version, int), isinstance(version, float)):
                 raise TypeError("argument version is not of type string, int, or double")
 
+        if isinstance(version, list) or isinstance(version, tuple) or isinstance(version, dict):
+            raise TypeError("argument version is not of type string, int, or double")
+
+        if type(version) == type(True):
+            raise TypeError("argument version should not be of type boolean")
+
+        if not version:
+            raise ValueError("given version string is empty")
+
 
         global _verGlob
         _verGlob = version
 
-
+    #Defines your program name which will be output alongside help dialogue
     @staticmethod
     def name(app_name):
         #Error checking
-        if not app_name:
-            raise ValueError("given app name string is empty")
-        
         if sys.version_info.major >= 3:
             if not (isinstance(app_name, str)):
                 raise TypeError("argument app name is not of type string")
@@ -116,30 +134,33 @@ class HelpHandler():
             if not (isinstance(app_name, basestring)):
                 raise TypeError("argument app name is not of type basestring")
 
+        if not app_name:
+            raise ValueError("given app name string is empty")
+        
 
         global _appNameGlob
         _appNameGlob = app_name
 
-
+    #A single function for passing your program's name as well as its version
     @staticmethod
     def info(app_name, version):
         HelpHandler.name(app_name)
         HelpHandler.version(version)
 
-
+    #This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
     @staticmethod
     def handle(help_dialogue):
         global _disableOutput
         
         if not help_dialogue:
             help_dialogue = "No usage help is available"
-        if (len(sys.argv) == 1) and (_noArgHelpGlob == True) and (_disableOutput != True):
+        if (len(sys.argv) == 1) and (_noArgHelpGlob == True) and (_disableOutput == False):
             HelpHandler.__print(help_dialogue)
             return
         
         #Set regex
         numHyphens = 0
-        if _matchNoHyphens == False:
+        if _matchHyphens == False:
             numHyphens = 1
         numHyphens = str(numHyphens)
 
@@ -200,6 +221,7 @@ class HelpHandler():
 
             return found_none
 
+    #This function like helpHandler.handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
     @staticmethod
     def handleFile(file_name):
         if not os.path.exists(file_name):
@@ -208,9 +230,13 @@ class HelpHandler():
             elif sys.version_info.major <= 2:
                 raise IOError("given file name does not refer to an existing file")
 
-        contents = open(file_name, 'r').read()
+        f = open(file_name, 'r')
+        contents = f.read()
+
         if re.search(r'^\s*$', contents):
+            f.close()
             raise EOFError("given file name was found, but contains no data")
 
+        f.close()
         return HelpHandler.handle(contents)
 

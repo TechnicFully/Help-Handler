@@ -4,7 +4,6 @@
 image:https://www.dropbox.com/s/qvtu9z2c4xekaww/f6d766cccecd96c622788a4aa99b438d1ab4abc9faee901949ea14beec23b5ee.png?raw=1[alt="HelpHandler"]
 
 
-'''
 
 
 Requirements
@@ -22,14 +21,24 @@ Requirements
 
 Usage
 ------
-The only function needed after including help_handler.h is `help_handler(int argc, char** argv, const char* help_dialogue)`. Beyond that, most users will only be concerned with ```help_handler_config(int option_flags)``` to enable and disable various functionality to avoid output when unwanted. As a bonus, functions support type overloading if your compiler standard is set to C11 or above (See below). You can refer to the _examples_ folder for more advanced usage.
+The only function needed after including help_handler.h is `help_handler(int argc, char** argv, const char* help_dialogue)`. Beyond that, most users will only be concerned with the `version` function and `help_handler_config(int option_flags)` function (see below) to enable and disable various functionality to avoid output when unwanted. As a bonus, functions support type overloading if your compiler standard is set to C11 or above (See below). You can refer to the _examples_ folder for more advanced usage.
 
-Basic usage example:
+Copy-paste example:
 [source,C]
 ----------
-help_handler(argc, argv, "Usage: Test");
+#include "help_handler.h"
+
+#include <stdlib.h>
+
+
+int main(int argc, char** argv) {
+    help_handler_version("1.0"); //This must come before the main help_handler function, which is what actually processes arguments
+    help_handler(argc, argv, "usage: help dialogue example");
+
+    return EXIT_SUCCESS;
+}
 ----------
-A negative value is returned if an error occurred, otherwise the number of arguments matched will be returned, (0 if none). It will increase your executable size by ~20KB with no optimizations or other flags enabled.
+A negative value is returned if an error occurred, otherwise the number of arguments matched will be returned, (0 if none).
 
 
 Functions
@@ -64,25 +73,27 @@ void help_handler_version_i(unsigned int ver);
 
 Configuration options
 ---------------------
-Passable to help_handler_config(int option_flags):
+The `config` function is used to configure output functionality. The passable parameters are as follows...
 ```
-DISABLE_EXTRA_STRINGS   //For disabling matching of arguments h, -h, --h, v, -v, --v
-DISABLE_NO_ARGS_HELP    //Disable help dialogue output when no arguments are passed
-UNKNOWN_ARGS_HELP       //Enable dialogue output when an unknown argument is passed
+DISABLE_NO_ARGS_HELP     - Disable printing of help dialogue when no arguments are given
+DISABLE_EXTRA_STRINGS    - Disable matching of h, -h, --h, v, -v and --v which may conflict with your program’s flags
+DISABLE_MATCH_HYPHENS    - Disable matching of arguments with hyphens (i.e., Help Handler will match "help", but not "--help")
+ENABLE_HYPHENS_ONLY      - Only match arguments that begin with one or more hyphens
+ENABLE_UNKNOWN_ARGS_HELP - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
 ```
 
 You may define these macros prior to including help_handler.h:
 ```
-HELP_HANDLER_NO_OVERLOADING
-HELP_HANDLER_IGNORE_WARN
-HELP_HANDLER_IGNORE_ERR 
-HELP_HANDLER_IGNORE_ALL
+HELP_HANDLER_NO_OVERLOADING - Disable function overloading in the library
+HELP_HANDLER_IGNORE_WARN    - Disable output of warnings
+HELP_HANDLER_IGNORE_ERR     - Disable output of errors
+HELP_HANDLER_IGNORE_ALL     - Disable output of warnings and errors
 ```
 
 Known limitations & issues
 --------------------------
-- MSVC compiles with a number of warnings currently.
 - Non-POSIX systems don't have regex argument matching, as the regex library (_regex.h_) is a POSIX C library, and Windows does not even have a system library for this. A third party library will be embedded for those systems in the future.
+- There is no support for UTF-8, and therefore essentially only English.
 
 
 Contributing
