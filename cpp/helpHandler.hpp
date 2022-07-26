@@ -34,8 +34,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#define HELP_HANDLER_VERSION_MAJOR 1
-#define HELP_HANDLER_VERSION_MINOR 0
+#define HELP_HANDLER_VERSION_MAJOR 0
+#define HELP_HANDLER_VERSION_MINOR 1
 #define HELP_HANDLER_VERSION_BUGFIX 0
 #define HELP_HANDLER_VERSION_STR "0.1.0"
 
@@ -73,7 +73,7 @@ namespace helpHandler {
     } most_recent_t;
 
     static struct info_t {
-        std::string name        = "";
+        std::string name;
         std::string versionStr  = "No version is available";
         unsigned int versionInt = 0;
         double versionDouble    = 0;
@@ -176,9 +176,9 @@ namespace helpHandler {
         bool matchedVer  = false;
 
         //Construct regex
-        std::string helpExpression = "";
-        std::string versionExpression = "";
-        std::string hyphensExpression = "";
+        std::string helpExpression;
+        std::string versionExpression;
+        std::string hyphensExpression;
     
 
         if (options_t.hyphensOnly == true) {
@@ -384,7 +384,7 @@ namespace helpHandler {
         helpHandler::name(appName);
         helpHandler::version(version);
     }
-}
+} //namespace helpHandler
 
 #undef NEWLINE
 #endif /* HELP_HANDLER_HPP */
