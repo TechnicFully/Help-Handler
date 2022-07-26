@@ -39,6 +39,8 @@ local options_t = {
 }
 
 
+
+
 ---- Local functions
 local function match(regex, optional_regex)
     for i = 1, #arg do
@@ -46,9 +48,11 @@ local function match(regex, optional_regex)
             return true
         end
 
-        if (string.match(arg[i], optional_regex)) then
-            return true
-        end    
+        if optional_regex ~= nil then
+            if (string.match(arg[i], optional_regex)) then
+                return true
+            end
+        end
     end
 
     return false
@@ -57,8 +61,7 @@ end
 
 
 
-
----- Public function
+---- Public functions
 
 --Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
 HelpHandler.version = function(version)
@@ -95,7 +98,7 @@ end
         unknown_arg_help    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
         disable_output      - Disable all output of HelpHandler
 --]]
-HelpHandler.config = function(extra_strings, no_arg_help, match_hyphens, hyphens_only, unknown_arg_help)
+HelpHandler.config = function(no_arg_help, extra_strings, match_hyphens, hyphens_only, unknown_arg_help)
     if type(extra_strings) == "nil" and
         type(no_arg_help) == "nil" and
         type(match_hyphens) == "nil" and
