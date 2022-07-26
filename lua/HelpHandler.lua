@@ -87,7 +87,7 @@ end
 --A single function for passing your program's name as well as its version
 HelpHandler.info = function(app_name, version)
     HelpHandler.name(app_name)
-    HelpHandler.ver(version)
+    HelpHandler.version(version)
 end
 
 --[[ For configuring functionality that might conflict/clutter other program output. The parameters are as follows...
@@ -149,6 +149,7 @@ HelpHandler.handle = function(help_dialogue)
         return
     end
 
+    
     matchHelp, matchVer = false
     matches = 0
     if (match('-*h+e+l+p+', '-*h+') == true) then
