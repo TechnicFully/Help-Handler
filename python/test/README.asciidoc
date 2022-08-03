@@ -1,0 +1,24 @@
+:blank: pass:[ +]
+
+
+Testing
+-------
+To run the Help-Handler unit tests, you will need Python 3.4 or above. To run the unit tests, simply run `python3 unit-test.py`
+
+
+
+Contributing
+------------
+If you'd like to submit a bugfix, I'd be glad to take a pull request or fix it myself given adequate description of the cause of the issue. If you'd like a feature added, it will be  considered so long as it's within the scope of this project.
+
+
+License
+-------
+Distributed under the MIT License. See link:https://github.com/TechnicFully/Help-Handler/blob/master/LICENSE[here] for more information.
+
+
+Contact
+------
+keaton@keatonsquires.com
+
+

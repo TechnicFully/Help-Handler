@@ -1,0 +1,36 @@
+:blank: pass:[ +]
+
+
+Testing
+-------
+To compile the Help-Handler unit tests, the following _dependencies_ are required...
+
+- link:https://github.com/google/googletest[Google Test]
+- link:https://cmake.org/[CMake]
+
+
+then on MacOS or Linux, run the following _commands_...
+
+. ``mkdir build ``
+.  `` cd build ``
+. `` cmake .. ``
+. `` make ``
+. `` ./HelpHandlerTest ``
+
+
+
+Contributing
+------------
+If you'd like to submit a bugfix, I'd be glad to take a pull request or fix it myself given adequate description of the cause of the issue. If you'd like a feature added, it will be  considered so long as it's within the scope of this project.
+
+
+License
+-------
+Distributed under the MIT License. See link:https://github.com/TechnicFully/Help-Handler/blob/master/LICENSE[here] for more information.
+
+
+Contact
+------
+keaton@keatonsquires.com
+
+
