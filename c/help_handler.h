@@ -42,7 +42,7 @@ int DISABLE_EXTRA_STRINGS    = 0x00000001;
 int DISABLE_NO_ARGS_HELP     = 0000000010;
 int DISABLE_MATCH_HYPHENS    = 0x00000100;
 int ENABLE_UNKNOWN_ARGS_HELP = 0x00001000;
-int ENABLE_HYPHENS_ONLY      = 0x00010000; //Value being higher than match_hyphens is intentional, to override in case both are set
+int ENABLE_HYPHENS_ONLY      = 0x00010000;
 
 //Return values
 static const int helpHandlerSuccess = 0; //This should remain 0, as it's also used to indicate no arguments were matched
@@ -372,7 +372,7 @@ static char* help_handler_strerror(int error) {
     #ifdef HELP_HANDLER_SECURE_VARIANTS
     char e[MAX_STRING_LEN];
     int strerror_err = strerror_s(e, sizeof(e), error);
-    return (strerror_err == 0) ? e : ""; 
+    return (strerror_err == 0) ? e : (char*)""; 
     #else
     return strerror(error);
     #endif
@@ -668,8 +668,8 @@ static int help_handler_sub(int argc, char** argv) {
     int i = 0;
 
     if (options.extra_strings != true) {
-        ver_lex[0]  = "";ver_lex[1]  = "";ver_lex[2]  = "";
-        help_lex[0] = "";help_lex[1] = "";help_lex[2] = ""; 
+        ver_lex[0]  = (char*)"";ver_lex[1]  = (char*)"";ver_lex[2]  = (char*)"";
+        help_lex[0] = (char*)"";help_lex[1] = (char*)"";help_lex[2] = (char*)""; 
         i = 3; } //First three elements of help/ver array should be abbreviated terms, hence setting the array index to the fourth element
 
     int result = 0;
@@ -1036,9 +1036,10 @@ int help_handler(int argc, char** argv, const char* help_dialogue) {
         HELP_DEBUG_INFO("No matches found");
         print_unknown(argc); }
 
+    #ifndef _WIN32 //Windows cmdl automatically outputs a newline at the end of a program run, so skip this
     if (result >= 0 && result != helpHandlerSuccess) {
         print_pipe(newline); }
-
+    #endif
 
     HELP_DEBUG_INFO("Deallocating help dialogue memory");
     free(help);
