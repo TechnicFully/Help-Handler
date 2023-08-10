@@ -189,8 +189,8 @@ namespace helpHandler {
 
 
         if (options_t.matchHyphens == true || options_t.hyphensOnly == true) {
-                helpExpression      += hyphensExpression;
-                versionExpression   += hyphensExpression;
+            helpExpression      += hyphensExpression;
+            versionExpression   += hyphensExpression;
         }
 
 
@@ -229,7 +229,7 @@ namespace helpHandler {
         if (matches > 0) {
             if (matchedVer == true) {
                 switch (most_recent_t.ver) {
-                    case versionT::stringT: std::cout << utility::trim(info_t.versionStr); break;
+                    case versionT::stringT: std::cout << info_t.versionStr; break;
                     case versionT::integerT: std::cout << info_t.versionInt; break; 
                     case versionT::doubleT: std::cout << info_t.versionDouble; break;
                 }
