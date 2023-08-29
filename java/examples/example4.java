@@ -1,4 +1,4 @@
-public class example1 {
+public class example4 {
     public static void example1(final String args[]) {
         try {
             HelpHandler.info("TestApp", "1.0"); //This is self-explanatory: the info() and version() functions combined for convenience

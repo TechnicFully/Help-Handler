@@ -1,4 +1,4 @@
-public class example1 {
+public class example3 {
     public static void example1(final String args[]) {
         try {
             HelpHandler.name("TestApp"); //This must also come before HelpHandler.handle, however it doesn't matter if it's called/set before or after HelpHandler.version()
