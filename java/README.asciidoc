@@ -13,7 +13,7 @@ Requirements
 
 Usage
 ------
-The only function needed after compiling HelpHandler.java is `HelpHandler.handle(final String args[], String helpDialogue)`. Beyond that, most users will only be concerned with ```HelpHandler.config(bool noArgHelp, bool extraStrings, bool unknownArgHelp)``` to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
+The only function needed after compiling HelpHandler.java is `HelpHandler.handle(final String args[], String helpDialogue)`. Beyond that, most users will only be concerned with the function `HelpHandler.version` and `HelpHandler.config(int optionFlags)` to enable and disable various functionality to avoid output when unwanted. You can refer to the _examples_ folder for more advanced usage.
 
 Basic usage example:
 [source,java]
@@ -21,6 +21,7 @@ Basic usage example:
 public class main {
     public static void main(final String args[]) {
         try {
+            HelpHandler.version("1.0") //This must come before the main HelpHandler.handle function, which is what actually processes arguments
             HelpHandler.handle(args, "usage: help dialogue example");
         } catch (Exception e) {
             e.printStackTrace();
@@ -39,7 +40,7 @@ Functions
 ----------
 int  helpHandler.handle(final String args[], String helpDialogue) throws RuntimeException;
 int  handleFile(String args[], String file_name)
-void helpHandler.config(bool extraStrings=true, bool noArgHelp=true, bool unknownArgHelp=false); //noArgHelp and unknownArgHelp are optional
+void helpHandler.config(int optionFlags);
 void helpHandler.version(String|double  version); //Can throw RuntimeException if string is passed
 void name(String appName);
 void info(String appName, String version);
