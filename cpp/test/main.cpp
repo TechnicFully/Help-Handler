@@ -3,23 +3,36 @@
 
 #include "../helpHandler.hpp"
 
-
+#include <limits>
+#include <random>
+#include <string>
 #include <iostream>
 #include <exception>
 
 
 
 
-TEST(HelpHandler_handle, argc) {
+static int random_num(int min, int max) {
+    static std::default_random_engine rng;
+
+    std::uniform_real_distribution<float> dist(min, max); 
+    return dist(rng);
+}
+
+
+
+
+
+TEST(HelpHandler_handle, argcNegative) {
     char* argv[] = { "" };
     
-
+    
     EXPECT_THROW({
         helpHandler::handle(-1, argv);
     }, std::invalid_argument);
 }
 
-TEST(HelpHandler_handle, argv) {
+TEST(HelpHandler_handle, argcZero) {
     char* argv[] = { "" };
     
 
@@ -46,11 +59,17 @@ TEST(HelpHandler_handleFile, fileName) {
 
 
 TEST(HelpHandler_config, options) {
-    //TODO: generate random numbers until given one that doesn't match any of the possible config int values
-
     EXPECT_THROW({
         helpHandler::config(-1);
     }, std::invalid_argument);
+
+    for (int i = 0; i != 4096; i++) { //Magic number. No particular reason this was chosen
+        EXPECT_THROW({
+                int r = random_num(std::numeric_limits<int>::min(), -1);
+                helpHandler::config(r);
+        }, std::invalid_argument);
+    }
+
 }
 
 

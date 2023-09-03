@@ -91,7 +91,7 @@ namespace helpHandler {
     /*****************/
     /**** PRIVATE ****/
     /*****************/
-    namespace detail {
+    namespace {
         namespace firstRun {
             constexpr const char* file_config = "help_handler_data.bin";
 
@@ -133,7 +133,8 @@ namespace helpHandler {
     }
 
 
-    using namespace detail;
+
+
 
 
 
