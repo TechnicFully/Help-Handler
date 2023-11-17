@@ -8,7 +8,7 @@
 
 int main(int argc, char** argv) {
     try {
-        helpHandler::info("TestApp", "1.0"); //This is self-explanatory: the info() and version() functions combined for convenience
+        helpHandler::info("TestApp", "1.0"); //This is self-explanatory, being the info() and version() functions combined for convenience
         helpHandler::handle(argc, argv, "usage: help dialogue example");
     } catch(const std::exception& e) { std::cout << e.what(); }
 

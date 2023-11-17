@@ -52,12 +52,20 @@
     std::flush;
 #endif
 
-int DISABLE_NO_ARGS_HELP     = 0x00000010;
-int DISABLE_EXTRA_STRINGS    = 0x00000001;
+//For use with config()
+int DISABLE_NO_ARGS_HELP     = 0x00000001;
+int DISABLE_EXTRA_STRINGS    = 0x00000010;
 int DISABLE_MATCH_HYPHENS    = 0x00000100;
 int ENABLE_UNKNOWN_ARGS_HELP = 0x00001000;
-int ENABLE_HYPHENS_ONLY      = 0x00002000; //Value being higher than match_hyphens is intentional, to override in case both are set
+int ENABLE_HYPHENS_ONLY      = 0x00000200; //Value being higher than DISABLE_MATCH_HYPHENS is intentional, to override in case both are set
 
+/// @brief 
+enum {
+    HELP_HANDLER_NONE_MATCHED,
+    HELP_HANDLER_HELP_MATCHED,
+    HELP_HANDLER_VERSION_MATCHED,
+    HELP_HANDLER_ALL_MATCHED,
+};
 
 
 namespace helpHandler {
@@ -88,46 +96,33 @@ namespace helpHandler {
     } options_t;
 
 
-    /*****************/
-    /**** PRIVATE ****/
-    /*****************/
+    /*
+     * ██████╗ ██████╗ ██╗██╗   ██╗ █████╗ ████████╗███████╗
+     * ██╔══██╗██╔══██╗██║██║   ██║██╔══██╗╚══██╔══╝██╔════╝
+     * ██████╔╝██████╔╝██║██║   ██║███████║   ██║   █████╗  
+     * ██╔═══╝ ██╔══██╗██║╚██╗ ██╔╝██╔══██║   ██║   ██╔══╝  
+     * ██║     ██║  ██║██║ ╚████╔╝ ██║  ██║   ██║   ███████╗
+     * ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝  ╚═╝  ╚═╝   ╚═╝   ╚══════╝
+     */
     namespace {
-        namespace firstRun {
-            constexpr const char* file_config = "help_handler_data.bin";
-
-            static int set(bool b) {
-                if (b == true) {
-                    std::ofstream outfile(file_config);
-                } else {
-                    if (remove(file_config) != 0) {
-                        throw std::ios_base::failure("Failed to delete help_handler_data.bin");
-                    }
-                }
-                return EXIT_SUCCESS;
-            }
-
-            static bool is() {
-                std::ifstream f(file_config);
-                if (f.good()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        }
-
         namespace utility {
-            static std::string trim(const std::string& s) {
-                if (s.find_first_not_of(' ') == std::string::npos) {
-                    return "";
-                }
+            namespace internal {
+                static std::string trim(const std::string& s) {
+                    if (s.find_first_not_of(' ') == std::string::npos) {
+                        return "";
+                    }
 
-                size_t first = s.find_first_not_of(' ');
-                if (std::string::npos == first) {
-                    return s; }
-                    
-                size_t last = s.find_last_not_of(' ');
-                return s.substr(first, (last - first + 1));
+                    size_t first = s.find_first_not_of(' ');
+                    if (std::string::npos == first) {
+                        return s; }
+                        
+                    size_t last = s.find_last_not_of(' ');
+                    return s.substr(first, (last - first + 1));
+                }
+            }
+
+            static std::string sanitize(const std::string& s) {
+                return internal::trim(s); //Currently a useless function wrapper for trim() till I implement whitespace breaks
             }
         }
     }
@@ -139,18 +134,22 @@ namespace helpHandler {
 
 
 
-    /****************/
-    /**** PUBLIC ****/
-    /****************/
-    //This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
+    /*
+     * ██████╗ ██╗   ██╗██████╗ ██╗     ██╗ ██████╗
+     * ██╔══██╗██║   ██║██╔══██╗██║     ██║██╔════╝
+     * ██████╔╝██║   ██║██████╔╝██║     ██║██║     
+     * ██╔═══╝ ██║   ██║██╔══██╗██║     ██║██║     
+     * ██║     ╚██████╔╝██████╔╝███████╗██║╚██████╗
+     * ╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝                                   
+     */
+    // This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this.
+    // Returns HELP_HANDLER_NONE_MATCHED (0) if nothing was matched, HELP_HANDLER_HELP_MATCHED if 'help' was matched, HELP_HANDLER_VERSION_MATCHED if 'version' was matched, or HELP_HANDLER_MATCHED_ALL if 'help' and 'version' were matched
     int handle(int argc, char** argv, std::string help) {
-        firstRun::set(true);
-
         if (help.empty()) {
             help = "No usage help is available"; }
         if (argc == 1 && options_t.noArgHelp == true) {
             std::cout << help << NEWLINE;
-            return EXIT_SUCCESS; }
+            return HELP_HANDLER_NONE_MATCHED; }
 
 
         /****************/
@@ -240,12 +239,19 @@ namespace helpHandler {
             if (matchedHelp == true) {
                 if (matchedVer == true) { std::cout << NEWLINE; }
                 if (info_t.name.empty() == false) { 
-                    std::cout << utility::trim(info_t.name) << " "; }
+                    std::cout << utility::sanitize(info_t.name) << " "; }
                 std::cout << help;
             }
 
             std::cout << NEWLINE;
-            return matches;
+
+            if (matchedHelp == true && matchedVer == true) {
+                return HELP_HANDLER_ALL_MATCHED;
+            } else if (matchedHelp == true) {
+                return HELP_HANDLER_HELP_MATCHED;
+            } else if (matchedVer == true) {
+                return HELP_HANDLER_VERSION_MATCHED;
+            }
         }
 
         //End
@@ -254,10 +260,10 @@ namespace helpHandler {
             std::cout << NEWLINE;
         }
 
-        return 0;
+        return HELP_HANDLER_NONE_MATCHED;
     }
 
-    //For configuring functionality that might conflict/clutter other program output. You may pass the following flags...
+    // For configuring functionality that might conflict/clutter other program output. You may pass the following flags...
     //      DISABLE_NO_ARGS_HELP     - Disable printing of help dialogue when no arguments are given
     //      DISABLE_EXTRA_STRINGS    - Disable matching of h, -h, --h, v, -v and --v which may conflict with your program’s flags
     //      DISABLE_MATCH_HYPHENS    - Disable matching of arguments with hyphens (i.e., Help Handler will match "help", but not "--help")
@@ -280,107 +286,107 @@ namespace helpHandler {
     }
 
 
-    //This function like helpHandler::handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
-    int handleFile(int argc, char** argv, const std::string& fileName) {
-        std::ifstream f;
-        std::string s;
+    // This function like helpHandler::handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
+    int handleFile(int argc, char** argv, const std::string& filename) {
+        std::ifstream file_handle;
+        std::string file_data;
 
-        f.open(fileName, std::ios::in);
-        if (!f.is_open()) {
-            throw std::ios_base::failure("Could not open file"); }
-        if (f.peek() == std::ifstream::traits_type::eof()) {
+        file_handle.open(filename, std::ios::in);
+        if (!file_handle.is_open()) {
+            throw std::ios_base::failure("Given help file was not found"); }
+        if (file_handle.peek() == std::ifstream::traits_type::eof()) {
             throw std::runtime_error("Given help file is empty"); }
 
         std::string line;
-        while(getline(f, line)) {
-            s += line; }
+        while(getline(file_handle, line)) {
+            file_data += line; }
 
-        f.close();
+        file_handle.close();
 
-        return helpHandler::handle(argc, argv, s);
+        return helpHandler::handle(argc, argv, file_data);
     } 
 
-    //Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
+    // Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
     void version(double version) noexcept {
         info_t.versionDouble = version;
         most_recent_t.ver = versionT::doubleT;
     }
-    //Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
+    // Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
     void version(unsigned int version) noexcept {
         info_t.versionInt = version;
         most_recent_t.ver = versionT::integerT;
     }
-    //Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
+    // Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
     void version(int version) noexcept {
         info_t.versionInt = version;
         most_recent_t.ver = versionT::integerT;
     }
-    //Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
+    // Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
     void version(std::string version) { //Parent
-        version = utility::trim(version);
+        version = utility::sanitize(version);
 
         if (version.empty()) {
             throw std::invalid_argument("Version string was given, but is empty"); }
         
-        info_t.versionStr = utility::trim(version);
+        info_t.versionStr = utility::sanitize(version);
         most_recent_t.ver = versionT::stringT;
     }
 
 
-    //This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this, and when no help dialogue variable is passed, will simply return what arguments were matchewd
+    // This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this, and when no help dialogue variable is passed, will simply return what arguments were matchewd
     int handle(int argc, char** argv) {
         helpHandler::config(DISABLE_NO_ARGS_HELP);
         return helpHandler::handle(argc, argv, "");
     }
-    //This is the main function which processes and outputs the appropriate dialogue based on the user's input, and sets the program's version. You must pass or set any other options and info before calling this
+    // This is the main function which processes and outputs the appropriate dialogue based on the user's input, and sets the program's version. You must pass or set any other options and info before calling this
     int handle(int argc, char** argv, std::string helpDialogue, std::string version) {
         helpHandler::version(version);
         return helpHandler::handle(argc, argv, helpDialogue);
     }
-    //This is the main function which processes and outputs the appropriate dialogue based on the user's input, and sets the program's version. You must pass or set any other options and info before calling this
+    // This is the main function which processes and outputs the appropriate dialogue based on the user's input, and sets the program's version. You must pass or set any other options and info before calling this
     int handle(int argc, char** argv, std::string helpDialogue, double version) {
         helpHandler::version(version);
         return helpHandler::handle(argc, argv, helpDialogue);
     }
 
-    //This function like helpHandler::handle(), will processes and outputs the appropriate dialogue based on the user's input, but using the given file(name) as its dialogue source. You must pass or set any other options and info before calling this
+    // This function like helpHandler::handle(), will processes and outputs the appropriate dialogue based on the user's input, but using the given file(name) as its dialogue source. You must pass or set any other options and info before calling this
     int handleFile(int argc, char** argv, const std::string& fileName, std::string version) {
         helpHandler::version(version);
         return helpHandler::handleFile(argc, argv, fileName);
     }
-    //This function like helpHandler::handle(), will processes and outputs the appropriate dialogue based on the user's input, but using the given file(name) as its dialogue source. You must pass or set any other options and info before calling this
+    // This function like helpHandler::handle(), will processes and outputs the appropriate dialogue based on the user's input, but using the given file(name) as its dialogue source. You must pass or set any other options and info before calling this
     int handleFile(int argc, char** argv, const std::string& fileName, double version) {
         helpHandler::version(version);
         return helpHandler::handleFile(argc, argv, fileName);
     }
 
-    //Defines your program name which will be output alongside help dialogue
+    // Defines your program name which will be output alongside help dialogue
     void name(std::string appName) { //Parent
-        appName = utility::trim(appName);
+        appName = utility::sanitize(appName);
 
         if (appName.empty()) {
             throw std::invalid_argument("App name was given, but is empty");
         }
 
-        info_t.name = utility::trim(appName);
+        info_t.name = utility::sanitize(appName);
     }
 
-    //A single function for passing your program's name as well as its version
+    // Set your program's name as well as its version
     void info(const std::string& appName, std::string version) {
         helpHandler::name(appName);
         helpHandler::version(version);
     }
-    //A single function for passing your program's name as well as its version
+    // Set your program's name as well as its version
     void info(const std::string& appName, double version) {
         helpHandler::name(appName);
         helpHandler::version(version);
     }
-    //A single function for passing your program's name as well as its version
+    // Set your program's name as well as its version
     void info(const std::string& appName, unsigned int version) {
         helpHandler::name(appName);
         helpHandler::version(version);
     }
-    //A single function for passing your program's name as well as its version
+    // Set your program's name as well as its version
     void info(const std::string& appName, int version) {
         helpHandler::name(appName);
         helpHandler::version(version);
