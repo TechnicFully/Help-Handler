@@ -86,7 +86,7 @@ TEST(HelpHandler_version, version) {
 
 
 
-TEST(HelpHandler_name, appName) {
+TEST(HelpHandler_name, appname) {
     EXPECT_THROW({
         helpHandler::name("");
     }, std::invalid_argument);
@@ -96,6 +96,30 @@ TEST(HelpHandler_name, appName) {
     }, std::invalid_argument);
 
     //TODO: capture output of helpHandler::name(" 1 ");
+}
+
+
+TEST(HelpHandler_ReturnValues, handle) {
+    int rvalue = -1; //Magic number. Return value is represented as an enum and therefore implicitly converted to an int, starting from 0. This prevents a false positive.
+
+    char* argvHelpVersion[] = { "--help", "--version" };
+    char* argvHelp[] = { "--help" };
+    char* argvVersion[] = { "--version" };
+    char* argvBlank[] = { "blank" };
+    const char* dummy_dialogue = "dummy dialogue";
+
+
+    rvalue = helpHandler::handle(4, argvHelpVersion, dummy_dialogue);
+    ASSERT_EQ(rvalue, HELP_HANDLER_ALL_MATCHED);
+
+    rvalue = helpHandler::handle(3, argvHelp, dummy_dialogue);
+    ASSERT_EQ(rvalue, HELP_HANDLER_HELP_MATCHED);
+
+    helpHandler::handle(3, argvVersion, dummy_dialogue);
+    ASSERT_EQ(rvalue, HELP_HANDLER_VERSION_MATCHED);
+
+    helpHandler::handle(3, argvBlank, dummy_dialogue);
+    ASSERT_EQ(rvalue, HELP_HANDLER_NONE_MATCHED);
 }
 
 
