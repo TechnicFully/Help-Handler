@@ -3,10 +3,7 @@ project(HelpHandlerTest LANGUAGES CXX VERSION 0.1.0 HOMEPAGE_URL https://github.
 cmake_minimum_required(VERSION 2.9)
 
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "-Wno-write-strings")
-set(CMAKE_C_FLAGS "-fpermissive")
-
+###Settings
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/emptyTestFile.txt ${CMAKE_CURRENT_BINARY_DIR}/emptyTestFile.txt COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/filledTestFile.txt ${CMAKE_CURRENT_BINARY_DIR}/filledTestFile.txt COPYONLY)
 add_definitions(-DHELP_HANDLER_DEBUG)
@@ -14,8 +11,8 @@ add_definitions(-DHELP_HANDLER_DEBUG)
 
 
 
+###Add GTest
 enable_testing()
-
 
 include(FetchContent)
 FetchContent_Declare(
@@ -25,10 +22,14 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) #For Windows: prevent overriding the parent project's compiler/linker settings
 FetchContent_MakeAvailable(googletest)
 
-
 include(GoogleTest)
 
+
+
+
+###Finish
 add_executable(HelpHandlerTest main.cpp)
 target_include_directories(HelpHandlerTest PRIVATE ${GTEST_INCLUDE_DIRS})
 target_link_libraries(HelpHandlerTest PRIVATE GTest::gtest_main pthread)
+target_compile_options(HelpHandlerTest PRIVATE -Wall -Wextra -pedantic -Wconversion -fstack-protector-all -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat=2 -Wshadow -fwrapv -Wunreachable-code -fsanitize=address -g3 -std=c++11 -Wno-write-strings -fpermissive)
 
