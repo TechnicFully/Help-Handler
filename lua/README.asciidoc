@@ -43,13 +43,13 @@ HelpHandler.info(string app_name, string|number version)
 
 Configuration
 -------------
-The `config` function is used to configure output functionality. To leave the parameter as default, simply pass `nil`. The passable parameters are as follows...
+The `config` function is used to configure output functionality.The passable parameters are as follows...
 ```
-no_arg_help         - Print help dialogue when no arguments are given
-extra_strings       - Whether to match for h, -h, --h, v, -v and --v specifically (which may conflict with your program’s flags)
-match_hyphens       - Match arguments beginning with hyphens (i.e., "help" vs "--help")
-hyphens_only        - Only match arguments that begin with one or more hyphens
-unknown_arg_help    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
+DISABLE_NO_ARGS_HELP         - Print help dialogue when no arguments are given
+DISABLE_EXTRA_STRINGS       - Whether to match for h, -h, --h, v, -v and --v specifically (which may conflict with your program’s flags)
+DISABLE_MATCH_HYPHENS       - Match arguments beginning with hyphens (i.e., "help" vs "--help")
+ENABLE_HYPHENS_ONLY        - Only match arguments that begin with one or more hyphens
+ENABLE_UNKNOWN_ARGS_HELP    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
 ```
 
 
