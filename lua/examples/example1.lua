@@ -4,4 +4,4 @@ require "HelpHandler"
 
 
 
-HelpHandler.handle("usage: help dialogue example")
+HelpHandler.handle("usage: help dialogue example") --Set help dialogue and process arguments

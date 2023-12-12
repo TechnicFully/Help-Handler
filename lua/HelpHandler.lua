@@ -25,6 +25,22 @@ SOFTWARE.
 
 HelpHandler = {}
 
+HELP_HANDLER_FAILURE = -1
+HELP_HANDLER_SUCCESS = 0
+
+
+HELP_HANDLER_ALL_MATCHED = 1
+HELP_HANDLER_HELP_MATCHED = 2
+HELP_HANDLER_VERSION_MATCHED = 3
+HELP_HANDLER_NONE_MATCHED = 4
+
+DISABLE_NO_ARGS_HELP     = 00000001
+DISABLE_EXTRA_STRINGS    = 00000010
+DISABLE_MATCH_HYPHENS    = 00000100
+ENABLE_HYPHENS_ONLY      = 00001000
+ENABLE_UNKNOWN_ARGS_HELP = 00010000
+
+
 local info_t = {
     name        = "",
     version     = "No version is available",
@@ -38,17 +54,51 @@ local options_t = {
     unknown_arg_help = false,
 }
 
+local HELP_HANDLER_DEBUG = true
+
+local DEBUG_TRACE
+local DEBUG_INFO
+local DEBUG_WARN
+local DEBUG_ERR
 
 
+---- ██╗      ██████╗  ██████╗ █████╗ ██╗         ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗███████╗
+---- ██║     ██╔═══██╗██╔════╝██╔══██╗██║         ██╔════╝██║   ██║████╗  ██║██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║██╔════╝
+---- ██║     ██║   ██║██║     ███████║██║         █████╗  ██║   ██║██╔██╗ ██║██║        ██║   ██║██║   ██║██╔██╗ ██║███████╗
+---- ██║     ██║   ██║██║     ██╔══██║██║         ██╔══╝  ██║   ██║██║╚██╗██║██║        ██║   ██║██║   ██║██║╚██╗██║╚════██║
+---- ███████╗╚██████╔╝╚██████╗██║  ██║███████╗    ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
+---- ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝    ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝                                                                                                                     
+local function debug_print(msg, msg_type)
+    if HELP_HANDLER_DEBUG == false then
+        return
+    end
 
----- Local functions
+    if msg_type == DEBUG_TRACE then
+        io.write("HELP HANDLER (TRACE):  ")
+        print(msg)
+    elseif msg_type == DEBUG_INFO then
+        io.write("HELP HANDLER (INFO):   ")
+        print(msg)
+    elseif msg_type == DEBUG_WARN then
+        io.write("HELP HANDLER (WARN):   ")
+        print(msg)
+    elseif msg_type == DEBUG_ERR then
+        io.write("HELP HANDLER (ERROR)   ")
+        print(msg)
+    end
+end
+
+
 local function match(regex, optional_regex)
     for i = 1, #arg do
+        debug_print("Regex processing argument")
+
         if (string.match(arg[i], regex)) then
             return true
         end
 
         if optional_regex ~= nil then
+            debug_print("Second regex processing argument")
             if (string.match(arg[i], optional_regex)) then
                 return true
             end
@@ -59,16 +109,30 @@ local function match(regex, optional_regex)
 end
 
 
+local function print_pipe(s) --Wrapper function for io.write() is to purely avoid cluttering test suite output when necesary
+    if HELP_HANDLER_DEBUG == true then
+        return
+    end
+
+    print(s)
+end
 
 
----- Public functions
 
+
+---- ██████╗ ██╗   ██╗██████╗ ██╗     ██╗ ██████╗    ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗███████╗
+---- ██╔══██╗██║   ██║██╔══██╗██║     ██║██╔════╝    ██╔════╝██║   ██║████╗  ██║██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║██╔════╝
+---- ██████╔╝██║   ██║██████╔╝██║     ██║██║         █████╗  ██║   ██║██╔██╗ ██║██║        ██║   ██║██║   ██║██╔██╗ ██║███████╗
+---- ██╔═══╝ ██║   ██║██╔══██╗██║     ██║██║         ██╔══╝  ██║   ██║██║╚██╗██║██║        ██║   ██║██║   ██║██║╚██╗██║╚════██║
+---- ██║     ╚██████╔╝██████╔╝███████╗██║╚██████╗    ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
+---- ╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝    ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝                                                                                                                          
 --Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
 HelpHandler.version = function(version)
     if type(version) ~= "number" and type(version) ~= "string" then
         error("Version argument given is not a string or number")
     end
 
+    debug_print("Setting given program version")
     info_t.version = version
 end
 
@@ -81,6 +145,7 @@ HelpHandler.name = function(app_name)
         error("App name given, but is empty")
     end
     
+    debug_print("Setting given program name")
     info_t.name = app_name
 end
 
@@ -90,98 +155,107 @@ HelpHandler.info = function(app_name, version)
     HelpHandler.version(version)
 end
 
---[[ For configuring functionality that might conflict/clutter other program output. The parameters are as follows...
-        no_arg_help         - Print help dialogue when no arguments are given
-        extra_strings       - Whether to match for h, -h, --h, v, -v and --v specifically (which may conflict with your program’s flags)
-        match_hyphens       - Match arguments beginning with hyphens (i.e., "help" vs "--help")
-        hyphens_only        - Only match arguments that begin with one or more hyphens
-        unknown_arg_help    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
-        disable_output      - Disable all output of HelpHandler
+--[[ For configuring functionality that might conflict/clutter other program output. You may pass the following flags...
+        DISABLE_NO_ARGS_HELP     - Disable printing of help dialogue when no arguments are given
+        DISABLE_EXTRA_STRINGS    - Disable matching of h, -h, --h, v, -v and --v which may conflict with your program’s flags
+        DISABLE_MATCH_HYPHENS    - Disable matching of arguments with hyphens (i.e., Help Handler will match "help", but not "--help")
+        ENABLE_HYPHENS_ONLY      - Only match arguments that begin with one or more hyphens
+        ENABLE_UNKNOWN_ARGS_HELP - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this```````````````````````````````````````````````````````````````````
 --]]
-HelpHandler.config = function(no_arg_help, extra_strings, match_hyphens, hyphens_only, unknown_arg_help)
-    if type(extra_strings) == "nil" and
-        type(no_arg_help) == "nil" and
-        type(match_hyphens) == "nil" and
-        type(hyphens_only) == "nil" and
-        type(unknown_arg_help) == "nil" then
-            error("Invalid arguments passed")
+
+
+HelpHandler.config = function(option_flags)
+    if type(option_flags) ~= "number" then
+        error("Invalid argument type passed. Must be a number")
     end
 
+    if option_flags & DISABLE_NO_ARGS_HELP then options_t.no_arg_help = false end
+    if option_flags & DISABLE_EXTRA_STRINGS then options_t.extra_strings = false end
+    if option_flags & DISABLE_MATCH_HYPHENS then options_t.match_hyphens = false end
+    if option_flags & ENABLE_HYPHENS_ONLY then options_t.hyphens_only = true end
+    if option_flags & ENABLE_UNKNOWN_ARGS_HELP then options_t.unknown_arg_help = true end
+    
+    if option_flags ~= (option_flags & DISABLE_NO_ARGS_HELP) and
+        option_flags ~= (option_flags & DISABLE_EXTRA_STRINGS) and
+        option_flags ~= (option_flags & DISABLE_MATCH_HYPHENS) and
+        option_flags ~= (option_flags & ENABLE_UNKNOWN_ARGS_HELP) and
+        option_flags ~= (option_flags & ENABLE_HYPHENS_ONLY) then
+            error("Unknown flag passed")
+            return HELP_HANDLER_FAILURE
+    end
 
-    if type(extra_strings) ~= "boolean" and type(extra_strings) ~= "nil" then error("Argument extra_strings is not a boolean") end
-    if type(no_arg_help) ~= "boolean" and type(no_arg_help) ~= "nil" then error("Argument no_arg_help is not a boolean") end
-    if type(match_hyphens) ~= "boolean" and type(match_hyphens) ~= "nil" then error("Argument match_hyphens is not a boolean") end
-    if type(hyphens_only) ~= "boolean" and type(hyphens_only) ~= "nil" then error("Argument hyphens_only is not a boolean") end
-    if type(unknown_arg_help) ~= "boolean" and type(unknown_arg_help) ~= "nil" then error("Argument unknown_arg_help is not a boolean") end
-
-
-    if extra_strings ~= nil then options_t.extra_strings = extra_strings end
-    if no_arg_help ~= nil then options_t.unknown_arg_help = no_arg_help end
-    if match_hyphens ~= nil then options_t.match_hyphens = match_hyphens end
-    if hyphens_only ~= nil then options_t.hyphens_only = hyphens_only end
-    if unknown_arg_help ~= nil then options_t.unknown_arg_help = unknown_arg_help end
+    return HELP_HANDLER_SUCCESS
 end
+
+
 
 --This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
 HelpHandler.handle = function(help_dialogue)
-    if help_dialogue == nil or help == '' then
-        help_dialogue = "No usage help is available"
+    if help_dialogue ~= nil then
+        if type(help_dialogue) ~= "string" then 
+            error("Invalid help dialogue argument type given, must be nil, or a string")
+        end
     end
-    if type(help_dialogue) ~= "string" then
-        error("Help argument given is not a string")
+            
+            
+    if help_dialogue == nil or help_dialogue:gsub("%s+", "") == '' then
+        debug_print("No help dialogue was given. Setting to default")
+        help_dialogue = "No usage help is available"
     end
 
 
     if (#arg == 0 and options_t.no_arg_help == true) then
-        if (info_t.name ~= '' and info_t.version ~= '') then
-            io.write(info_t.name, " (Version ", string.gsub(info_t.version, "%s+", ""), ")")
-        elseif (info_t.name ~= '' and info_t.version == '') then
-            io.write(info_t.name)
-        elseif(info_t.name == '' and info_t.version ~= '') then
-            io.write(info_t.version)
-        end
-
-        if (info_t.name ~= '' or info_t.version ~= '') then
-            io.write("\n")
-        end
-
-        print(help_dialogue)
-        return
+        debug_print("No arguments were given. Printing help dialogue and exiting...")
+        print_pipe(help_dialogue)
+        return HELP_HANDLER_NONE_MATCHED
     end
 
     
-    matchHelp, matchVer = false
-    matches = 0
+    local matchHelp, matchVer = false
+    local matches = 0
     if (match('-*h+e+l+p+', '-*h+') == true) then
+        debug_print("Matched help argument")
         matchHelp = true
         matches = matches + 1
     end 
 
     if (match('-*v+e+r+s+i+o+n+', '-*v+') == true) then
+        debug_print("Matched version argument")
         matchVer = true
         matches = matches + 1
-    end 
-
-
-    if matchVer == true then
-        print(info_t.version)
     end
-    if matchHelp == true then
-        print(help_dialogue)
+
+
+    if matchHelp == true and matchVer == true then
+        debug_print("Outputting help and version info")
+        print_pipe(info_t.version)
+        print_pipe(info_t.help)
+        return HELP_HANDLER_ALL_MATCHED
+    elseif matchHelp == true then
+        debug_print("Outputting help info")
+        print_pipe(help_dialogue)
+        return HELP_HANDLER_HELP_MATCHED
+    elseif matchVer == true then
+        debug_print("Outputting version info")
+        print_pipe(info_t.version)
+        return HELP_HANDLER_VERSION_MATCHED
     end
     
         
     if options_t.unknown_arg_help == true and #arg > 0 then
+        debug_print("Unknown arguments were given. Exiting...")
+
         if #arg > 1 then
-            print("Unknown arguments given")
+            print_pipe("Unknown arguments given")
         else
-            print("Unknown argument given")
+            print_pipe("Unknown argument given")
         end
 
-        return
+        return HELP_HANDLER_NONE_MATCHED
     end
 
-    return matches
+    debug_print("No arguments were matched. Exiting...")
+    return HELP_HANDLER_NONE_MATCHED
 end
 
 --This function like helpHandler.handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this

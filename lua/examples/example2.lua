@@ -4,5 +4,5 @@ require "HelpHandler"
 
 
 
-HelpHandler.version("1.0") --This must come before the main HelpHandler.handle function, which is what actually processes arguments
+HelpHandler.version("1.0") --This must come before the main helpHandler::handle function, which is what processes the arguments
 HelpHandler.handle("usage: help dialogue example")
