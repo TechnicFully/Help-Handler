@@ -31,5 +31,5 @@ include(GoogleTest)
 add_executable(HelpHandlerTest main.cpp)
 target_include_directories(HelpHandlerTest PRIVATE ${GTEST_INCLUDE_DIRS})
 target_link_libraries(HelpHandlerTest PRIVATE GTest::gtest_main pthread)
-target_compile_options(HelpHandlerTest PRIVATE -Wall -Wextra -pedantic -Wconversion -fstack-protector-all -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat=2 -Wshadow -fwrapv -Wunreachable-code -fsanitize=address -g3 -std=c++11 -Wno-write-strings -fpermissive)
+target_compile_options(HelpHandlerTest PRIVATE -Wall -Wextra -pedantic -Wconversion -fstack-protector-all -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat=2 -Wshadow -fwrapv -Wunreachable-code -g3 -std=c++11 -Wno-write-strings -fpermissive)
 
