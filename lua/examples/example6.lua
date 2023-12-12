@@ -8,9 +8,9 @@ HelpHandler.info("TestApp", "1.0")
 
 HelpHandler.config(DISABLE_EXTRA_STRINGS) --Disables matching abbreviated arguments, v, -v, --v, h, -h, --h
                                           --You can also pass...
-                                              --no_arg_help
-                                              --match_hyphens
-                                              --unknown_args_help
-                                              --hyphens_only
+                                              --DISABLE_NO_ARGS_HELP
+                                              --DISABLE_MATCH_HYPHENS
+                                              --ENABLE_UNKNOWN_ARGS_HELP
+                                              --ENABLE_HYPHENS_ONLY
 
-HelpHandler.handle("example_dialogue_file.txt")
+HelpHandler.handleFile("example_dialogue_file.txt")
