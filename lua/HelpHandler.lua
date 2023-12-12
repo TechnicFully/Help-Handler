@@ -215,7 +215,7 @@ HelpHandler.handle = function(help_dialogue)
 
     local matchHelp, matchVer = false
     local matches = 0
-    if (match('-*h+e+l+p+', '-*h+') == true) then
+    if (match('-*h+e+l+p+', '^-*h+$') == true) then
         debug_print("Matched help argument")
         matchHelp = true
         matches = matches + 1
