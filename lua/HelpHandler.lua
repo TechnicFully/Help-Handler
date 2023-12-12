@@ -54,7 +54,7 @@ local options_t = {
     unknown_arg_help = false,
 }
 
-local HELP_HANDLER_DEBUG = true
+local HELP_HANDLER_DEBUG = false --Enable to print debug messaging, or comment out to enable debug messaging AND dialogue output
 
 local DEBUG_TRACE
 local DEBUG_INFO
@@ -91,16 +91,19 @@ end
 
 local function match(regex, optional_regex)
     for i = 1, #arg do
-        debug_print("Regex processing argument")
 
-        if (string.match(arg[i], regex)) then
+        debug_print("Processing argument with regex (ROUND " .. tostring(i) .. ")")
+
+        if (string.match(arg[i]:lower(), regex)) then
             return true
         end
 
-        if optional_regex ~= nil then
-            debug_print("Second regex processing argument")
-            if (string.match(arg[i], optional_regex)) then
-                return true
+        if options_t.extra_strings == true then
+            if optional_regex ~= nil then
+                debug_print("Processing argument with secondary regex (ROUND " .. tostring(i) .. ")")
+                if (string.match(arg[i]:lower(), optional_regex)) then
+                    return true
+                end
             end
         end
     end
@@ -209,7 +212,7 @@ HelpHandler.handle = function(help_dialogue)
         return HELP_HANDLER_NONE_MATCHED
     end
 
-    
+
     local matchHelp, matchVer = false
     local matches = 0
     if (match('-*h+e+l+p+', '-*h+') == true) then
@@ -218,7 +221,7 @@ HelpHandler.handle = function(help_dialogue)
         matches = matches + 1
     end 
 
-    if (match('-*v+e+r+s+i+o+n+', '-*v+') == true) then
+    if (match('-*v+e+r+s+i+o+n+', '^-*v+$') == true) then
         debug_print("Matched version argument")
         matchVer = true
         matches = matches + 1
@@ -228,7 +231,7 @@ HelpHandler.handle = function(help_dialogue)
     if matchHelp == true and matchVer == true then
         debug_print("Outputting help and version info")
         print_pipe(info_t.version)
-        print_pipe(info_t.help)
+        print_pipe(help_dialogue)
         return HELP_HANDLER_ALL_MATCHED
     elseif matchHelp == true then
         debug_print("Outputting help info")
