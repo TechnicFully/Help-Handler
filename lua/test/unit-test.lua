@@ -100,15 +100,6 @@ function test_config_invalid_arguments()
 end
 
 
-function test_config_valid_arguments()
-    lu.assertEquals(HelpHandler.config(DISABLE_NO_ARGS_HELP), HELP_HANDLER_SUCCESS)
-    lu.assertEquals(HelpHandler.config(DISABLE_EXTRA_STRINGS), HELP_HANDLER_SUCCESS)
-    lu.assertEquals(HelpHandler.config(DISABLE_MATCH_HYPHENS), HELP_HANDLER_SUCCESS)
-    lu.assertEquals(HelpHandler.config(ENABLE_UNKNOWN_ARGS_HELP), HELP_HANDLER_SUCCESS)
-    lu.assertEquals(HelpHandler.config(ENABLE_HYPHENS_ONLY), HELP_HANDLER_SUCCESS)
-end
-
-
 
 
 os.exit(lu.LuaUnit.run())

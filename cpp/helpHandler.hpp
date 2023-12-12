@@ -34,12 +34,46 @@
 #include <iostream>
 #include <stdexcept>
 
+
+
+
+// ██╗   ██╗███████╗███████╗██████╗     ███╗   ███╗ █████╗  ██████╗██████╗  ██████╗ ███████╗       ██╗       ██╗   ██╗ █████╗ ██████╗ ██╗ █████╗ ██████╗ ██╗     ███████╗███████╗    
+// ██║   ██║██╔════╝██╔════╝██╔══██╗    ████╗ ████║██╔══██╗██╔════╝██╔══██╗██╔═══██╗██╔════╝       ██║       ██║   ██║██╔══██╗██╔══██╗██║██╔══██╗██╔══██╗██║     ██╔════╝██╔════╝    
+// ██║   ██║███████╗█████╗  ██████╔╝    ██╔████╔██║███████║██║     ██████╔╝██║   ██║███████╗    ████████╗    ██║   ██║███████║██████╔╝██║███████║██████╔╝██║     █████╗  ███████╗    
+// ██║   ██║╚════██║██╔══╝  ██╔══██╗    ██║╚██╔╝██║██╔══██║██║     ██╔══██╗██║   ██║╚════██║    ██╔═██╔═╝    ╚██╗ ██╔╝██╔══██║██╔══██╗██║██╔══██║██╔══██╗██║     ██╔══╝  ╚════██║    
+// ╚██████╔╝███████║███████╗██║  ██║    ██║ ╚═╝ ██║██║  ██║╚██████╗██║  ██║╚██████╔╝███████║    ██████║       ╚████╔╝ ██║  ██║██║  ██║██║██║  ██║██████╔╝███████╗███████╗███████║    
+//  ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝    ╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚═════╝        ╚═══╝  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝╚══════╝                                                                                                                                                                                   
+//These should be the only relevant variables to any library user not trying to change functionality
+
 #define HELP_HANDLER_VERSION_MAJOR 0
 #define HELP_HANDLER_VERSION_MINOR 1
 #define HELP_HANDLER_VERSION_BUGFIX 0
 #define HELP_HANDLER_VERSION_STR "0.1.0"
 
-//C++'s std::endl doesn't change its newline feed to the appropriate host OS's, so we use our own
+//For use with config()
+int DISABLE_NO_ARGS_HELP     = 0x00000001;
+int DISABLE_EXTRA_STRINGS    = 0x00000010;
+int DISABLE_MATCH_HYPHENS    = 0x00000100;
+int ENABLE_HYPHENS_ONLY      = 0x00000200; //Value being higher than DISABLE_MATCH_HYPHENS is intentional, to override in case both are set
+int ENABLE_UNKNOWN_ARGS_HELP = 0x00001000;
+
+//User return values
+enum {
+    HELP_HANDLER_NONE_MATCHED,
+    HELP_HANDLER_HELP_MATCHED,
+    HELP_HANDLER_VERSION_MATCHED,
+    HELP_HANDLER_ALL_MATCHED,
+};
+
+
+//██╗███╗   ██╗████████╗███████╗██████╗ ███╗   ██╗ █████╗ ██╗         ███╗   ███╗ █████╗  ██████╗██████╗  ██████╗ ███████╗       ██╗       ██╗   ██╗ █████╗ ██████╗ ██╗ █████╗ ██████╗ ██╗     ███████╗███████╗
+//██║████╗  ██║╚══██╔══╝██╔════╝██╔══██╗████╗  ██║██╔══██╗██║         ████╗ ████║██╔══██╗██╔════╝██╔══██╗██╔═══██╗██╔════╝       ██║       ██║   ██║██╔══██╗██╔══██╗██║██╔══██╗██╔══██╗██║     ██╔════╝██╔════╝
+//██║██╔██╗ ██║   ██║   █████╗  ██████╔╝██╔██╗ ██║███████║██║         ██╔████╔██║███████║██║     ██████╔╝██║   ██║███████╗    ████████╗    ██║   ██║███████║██████╔╝██║███████║██████╔╝██║     █████╗  ███████╗
+//██║██║╚██╗██║   ██║   ██╔══╝  ██╔══██╗██║╚██╗██║██╔══██║██║         ██║╚██╔╝██║██╔══██║██║     ██╔══██╗██║   ██║╚════██║    ██╔═██╔═╝    ╚██╗ ██╔╝██╔══██║██╔══██╗██║██╔══██║██╔══██╗██║     ██╔══╝  ╚════██║
+//██║██║ ╚████║   ██║   ███████╗██║  ██║██║ ╚████║██║  ██║███████╗    ██║ ╚═╝ ██║██║  ██║╚██████╗██║  ██║╚██████╔╝███████║    ██████║       ╚████╔╝ ██║  ██║██║  ██║██║██║  ██║██████╔╝███████╗███████╗███████║
+//╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚═════╝        ╚═══╝  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝╚══════╝
+
+//C++'s std::endl doesn't change its newline feed to the appropriate host OS's, so we roll our own macro
 #ifdef _WIN32
 #define NEWLINE \
     "\r\n" \
@@ -51,21 +85,6 @@
     << \
     std::flush;
 #endif
-
-//For use with config()
-int DISABLE_NO_ARGS_HELP     = 0x00000001;
-int DISABLE_EXTRA_STRINGS    = 0x00000010;
-int DISABLE_MATCH_HYPHENS    = 0x00000100;
-int ENABLE_UNKNOWN_ARGS_HELP = 0x00001000;
-int ENABLE_HYPHENS_ONLY      = 0x00000200; //Value being higher than DISABLE_MATCH_HYPHENS is intentional, to override in case both are set
-
-/// @brief 
-enum {
-    HELP_HANDLER_NONE_MATCHED,
-    HELP_HANDLER_HELP_MATCHED,
-    HELP_HANDLER_VERSION_MATCHED,
-    HELP_HANDLER_ALL_MATCHED,
-};
 
 
 namespace helpHandler {
@@ -143,7 +162,8 @@ namespace helpHandler {
      * ╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝                                   
      */
     // This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this.
-    // Returns HELP_HANDLER_NONE_MATCHED (0) if nothing was matched, HELP_HANDLER_HELP_MATCHED if 'help' was matched, HELP_HANDLER_VERSION_MATCHED if 'version' was matched, or HELP_HANDLER_MATCHED_ALL if 'help' and 'version' were matched
+    // Throws invalid_argument if argv is NULL, argc is less than 1 or outside limits of int type
+    // Returns HELP_HANDLER_NONE_MATCHED if nothing was matched, HELP_HANDLER_HELP_MATCHED if 'help' was matched, HELP_HANDLER_VERSION_MATCHED if 'version' was matched, or HELP_HANDLER_MATCHED_ALL if 'help' and 'version' were matched
     int handle(int argc, char** argv, std::string help) {
         if (help.empty()) {
             help = "No usage help is available"; }
@@ -269,6 +289,7 @@ namespace helpHandler {
     //      DISABLE_MATCH_HYPHENS    - Disable matching of arguments with hyphens (i.e., Help Handler will match "help", but not "--help")
     //      ENABLE_HYPHENS_ONLY      - Only match arguments that begin with one or more hyphens
     //      ENABLE_UNKNOWN_ARGS_HELP - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
+    // Will throw std::invalid_argument if an invalid flag is passed
     void config(int option_flags) {
         if (option_flags & DISABLE_NO_ARGS_HELP)        { options_t.noArgHelp       = false; }
         if (option_flags & DISABLE_EXTRA_STRINGS)       { options_t.extraStrings    = false; }
@@ -286,7 +307,9 @@ namespace helpHandler {
     }
 
 
-    // This function like helpHandler::handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
+    // This function like helpHandler::handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this.
+    // Throws either std::ios_base::failure if given filename was not found, or std::runtime_error if given file is empty
+    // Returns the same values as HelpHandler.handle()
     int handleFile(int argc, char** argv, const std::string& filename) {
         std::ifstream file_handle;
         std::string file_data;
@@ -322,11 +345,13 @@ namespace helpHandler {
         most_recent_t.ver = versionT::integerT;
     }
     // Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
+    // Throws std::invalid_argument if version string is empty
     void version(std::string version) { //Parent
         version = utility::sanitize(version);
 
         if (version.empty()) {
-            throw std::invalid_argument("Version string was given, but is empty"); }
+            throw std::invalid_argument("Version string was given, but is empty");
+        }
         
         info_t.versionStr = utility::sanitize(version);
         most_recent_t.ver = versionT::stringT;
@@ -361,6 +386,7 @@ namespace helpHandler {
     }
 
     // Defines your program name which will be output alongside help dialogue
+    // Throws std::invalid_argument is appName is empty
     void name(std::string appName) { //Parent
         appName = utility::sanitize(appName);
 

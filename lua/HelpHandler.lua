@@ -23,8 +23,13 @@ SOFTWARE.
 --]]
 
 
-HelpHandler = {}
-
+--██╗   ██╗███████╗███████╗██████╗     ██╗   ██╗ █████╗ ██████╗ ██╗ █████╗ ██████╗ ██╗     ███████╗███████╗
+--██║   ██║██╔════╝██╔════╝██╔══██╗    ██║   ██║██╔══██╗██╔══██╗██║██╔══██╗██╔══██╗██║     ██╔════╝██╔════╝
+--██║   ██║███████╗█████╗  ██████╔╝    ██║   ██║███████║██████╔╝██║███████║██████╔╝██║     █████╗  ███████╗
+--██║   ██║╚════██║██╔══╝  ██╔══██╗    ╚██╗ ██╔╝██╔══██║██╔══██╗██║██╔══██║██╔══██╗██║     ██╔══╝  ╚════██║
+--╚██████╔╝███████║███████╗██║  ██║     ╚████╔╝ ██║  ██║██║  ██║██║██║  ██║██████╔╝███████╗███████╗███████║
+-- ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝      ╚═══╝  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝╚══════╝
+-- These should be the only relevant variables to any library user not trying to change functionality
 HELP_HANDLER_FAILURE = -1
 HELP_HANDLER_SUCCESS = 0
 
@@ -39,6 +44,17 @@ DISABLE_EXTRA_STRINGS    = 00000010
 DISABLE_MATCH_HYPHENS    = 00000100
 ENABLE_UNKNOWN_ARGS_HELP = 00000200 --Value being higher than DISABLE_MATCH_HYPHENS is intentional, to override in case both are set
 ENABLE_HYPHENS_ONLY      = 00001000
+
+
+
+
+--██╗███╗   ██╗████████╗███████╗██████╗ ███╗   ██╗ █████╗ ██╗         ██╗   ██╗ █████╗ ██████╗ ██╗ █████╗ ██████╗ ██╗     ███████╗███████╗
+--██║████╗  ██║╚══██╔══╝██╔════╝██╔══██╗████╗  ██║██╔══██╗██║         ██║   ██║██╔══██╗██╔══██╗██║██╔══██╗██╔══██╗██║     ██╔════╝██╔════╝
+--██║██╔██╗ ██║   ██║   █████╗  ██████╔╝██╔██╗ ██║███████║██║         ██║   ██║███████║██████╔╝██║███████║██████╔╝██║     █████╗  ███████╗
+--██║██║╚██╗██║   ██║   ██╔══╝  ██╔══██╗██║╚██╗██║██╔══██║██║         ╚██╗ ██╔╝██╔══██║██╔══██╗██║██╔══██║██╔══██╗██║     ██╔══╝  ╚════██║
+--██║██║ ╚████║   ██║   ███████╗██║  ██║██║ ╚████║██║  ██║███████╗     ╚████╔╝ ██║  ██║██║  ██║██║██║  ██║██████╔╝███████╗███████╗███████║
+--╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝      ╚═══╝  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝╚══════╝
+HelpHandler = {}
 
 
 local info_t = {
@@ -60,6 +76,8 @@ local DEBUG_TRACE
 local DEBUG_INFO
 local DEBUG_WARN
 local DEBUG_ERR
+
+
 
 
 ---- ██╗      ██████╗  ██████╗ █████╗ ██╗         ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗███████╗
@@ -139,6 +157,7 @@ HelpHandler.version = function(version)
     info_t.version = version
 end
 
+
 --Defines your program name which will be output alongside help dialogue
 HelpHandler.name = function(app_name)
     if type(app_name) ~= "string" then
@@ -151,6 +170,7 @@ HelpHandler.name = function(app_name)
     debug_print("Setting given program name")
     info_t.name = app_name
 end
+
 
 --A single function for passing your program's name as well as its version
 HelpHandler.info = function(app_name, version)
@@ -185,8 +205,6 @@ HelpHandler.config = function(option_flags)
         option_flags ~= (option_flags & ENABLE_HYPHENS_ONLY) then
             error("Unknown flag passed")
     end
-
-    return HELP_HANDLER_SUCCESS
 end
 
 
@@ -259,6 +277,7 @@ HelpHandler.handle = function(help_dialogue)
     debug_print("No arguments were matched. Exiting...")
     return HELP_HANDLER_NONE_MATCHED
 end
+
 
 --This function like helpHandler.handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
 HelpHandler.handleFile = function(file_name)
