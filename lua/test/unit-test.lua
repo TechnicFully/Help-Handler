@@ -35,17 +35,40 @@ function test_name()
 end
 
 
+function test_handle_file()
+    lu.assertErrorMsgContains("File name argument given is not a string", HelpHandler.handleFile, nil)
+    lu.assertErrorMsgContains("File name argument given is not a string", HelpHandler.handleFile, true)
+    lu.assertErrorMsgContains("File name argument given is not a string", HelpHandler.handleFile, print)
+    lu.assertErrorMsgContains("File name argument given is not a string", HelpHandler.handleFile, dummy_table)
+    lu.assertErrorMsgContains("File name argument given is not a string", HelpHandler.handleFile, dummy_number)
+end
+
+
 function test_handle_invalid_arguments()
-    -- Nil and empty string values simply set the response to a default placeholder dialogue
+    -- Nil and empty string values set the response to a default help dialogue, so test other types
     lu.assertErrorMsgContains("Invalid help dialogue argument type given, must be nil, or a string", HelpHandler.handle, true)
     lu.assertErrorMsgContains("Invalid help dialogue argument type given, must be nil, or a string", HelpHandler.handle, print)
     lu.assertErrorMsgContains("Invalid help dialogue argument type given, must be nil, or a string", HelpHandler.handle, dummy_table)
     lu.assertErrorMsgContains("Invalid help dialogue argument type given, must be nil, or a string", HelpHandler.handle, dummy_number)
 end
 
+
 function test_handle_valid_arguments()
-    lu.assertEquals(HelpHandler.handle(dummy_string), HELP_HANDLER_SUCCESS)
+    lu.assertEquals(HelpHandler.handle(dummy_string), HELP_HANDLER_NONE_MATCHED)
+    lu.assertEquals(HelpHandler.handle("  "), HELP_HANDLER_NONE_MATCHED)
+
+    --Test that empty spaces are removed and process correctly
+    arg[1] = "--help"
+    arg[2] = "--version"
+    lu.assertEquals(HelpHandler.handle("  "), HELP_HANDLER_ALL_MATCHED)
+
+    arg[2] = nil
+    lu.assertEquals(HelpHandler.handle("  "), HELP_HANDLER_HELP_MATCHED)
+
+    arg[1] = "--version"
+    lu.assertEquals(HelpHandler.handle("  "), HELP_HANDLER_VERSION_MATCHED)
 end
+
 
 function test_handle_return_values()
     arg[1] = "--version"
@@ -57,15 +80,10 @@ function test_handle_return_values()
     arg[1] = "--help"
     arg[2] = "--version"
     lu.assertEquals(HelpHandler.handle(), HELP_HANDLER_ALL_MATCHED)
-end
 
-
-function test_handle_file()
-    lu.assertErrorMsgContains("File name argument given is not a string", HelpHandler.handleFile, nil)
-    lu.assertErrorMsgContains("File name argument given is not a string", HelpHandler.handleFile, true)
-    lu.assertErrorMsgContains("File name argument given is not a string", HelpHandler.handleFile, print)
-    lu.assertErrorMsgContains("File name argument given is not a string", HelpHandler.handleFile, dummy_table)
-    lu.assertErrorMsgContains("File name argument given is not a string", HelpHandler.handleFile, dummy_number)
+    --Reset values
+    arg[1] = nil
+    arg[2] = nil
 end
 
 
@@ -76,6 +94,8 @@ function test_config_invalid_arguments()
     lu.assertErrorMsgContains("Invalid argument type passed. Must be a number", HelpHandler.config, print)
     lu.assertErrorMsgContains("Invalid argument type passed. Must be a number", HelpHandler.config, dummy_table)
     lu.assertErrorMsgContains("Invalid argument type passed. Must be a number", HelpHandler.config, dummy_string)
+
+    lu.assertErrorMsgContains("Unknown flag passed", HelpHandler.config, dummy_number)
     
 end
 
@@ -87,6 +107,7 @@ function test_config_valid_arguments()
     lu.assertEquals(HelpHandler.config(ENABLE_UNKNOWN_ARGS_HELP), HELP_HANDLER_SUCCESS)
     lu.assertEquals(HelpHandler.config(ENABLE_HYPHENS_ONLY), HELP_HANDLER_SUCCESS)
 end
+
 
 
 

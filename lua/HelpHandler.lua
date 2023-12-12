@@ -37,8 +37,8 @@ HELP_HANDLER_NONE_MATCHED = 4
 DISABLE_NO_ARGS_HELP     = 00000001
 DISABLE_EXTRA_STRINGS    = 00000010
 DISABLE_MATCH_HYPHENS    = 00000100
+ENABLE_UNKNOWN_ARGS_HELP = 00000200 --Value being higher than DISABLE_MATCH_HYPHENS is intentional, to override in case both are set
 ENABLE_HYPHENS_ONLY      = 00001000
-ENABLE_UNKNOWN_ARGS_HELP = 00010000
 
 
 local info_t = {
@@ -181,7 +181,6 @@ HelpHandler.config = function(option_flags)
         option_flags ~= (option_flags & ENABLE_UNKNOWN_ARGS_HELP) and
         option_flags ~= (option_flags & ENABLE_HYPHENS_ONLY) then
             error("Unknown flag passed")
-            return HELP_HANDLER_FAILURE
     end
 
     return HELP_HANDLER_SUCCESS
