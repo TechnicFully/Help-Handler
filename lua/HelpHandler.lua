@@ -106,7 +106,6 @@ end
 
 local function match(regex, optional_regex)
     for i = 1, #arg do
-
         debug_print("Processing argument with regex (ROUND " .. tostring(i) .. " of " .. #arg .. ")")
 
         if (string.match(arg[i]:lower(), regex)) then
@@ -219,7 +218,9 @@ HelpHandler.handle = function(help_dialogue)
             error("Invalid help dialogue argument type given, must be nil, or a string")
         end
     end
-            
+
+
+    --Conditionally set help dialogue
     if help_dialogue == nil then
         debug_print("No help dialogue was given")
 
@@ -244,6 +245,7 @@ HelpHandler.handle = function(help_dialogue)
     end
 
 
+    --Process arguments
     local matchHelp, matchVer = false
     if (match('-*h+e+l+p+', '^-*h+$') == true) then
         debug_print("Matched help argument")
@@ -256,6 +258,7 @@ HelpHandler.handle = function(help_dialogue)
     end
 
 
+    --Finish if arguments were matched
     if matchHelp == true and matchVer == true then
         debug_print("Outputting help and version info")
         print_pipe(info_t.version)
@@ -271,7 +274,8 @@ HelpHandler.handle = function(help_dialogue)
         return HELP_HANDLER_VERSION_MATCHED
     end
     
-        
+    
+    --Finish if no arguments were matched
     if options_t.unknown_arg_help == true and #arg > 0 then
         debug_print("Unknown arguments were given. Exiting...")
 
