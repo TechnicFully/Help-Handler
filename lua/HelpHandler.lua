@@ -30,9 +30,6 @@ SOFTWARE.
 --╚██████╔╝███████║███████╗██║  ██║     ╚████╔╝ ██║  ██║██║  ██║██║██║  ██║██████╔╝███████╗███████╗███████║
 -- ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝      ╚═══╝  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝╚══════╝
 -- These should be the only relevant variables to any library user not trying to change functionality
-HELP_HANDLER_FAILURE = -1
-HELP_HANDLER_SUCCESS = 0
-
 
 HELP_HANDLER_ALL_MATCHED = 1
 HELP_HANDLER_HELP_MATCHED = 2
@@ -110,7 +107,7 @@ end
 local function match(regex, optional_regex)
     for i = 1, #arg do
 
-        debug_print("Processing argument with regex (ROUND " .. tostring(i) .. ")")
+        debug_print("Processing argument with regex (ROUND " .. tostring(i) .. " of " .. #arg .. ")")
 
         if (string.match(arg[i]:lower(), regex)) then
             return true
@@ -118,7 +115,7 @@ local function match(regex, optional_regex)
 
         if options_t.extra_strings == true then
             if optional_regex ~= nil then
-                debug_print("Processing argument with secondary regex (ROUND " .. tostring(i) .. ")")
+                debug_print("Processing argument with secondary regex (ROUND " .. tostring(i) .. " of " .. #arg .. ")")
                 if (string.match(arg[i]:lower(), optional_regex)) then
                     return true
                 end
@@ -135,7 +132,9 @@ local function print_pipe(s) --Wrapper function for io.write() is to purely avoi
         return
     end
 
-    print(s)
+    if s ~= nil then --Avoid printing help or version dialogue when they are not set
+        print(s)
+    end
 end
 
 
@@ -147,7 +146,8 @@ end
 ---- ██╔═══╝ ██║   ██║██╔══██╗██║     ██║██║         ██╔══╝  ██║   ██║██║╚██╗██║██║        ██║   ██║██║   ██║██║╚██╗██║╚════██║
 ---- ██║     ╚██████╔╝██████╔╝███████╗██║╚██████╗    ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
 ---- ╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝    ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝                                                                                                                          
---Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
+-- Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
+-- Throws an error if the given version is not a string or number type
 HelpHandler.version = function(version)
     if type(version) ~= "number" and type(version) ~= "string" then
         error("Version argument given is not a string or number")
@@ -158,7 +158,8 @@ HelpHandler.version = function(version)
 end
 
 
---Defines your program name which will be output alongside help dialogue
+-- Defines your program name which will be output alongside help dialogue
+-- Throws an error if the given app_name is not a string, or empty
 HelpHandler.name = function(app_name)
     if type(app_name) ~= "string" then
         error("App name given, but is not string type")
@@ -172,21 +173,23 @@ HelpHandler.name = function(app_name)
 end
 
 
---A single function for passing your program's name as well as its version
+-- A single function for passing your program's name as well as its version
+-- Returns the same values as HelpHandler.name() and HelpHandler.version()
+-- Throws the same errors as HelpHandler.name() and HelpHandler.version()
 HelpHandler.info = function(app_name, version)
     HelpHandler.name(app_name)
     HelpHandler.version(version)
 end
+
 
 --[[ For configuring functionality that might conflict/clutter other program output. You may pass the following flags...
         DISABLE_NO_ARGS_HELP     - Disable printing of help dialogue when no arguments are given
         DISABLE_EXTRA_STRINGS    - Disable matching of h, -h, --h, v, -v and --v which may conflict with your program’s flags
         DISABLE_MATCH_HYPHENS    - Disable matching of arguments with hyphens (i.e., Help Handler will match "help", but not "--help")
         ENABLE_HYPHENS_ONLY      - Only match arguments that begin with one or more hyphens
-        ENABLE_UNKNOWN_ARGS_HELP - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this```````````````````````````````````````````````````````````````````
+        ENABLE_UNKNOWN_ARGS_HELP - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
 --]]
-
-
+-- Throws an error if a non-number type is passed, or an invalid flag is given
 HelpHandler.config = function(option_flags)
     if type(option_flags) ~= "number" then
         error("Invalid argument type passed. Must be a number")
@@ -208,8 +211,8 @@ HelpHandler.config = function(option_flags)
 end
 
 
-
---This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
+-- This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
+-- Returns HELP_HANDLER_ALL_MATCHED, HELP_HANDLER_HELP_MATCHED, HELP_HANDLER_VERSION_MATCHED, or HELP_HANDLER_NONE_MATCHED
 HelpHandler.handle = function(help_dialogue)
     if help_dialogue ~= nil then
         if type(help_dialogue) ~= "string" then 
@@ -217,11 +220,21 @@ HelpHandler.handle = function(help_dialogue)
         end
     end
             
-            
-    if help_dialogue == nil or help_dialogue:gsub("%s+", "") == '' then
-        debug_print("No help dialogue was given. Setting to default")
-        help_dialogue = "No usage help is available"
+    if help_dialogue == nil then
+        debug_print("No help dialogue was given")
+
+        --We want to avoid printing anything if the user only plans on using this library for detecting arguments, so remove the version dialogue unless it was set by the user
+        if info_t.version == "No version is available" then
+            debug_print("No version or help dialogue was set, clearing version string...")
+            info_t.version = ""
+        end
+    else 
+        local help_dialogue_trimmed = help_dialogue:gsub("%s+", "")
+        if help_dialogue == '' then
+            help_dialogue = "No usage help is available"
+        end
     end
+
 
 
     if (#arg == 0 and options_t.no_arg_help == true) then
@@ -232,17 +245,14 @@ HelpHandler.handle = function(help_dialogue)
 
 
     local matchHelp, matchVer = false
-    local matches = 0
     if (match('-*h+e+l+p+', '^-*h+$') == true) then
         debug_print("Matched help argument")
         matchHelp = true
-        matches = matches + 1
     end 
 
     if (match('-*v+e+r+s+i+o+n+', '^-*v+$') == true) then
         debug_print("Matched version argument")
         matchVer = true
-        matches = matches + 1
     end
 
 
@@ -274,12 +284,14 @@ HelpHandler.handle = function(help_dialogue)
         return HELP_HANDLER_NONE_MATCHED
     end
 
+
     debug_print("No arguments were matched. Exiting...")
     return HELP_HANDLER_NONE_MATCHED
 end
 
 
---This function like helpHandler.handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
+-- This function like helpHandler.handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
+-- Throws an error if the given file_name is not a string, or could not be opened (does not exist, etc.)
 HelpHandler.handleFile = function(file_name)
     if type(file_name) ~= "string" then
         error("File name argument given is not a string")

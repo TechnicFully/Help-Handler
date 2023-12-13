@@ -13,4 +13,4 @@ HelpHandler.config(DISABLE_EXTRA_STRINGS) --Disables matching abbreviated argume
                                               --ENABLE_UNKNOWN_ARGS_HELP
                                               --ENABLE_HYPHENS_ONLY
 
-HelpHandler.handleFile("example_dialogue_file.txt")
+HelpHandler.handle("usage: help dialogue example")
