@@ -66,6 +66,8 @@ enum {
 };
 
 
+
+
 //██╗███╗   ██╗████████╗███████╗██████╗ ███╗   ██╗ █████╗ ██╗         ███╗   ███╗ █████╗  ██████╗██████╗  ██████╗ ███████╗       ██╗       ██╗   ██╗ █████╗ ██████╗ ██╗ █████╗ ██████╗ ██╗     ███████╗███████╗
 //██║████╗  ██║╚══██╔══╝██╔════╝██╔══██╗████╗  ██║██╔══██╗██║         ████╗ ████║██╔══██╗██╔════╝██╔══██╗██╔═══██╗██╔════╝       ██║       ██║   ██║██╔══██╗██╔══██╗██║██╔══██╗██╔══██╗██║     ██╔════╝██╔════╝
 //██║██╔██╗ ██║   ██║   █████╗  ██████╔╝██╔██╗ ██║███████║██║         ██╔████╔██║███████║██║     ██████╔╝██║   ██║███████╗    ████████╗    ██║   ██║███████║██████╔╝██║███████║██████╔╝██║     █████╗  ███████╗
@@ -115,6 +117,12 @@ namespace helpHandler {
     } options_t;
 
 
+
+
+
+
+
+
     /*
      * ██████╗ ██████╗ ██╗██╗   ██╗ █████╗ ████████╗███████╗
      * ██╔══██╗██╔══██╗██║██║   ██║██╔══██╗╚══██╔══╝██╔════╝
@@ -149,10 +157,6 @@ namespace helpHandler {
 
 
 
-
-
-
-
     /*
      * ██████╗ ██╗   ██╗██████╗ ██╗     ██╗ ██████╗
      * ██╔══██╗██║   ██║██╔══██╗██║     ██║██╔════╝
@@ -164,12 +168,11 @@ namespace helpHandler {
     // This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this.
     // Throws invalid_argument if argv is NULL, argc is less than 1 or outside limits of int type
     // Returns HELP_HANDLER_NONE_MATCHED if nothing was matched, HELP_HANDLER_HELP_MATCHED if 'help' was matched, HELP_HANDLER_VERSION_MATCHED if 'version' was matched, or HELP_HANDLER_MATCHED_ALL if 'help' and 'version' were matched
-    int handle(int argc, char** argv, std::string help) {
-        if (help.empty()) {
-            help = "No usage help is available"; }
+    int handle(int argc, char** argv, std::string help_dialogue) {
         if (argc == 1 && options_t.noArgHelp == true) {
-            std::cout << help << NEWLINE;
-            return HELP_HANDLER_NONE_MATCHED; }
+            std::cout << help_dialogue << NEWLINE;
+            return HELP_HANDLER_NONE_MATCHED;
+        }
 
 
         /****************/
@@ -237,12 +240,14 @@ namespace helpHandler {
                 std::regex helpRegex(helpExpression, std::regex_constants::icase);
                 if (std::regex_match(arg, helpRegex) == true) {
                     matchedHelp = true;
-                    matches++; }
+                    matches++;
+                }
 
                 std::regex versionRegex(versionExpression, std::regex_constants::icase);
                 if (std::regex_match(arg, versionRegex) == true) {
                     matchedVer = true;
-                    matches++; }
+                    matches++;
+                }
         }
 
         //Output appropriate results
@@ -259,8 +264,10 @@ namespace helpHandler {
             if (matchedHelp == true) {
                 if (matchedVer == true) { std::cout << NEWLINE; }
                 if (info_t.name.empty() == false) { 
-                    std::cout << utility::sanitize(info_t.name) << " "; }
-                std::cout << help;
+                    std::cout << utility::sanitize(info_t.name) << " ";
+                }
+
+                std::cout << help_dialogue;
             }
 
             std::cout << NEWLINE;
@@ -281,6 +288,12 @@ namespace helpHandler {
         }
 
         return HELP_HANDLER_NONE_MATCHED;
+    }
+
+
+    int handle(int argc, char** argv, char* help_dialogue) {
+
+        helpHandler::handle(argc, argv, help_dialogue);
     }
 
     // For configuring functionality that might conflict/clutter other program output. You may pass the following flags...
@@ -307,9 +320,9 @@ namespace helpHandler {
     }
 
 
-    // This function like helpHandler::handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this.
+    // This function like helpHandler::handle(), will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this.
     // Throws either std::ios_base::failure if given filename was not found, or std::runtime_error if given file is empty
-    // Returns the same values as HelpHandler.handle()
+    // Returns the same values as HelpHandler::handle()
     int handleFile(int argc, char** argv, const std::string& filename) {
         std::ifstream file_handle;
         std::string file_data;
