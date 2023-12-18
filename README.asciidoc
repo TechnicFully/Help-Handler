@@ -1,7 +1,7 @@
 :toc:
 :blank: pass:[ +]
 
-image:https://www.dropbox.com/s/qvtu9z2c4xekaww/f6d766cccecd96c622788a4aa99b438d1ab4abc9faee901949ea14beec23b5ee.png?raw=1[alt="HelpHandler"]
+image:https://www.dropbox.com/scl/fi/apjxajyd8wfl93dghtqc9/HelpHandler.png?rlkey=8rrrbhh82ybvv2rbqhz22il5r&raw=1
 
 
 '''
