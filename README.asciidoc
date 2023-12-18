@@ -1,7 +1,7 @@
 :toc:
 :blank: pass:[ +]
 
-image:https://www.dropbox.com/scl/fi/apjxajyd8wfl93dghtqc9/HelpHandler.png?rlkey=8rrrbhh82ybvv2rbqhz22il5r&raw=1
+image:https://www.dropbox.com/scl/fi/apjxajyd8wfl93dghtqc9/HelpHandler.png?rlkey=8rrrbhh82ybvv2rbqhz22il5r&raw=1[alt="HelpHandler"]
 
 
 '''
@@ -66,7 +66,7 @@ Planned Features
 ----------------
 - Support for unicode in all language implementations. Some languages such as Python support this natively, but others often don't.
 - Returning what type of arguments specifically were matched. This will allow using other libraries for handling options parsing without conflicts
-- Line break at whitespace according to terminal width
+- Line break at spaces according to terminal width
 - Option to output specific dialogue on first program run
 
 
