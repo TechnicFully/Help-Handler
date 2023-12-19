@@ -20,8 +20,8 @@ This library isn't meant to be another argument parser, but a one-file library t
 - C{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- C99
 - C+\+{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- C++11
 - Java{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- 7
-- Lua{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- 5.3.5 (Older versions untested)
-- Python - 2.7.17 through 3.xx
+- Lua{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}- 5.3.5
+- Python - 2.7.17 and 3.xx
 {blank}
 
 Usage
