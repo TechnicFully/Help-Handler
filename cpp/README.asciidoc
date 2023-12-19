@@ -23,19 +23,8 @@ The only function needed after including helpHandler.hpp is `helpHandler::handle
 Copy-paste example:
 [source,CPP]
 ----------
-#include "helpHandler.hpp"
++include::https://raw.githubusercontent.com/TechnicFully/Help-Handler/dev/cpp/examples/example2.cpp[]
 
-#include <exception>
-
-
-int main(int argc, char** argv) {
-    try {
-        helpHandler::version("1.0"); //This must come before the main helpHandler::handle function, which is what actually processes arguments
-        helpHandler::handle(argc, argv, "usage: example");
-    } catch(const std::exception& e) { std::cout << e.what(); }
-    
-    return EXIT_SUCCESS;
-}
 
 
 ----------
