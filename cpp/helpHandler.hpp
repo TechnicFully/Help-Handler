@@ -289,12 +289,7 @@ namespace helpHandler {
 
         return HELP_HANDLER_NONE_MATCHED;
     }
-
-
-    int handle(int argc, char** argv, char* help_dialogue) {
-
-        helpHandler::handle(argc, argv, help_dialogue);
-    }
+    
 
     // For configuring functionality that might conflict/clutter other program output. You may pass the following flags...
     //      DISABLE_NO_ARGS_HELP     - Disable printing of help dialogue when no arguments are given
