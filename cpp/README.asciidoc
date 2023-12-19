@@ -23,9 +23,11 @@ The only function needed after including helpHandler.hpp is `helpHandler::handle
 Copy-paste example:
 [source,CPP]
 ----------
-include::https://raw.githubusercontent.com/TechnicFully/Help-Handler/dev/cpp/examples/example2.cpp[]
-----------
++include::https://raw.githubusercontent.com/TechnicFully/Help-Handler/dev/cpp/examples/example2.cpp[]
 
+
+
+----------
 An exception will be thrown if an error occurs, and the number of arguments matched will be returned on success (0 if none). It will increase your executable size by ~100KB without optimizations turned on. If this is a concern, the C version of this library works with C++ as well.
 
 
