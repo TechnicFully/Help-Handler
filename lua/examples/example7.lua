@@ -15,4 +15,4 @@ elseif HELP_HANDLER_VERSION_MATCHED == return_value then
     print("Only version arguments were found")
 elseif HELP_HANDLER_NONE_MATCHED == return_value then
     print("No arguments were found")
-end
+end --These are all the possible return values

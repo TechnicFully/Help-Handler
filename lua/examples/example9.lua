@@ -5,7 +5,7 @@ require "HelpHandler"
 
 
 HelpHandler.info("TestApp", "1.0")
-return_value = HelpHandler.handle("") --This however, will print out text saying that no help dialogue has been set
+return_value = HelpHandler.handle() --This however, will print out text saying that no help dialogue has been set
 
 if HELP_HANDLER_ALL_MATCHED == return_value then
     print("Help and version arguments were found")
