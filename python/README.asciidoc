@@ -51,7 +51,6 @@ extra_strings       - Whether to match for h, -h, --h, v, -v and --v specificall
 match_hyphens       - Match arguments beginning with hyphens (i.e., "help" vs "--help")
 hyphens_only        - Only match arguments that begin with one or more hyphens
 unknown_arg_help    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
-disable_output      - Disable all output of HelpHandler
 ```
 
 Contributing
