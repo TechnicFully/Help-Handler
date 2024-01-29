@@ -6,7 +6,7 @@ from help_handler import *
 
 
 def main():
-    HelpHandler.version("1.0")  #This must come before the main HelpHandler.handle function, which is what actually processes arguments
+    HelpHandler.version("1.0")  #This must come before the main HelpHandler.handle() function, which is what actually processes arguments
     HelpHandler.handle("usage: help dialogue example")
 
 
