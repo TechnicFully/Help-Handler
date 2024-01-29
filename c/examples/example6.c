@@ -4,7 +4,7 @@
 
 
 int main(int argc, char** argv) {
-    help_handler_info("TestApp", "1.0"); //Also note that this is optional
+    help_handler_info("TestApp", "1.0");
     help_handler_config(DISABLE_EXTRA_STRINGS); //Disables matching abbreviated arguments, v, -v, --v, h, -h, --h
                                                 //You can also pass...
                                                 //  DISABLE_NO_ARGS_HELP
