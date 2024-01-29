@@ -1,3 +1,4 @@
+cd %~dp0
 @ECHO OFF
 ECHO Compiling C++ example 1...
 g++ example1.cpp -Wall -Wextra -pedantic -std=c++11 -o example1

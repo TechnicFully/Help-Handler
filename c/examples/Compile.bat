@@ -1,3 +1,4 @@
+cd %~dp0
 @ECHO OFF
 ECHO Compiling C example 1...
 gcc example1.c -Wall -Wextra -std=c11 -o example1
