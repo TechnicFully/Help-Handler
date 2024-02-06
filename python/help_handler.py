@@ -42,12 +42,12 @@ found_none    = 0x819657e71
 
 
 
-#██████╗ ██████╗ ██╗██╗   ██╗ █████╗ ████████╗███████╗    ██╗   ██╗ █████╗ ██████╗ ██╗ █████╗ ██████╗ ██╗     ███████╗███████╗
-#██╔══██╗██╔══██╗██║██║   ██║██╔══██╗╚══██╔══╝██╔════╝    ██║   ██║██╔══██╗██╔══██╗██║██╔══██╗██╔══██╗██║     ██╔════╝██╔════╝
-#██████╔╝██████╔╝██║██║   ██║███████║   ██║   █████╗      ██║   ██║███████║██████╔╝██║███████║██████╔╝██║     █████╗  ███████╗
-#██╔═══╝ ██╔══██╗██║╚██╗ ██╔╝██╔══██║   ██║   ██╔══╝      ╚██╗ ██╔╝██╔══██║██╔══██╗██║██╔══██║██╔══██╗██║     ██╔══╝  ╚════██║
-#██║     ██║  ██║██║ ╚████╔╝ ██║  ██║   ██║   ███████╗     ╚████╔╝ ██║  ██║██║  ██║██║██║  ██║██████╔╝███████╗███████╗███████║
-#╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝  ╚═╝  ╚═╝   ╚═╝   ╚══════╝      ╚═══╝  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝╚══════╝
+#██╗███╗   ██╗████████╗███████╗██████╗ ███╗   ██╗ █████╗ ██╗         ██╗   ██╗ █████╗ ██████╗ ██╗ █████╗ ██████╗ ██╗     ███████╗███████╗
+#██║████╗  ██║╚══██╔══╝██╔════╝██╔══██╗████╗  ██║██╔══██╗██║         ██║   ██║██╔══██╗██╔══██╗██║██╔══██╗██╔══██╗██║     ██╔════╝██╔════╝
+#██║██╔██╗ ██║   ██║   █████╗  ██████╔╝██╔██╗ ██║███████║██║         ██║   ██║███████║██████╔╝██║███████║██████╔╝██║     █████╗  ███████╗
+#██║██║╚██╗██║   ██║   ██╔══╝  ██╔══██╗██║╚██╗██║██╔══██║██║         ╚██╗ ██╔╝██╔══██║██╔══██╗██║██╔══██║██╔══██╗██║     ██╔══╝  ╚════██║
+#██║██║ ╚████║   ██║   ███████╗██║  ██║██║ ╚████║██║  ██║███████╗     ╚████╔╝ ██║  ██║██║  ██║██║██║  ██║██████╔╝███████╗███████╗███████║
+#╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝      ╚═══╝  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝╚══════╝                                                                                                                                    
 _extraStringsGlob = True
 _noArgHelpGlob = True
 _matchHyphens = True
@@ -62,13 +62,13 @@ _appNameGlob = ""
 
 
 
-#███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗███████╗
-#██╔════╝██║   ██║████╗  ██║██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║██╔════╝
-#█████╗  ██║   ██║██╔██╗ ██║██║        ██║   ██║██║   ██║██╔██╗ ██║███████╗
-#██╔══╝  ██║   ██║██║╚██╗██║██║        ██║   ██║██║   ██║██║╚██╗██║╚════██║
-#██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
-#╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝
 class HelpHandler():
+    #██████╗ ██████╗ ██╗██╗   ██╗ █████╗ ████████╗███████╗    ███╗   ███╗███████╗████████╗██╗  ██╗ ██████╗ ██████╗ ███████╗
+    #██╔══██╗██╔══██╗██║██║   ██║██╔══██╗╚══██╔══╝██╔════╝    ████╗ ████║██╔════╝╚══██╔══╝██║  ██║██╔═══██╗██╔══██╗██╔════╝
+    #██████╔╝██████╔╝██║██║   ██║███████║   ██║   █████╗      ██╔████╔██║█████╗     ██║   ███████║██║   ██║██║  ██║███████╗
+    #██╔═══╝ ██╔══██╗██║╚██╗ ██╔╝██╔══██║   ██║   ██╔══╝      ██║╚██╔╝██║██╔══╝     ██║   ██╔══██║██║   ██║██║  ██║╚════██║
+    #██║     ██║  ██║██║ ╚████╔╝ ██║  ██║   ██║   ███████╗    ██║ ╚═╝ ██║███████╗   ██║   ██║  ██║╚██████╔╝██████╔╝███████║
+    #╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝  ╚═╝  ╚═╝   ╚═╝   ╚══════╝    ╚═╝     ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝
     @staticmethod
     def __print(string, newline=True):
         global _disableOutput
@@ -78,13 +78,21 @@ class HelpHandler():
             else:
                 print(string, end='')
 
-    '''For configuring functionality that might conflict/clutter other program output. The parameters are as follows...
-        no_arg_help         - Print help dialogue when no arguments are given
-        extra_strings       - Whether to match for h, -h, --h, v, -v and --v specifically (which may conflict with your program’s flags)
-        match_hyphens       - Match arguments beginning with hyphens (i.e., "help" vs "--help")
-        hyphens_only        - Only match arguments that begin with one or more hyphens
-        unknown_arg_help    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
-        disable_output      - Disable all output of HelpHandler
+
+    #██████╗ ██╗   ██╗██████╗ ██╗     ██╗ ██████╗    ███╗   ███╗███████╗████████╗██╗  ██╗ ██████╗ ██████╗ ███████╗
+    #██╔══██╗██║   ██║██╔══██╗██║     ██║██╔════╝    ████╗ ████║██╔════╝╚══██╔══╝██║  ██║██╔═══██╗██╔══██╗██╔════╝
+    #██████╔╝██║   ██║██████╔╝██║     ██║██║         ██╔████╔██║█████╗     ██║   ███████║██║   ██║██║  ██║███████╗
+    #██╔═══╝ ██║   ██║██╔══██╗██║     ██║██║         ██║╚██╔╝██║██╔══╝     ██║   ██╔══██║██║   ██║██║  ██║╚════██║
+    #██║     ╚██████╔╝██████╔╝███████╗██║╚██████╗    ██║ ╚═╝ ██║███████╗   ██║   ██║  ██║╚██████╔╝██████╔╝███████║
+    #╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝    ╚═╝     ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝
+
+    ''' For configuring functionality that might conflict/clutter other program output. The parameters are as follows...
+          no_arg_help         - Print help dialogue when no arguments are given
+          extra_strings       - Whether to match for h, -h, --h, v, -v and --v specifically (which may conflict with your program’s flags)
+          match_hyphens       - Match arguments beginning with hyphens (i.e., "help" vs "--help")
+          hyphens_only        - Only match arguments that begin with one or more hyphens
+          unknown_arg_help    - Print help dialogue when an unknown argument is passed. You would typically whitelist your program’s option flags in combination with this
+          disable_output      - Disable all output of HelpHandler
     '''
     @staticmethod
     def config(no_arg_help=True, extra_strings=True, match_hyphens=True, hyphens_only=False, unknown_arg_help=False, disable_output=False):
@@ -118,7 +126,8 @@ class HelpHandler():
         _disableOutput      = disable_output
 
 
-    #Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
+    # Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
+    # Throws an error if the given version is not a str / basestring, int, or float type
     @staticmethod
     def version(version):
         #Error checking
@@ -142,7 +151,8 @@ class HelpHandler():
         global _verGlob
         _verGlob = version
 
-    #Defines your program name which will be output alongside help dialogue
+    # Defines your program name which will be output alongside help dialogue
+    # Throws an error if the given app_name is not a string, or empty
     @staticmethod
     def name(app_name):
         #Error checking
@@ -160,13 +170,16 @@ class HelpHandler():
         global _appNameGlob
         _appNameGlob = app_name
 
-    #A single function for passing your program's name as well as its version
+    # A single function for passing your program's name as well as its version
+    # Returns the same values as HelpHandler.name() and HelpHandler.version()
+    # Throws the same errors as HelpHandler.name() and HelpHandler.version()
     @staticmethod
     def info(app_name, version):
         HelpHandler.name(app_name)
         HelpHandler.version(version)
 
-    #This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
+    # This is the main function which processes and outputs the appropriate dialogue based on the user's input. You must pass or set any other options and info before calling this
+    # Returns found_all, found_help, found_version, or found_none
     @staticmethod
     def handle(help_dialogue):
         global _disableOutput
@@ -240,7 +253,8 @@ class HelpHandler():
 
             return found_none
 
-    #This function like helpHandler.handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
+    # This function like helpHandler.handle, will processes and output the appropriate dialogue based on the user's input, but using a file as its dialogue source. You must pass or set any other options and info before calling this
+    # Throws an error if the given file_name could not be opened (does not exist, etc.)
     @staticmethod
     def handleFile(file_name):
         if not os.path.exists(file_name):

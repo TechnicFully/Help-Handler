@@ -337,7 +337,7 @@ namespace helpHandler {
         return helpHandler::handle(argc, argv, file_data);
     } 
 
-    // Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
+    // Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
     void version(double version) noexcept {
         info_t.versionDouble = version;
         most_recent_t.ver = versionT::doubleT;
@@ -405,17 +405,17 @@ namespace helpHandler {
         info_t.name = utility::sanitize(appName);
     }
 
-    // Set your program's name as well as its version
+    // Set your program name as well as its version
     void info(const std::string& appName, std::string version) {
         helpHandler::name(appName);
         helpHandler::version(version);
     }
-    // Set your program's name as well as its version
+    // Set your program name as well as its version
     void info(const std::string& appName, double version) {
         helpHandler::name(appName);
         helpHandler::version(version);
     }
-    // Set your program's name as well as its version
+    // Set your program name as well as its version
     void info(const std::string& appName, unsigned int version) {
         helpHandler::name(appName);
         helpHandler::version(version);

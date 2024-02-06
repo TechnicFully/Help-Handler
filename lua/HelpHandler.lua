@@ -126,7 +126,7 @@ local function match(regex, optional_regex)
 end
 
 
-local function print_pipe(s) --Wrapper function for io.write() is to purely avoid cluttering test suite output when necesary
+local function print_pipe(s) --Wrapper function for print() is to purely avoid cluttering test suite output when necesary
     if HELP_HANDLER_DEBUG == true then
         return
     end
@@ -144,8 +144,9 @@ end
 ---- ██████╔╝██║   ██║██████╔╝██║     ██║██║         █████╗  ██║   ██║██╔██╗ ██║██║        ██║   ██║██║   ██║██╔██╗ ██║███████╗
 ---- ██╔═══╝ ██║   ██║██╔══██╗██║     ██║██║         ██╔══╝  ██║   ██║██║╚██╗██║██║        ██║   ██║██║   ██║██║╚██╗██║╚════██║
 ---- ██║     ╚██████╔╝██████╔╝███████╗██║╚██████╗    ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
----- ╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝    ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝                                                                                                                          
--- Set your programs version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
+---- ╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚═╝ ╚═════╝    ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝  
+                                                                                                                        
+-- Set your program version which will be output as appropriate. This shouldn't be anything fancy, just a simple version number
 -- Throws an error if the given version is not a string or number type
 HelpHandler.version = function(version)
     if type(version) ~= "number" and type(version) ~= "string" then
