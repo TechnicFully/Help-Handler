@@ -22,7 +22,11 @@ int main(int argc, char** argv) {
     } //These are all the possible return values
 
 
+    #ifdef _WIN32
+    printf("\n\n");
+    #else
     printf("\n");
+    #endif
 
     return return_value;
 }

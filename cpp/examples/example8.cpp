@@ -24,7 +24,11 @@ int main(int argc, char** argv) {
             std::cout << "No arguments were found";
         }
 
+        #ifdef _WIN32
+        std::cout << "\r\n" << std::flush;
+        #else
         std::cout << std::endl;
+        #endif
 
     } catch(const std::exception& e) { std::cout << e.what(); }
 

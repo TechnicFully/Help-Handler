@@ -23,7 +23,11 @@ int main(int argc, char** argv) {
     }
 
 
+    #ifdef _WIN32
+    printf("\n\n");
+    #else
     printf("\n");
+    #endif
 
     return return_value;
 }
