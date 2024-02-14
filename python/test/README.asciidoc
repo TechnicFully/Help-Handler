@@ -3,7 +3,7 @@
 
 Testing
 -------
-To run the Help-Handler unit tests, you will need Python 3.4 or above. To run the unit tests, simply run `python3 unit-test.py`
+To run the Help-Handler unit tests, simply run `python unit-test.py`. You may also test multiple versions of Python using Tox by running `tox`, or you can use Docker to run the tests in a virtualized environment with `docker build -f ./test/Dockerfile -t test . && docker run test`
 
 
 
