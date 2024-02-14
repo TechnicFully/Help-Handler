@@ -92,7 +92,14 @@ class HelpHandlerTests(unittest.TestCase):
             HelpHandler.config(match_hyphens=dict)
             HelpHandler.config(hyphens_only=dict)
             HelpHandler.config(unknown_arg_help=dict)
-            HelpHandler.config(disable_output=dict)     
+            HelpHandler.config(disable_output=dict)
+
+        try:
+            HelpHandler.config(True, True, True, True, True, True)
+            HelpHandler.config(False, False, False, False, False, False)
+            HelpHandler.config(True, True, True, False, False, True) #Reset settings
+        except Exception as e:
+            self.fail("function threw exception unexpectedly")
 
 
     def test_name(self):
